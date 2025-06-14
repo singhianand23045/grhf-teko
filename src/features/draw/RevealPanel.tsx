@@ -8,8 +8,14 @@ export default function RevealPanel() {
   const { drawnNumbers } = useDrawEngine();
   const { picked: userNumbers } = useNumberSelection();
 
-  // 3 rows × 6 columns grid (18 slots)
-  const slots: (number | undefined)[] = Array.from({ length: 18 }, (_, idx) => drawnNumbers[idx]);
+  // Always maintain 18 slots (3 rows × 6 columns)
+  // If no drawnNumbers yet, all slots must be undefined to show black circles
+  const slots: (number | undefined)[] =
+    drawnNumbers.length === 0
+      ? Array(18).fill(undefined)
+      : Array.from({ length: 18 }, (_, idx) =>
+          drawnNumbers[idx] !== undefined ? drawnNumbers[idx] : undefined
+        );
 
   // Break into 3 sets of 6 numbers each for display
   const drawnSets: (number | undefined)[][] = [[], [], []];
@@ -34,9 +40,8 @@ export default function RevealPanel() {
               className="flex flex-nowrap justify-center items-center gap-4 w-full max-w-full min-h-[56px]"
             >
               {set.map((n, colIdx) => {
-                // Before reveal: n === undefined for all slots
                 if (n === undefined) {
-                  // Phase 3 spec: always show fixed, filled black circles for unrevealed slots
+                  // Always show fixed, filled black circles for unrevealed slots and before reveal phase
                   return (
                     <span
                       key={colIdx}
@@ -56,7 +61,6 @@ export default function RevealPanel() {
                 // Revealed numbers:
                 // If it's a user's number, use "ticket" style (green, same as user's), else white circle, black border, black text
                 if (userSet.has(n)) {
-                  // Match userTicket style
                   return (
                     <span
                       key={colIdx}
@@ -75,7 +79,6 @@ export default function RevealPanel() {
                     </span>
                   );
                 }
-                // Normal revealed number (not user's): white background, black border, black text, bold, black circle
                 return (
                   <span
                     key={colIdx}
