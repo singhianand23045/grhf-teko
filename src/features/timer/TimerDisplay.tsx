@@ -1,4 +1,3 @@
-
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useTimer } from "./timer-context";
@@ -25,9 +24,11 @@ export default function TimerDisplay() {
           </div>
           {/* PHASE 3: Reveal draw engine in REVEAL state */}
           {state === "REVEAL" ? (
-            <DrawEngineProvider>
-              <RevealPanel />
-            </DrawEngineProvider>
+            <NumberSelectionProvider>
+              <DrawEngineProvider>
+                <RevealPanel />
+              </DrawEngineProvider>
+            </NumberSelectionProvider>
           ) : null}
           {/* PHASE 2: Numbers selection panel (hidden in REVEAL/COMPLETE) */}
           {state !== "COMPLETE" && state !== "REVEAL" && (
