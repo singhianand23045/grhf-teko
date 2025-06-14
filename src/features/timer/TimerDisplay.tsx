@@ -6,6 +6,9 @@ import { Repeat } from "lucide-react";
 // PHASE 2:
 import { NumberSelectionProvider } from "../number-select/NumberSelectionContext";
 import NumberSelectionPanel from "../number-select/NumberSelectionPanel";
+// PHASE 3:
+import { DrawEngineProvider } from "../draw/DrawEngineContext";
+import RevealPanel from "../draw/RevealPanel";
 
 export default function TimerDisplay() {
   const { countdown, state, resetDemo } = useTimer();
@@ -20,8 +23,14 @@ export default function TimerDisplay() {
           >
             {countdown}
           </div>
-          {/* PHASE 2: Numbers selection panel */}
-          {state !== "COMPLETE" && (
+          {/* PHASE 3: Reveal draw engine in REVEAL state */}
+          {state === "REVEAL" ? (
+            <DrawEngineProvider>
+              <RevealPanel />
+            </DrawEngineProvider>
+          ) : null}
+          {/* PHASE 2: Numbers selection panel (hidden in REVEAL/COMPLETE) */}
+          {state !== "COMPLETE" && state !== "REVEAL" && (
             <NumberSelectionProvider>
               <NumberSelectionPanel />
             </NumberSelectionProvider>
