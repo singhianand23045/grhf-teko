@@ -189,8 +189,8 @@ export default function TimerDisplay() {
       {Spacer}
       {/* Drawn numbers or reveal+ticket */}
       {state === "REVEAL" ? RevealSectionWithTicket : DrawSection}
-      {/* CreditsBar always visible except during demo COMPLETE */}
-      {state !== "COMPLETE" && <CreditsBar />}
+      {/* CreditsBar is always visible at all times in prototype */}
+      <CreditsBar />
       {/* No spacer below credits bar */}
       {/* Confirmed or selection (always 40% height, directly below credits) */}
       {state !== "REVEAL" && ConfirmedSection}

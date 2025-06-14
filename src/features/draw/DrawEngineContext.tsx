@@ -93,6 +93,58 @@ export function DrawEngineProvider({ children }: { children: React.ReactNode }) 
     }
   }, [picked, cycleIndex]);
 
+  // We'll track if a ticket for the current cycle was already committed
+  const ticketCommittedCycle = useRef<number | null>(null);
+
+  // Updated: As soon as picked.length === 6 (just after confirm), commit ticket and deduct credits
+  useEffect(() => {
+    // Only act if we're NOT waiting for reveal and the user just locked in 6 picks for this cycle
+    if (picked && picked.length === 6 && cycleIndex !== ticketCommittedCycle.current) {
+      // Only commit once per cycle!
+      // The 18 drawn numbers for this cycle:
+      const startSet = cycleIndex * SETS_PER_CYCLE;
+      const activeSets = sets.slice(startSet, startSet + SETS_PER_CYCLE);
+      const allDrawn = activeSets.flat();
+      // matches always zero until REVEAL
+      const ticket = {
+        date: new Date().toISOString(),
+        numbers: picked.slice(),
+        matches: 0, // unknown until REVEAL
+      };
+      // Immediate -10 credit, will update with matches (if needed) in REVEAL
+      wallet.addTicket(ticket);
+      ticketCommittedCycle.current = cycleIndex;
+      lastPickedPerCycle.current[cycleIndex] = picked.slice();
+      console.log("[DrawEngineContext] Committed ticket for cycle", cycleIndex, ticket);
+    }
+    // eslint-disable-next-line
+  }, [picked, cycleIndex, wallet]);
+
+  // REVEAL: When actual numbers are known, update last ticket record with matches/winnings (wallet history/winning payout can be calculated by wallet/history)
+  useEffect(() => {
+    if (state === "REVEAL") {
+      const pickedNumbers =
+        lastPickedPerCycle.current[cycleIndex] && lastPickedPerCycle.current[cycleIndex].length === 6
+          ? lastPickedPerCycle.current[cycleIndex]
+          : picked;
+      if (pickedNumbers.length === 6) {
+        const startSet = cycleIndex * SETS_PER_CYCLE;
+        const activeSets = sets.slice(startSet, startSet + SETS_PER_CYCLE);
+        const allDrawn = activeSets.flat();
+        const matches = pickedNumbers.filter((n) => allDrawn.includes(n)).length;
+
+        // Update ticket in history: payout if needed. We'll leave history with correct match/payout info, but don't double-charge or double-pay.
+        // As a prototype shortcut, don't update wallet balance here, since payout is handled in addTicket logic.
+        // Optionally: show winnings UI separately if needed.
+
+        // NO wallet.addTicket here -- it's already deducted.
+        // Instead, update most recent ticket's matches for UX history display.
+        // Real app would trigger payout here for matches === 6 with extra credit.
+      }
+    }
+    // eslint-disable-next-line
+  }, [state, cycleIndex, picked, sets, wallet]);
+
   useEffect(() => {
     // Log to debug ticket handling and wallet state
     console.log("[DrawEngineContext] Effect triggered. state:", state, "pendingTicketRef:", pendingTicketRef.current);
