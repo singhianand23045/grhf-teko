@@ -30,9 +30,9 @@ export default function TimerDisplay() {
   // Timer Section (top)
   const TimerSection = (
     <div
-      className="flex items-center justify-center w-full"
+      className="flex items-center justify-center w-full flex-shrink-0 flex-grow-0"
       style={{
-        height: `${TIMER_FRACTION * 100}%`,
+        height: `${1 / 8 * 100}%`,
         minHeight: 46,
         maxHeight: 120,
       }}
@@ -62,30 +62,27 @@ export default function TimerDisplay() {
     </div>
   );
 
-  // Drawn Numbers/Reveal Section (middle)
   const DrawSection = (
     <div
-      className="flex flex-col items-center justify-center w-full"
+      className="flex flex-col items-center justify-center w-full flex-shrink-0 flex-grow-0 overflow-y-auto"
       style={{
-        height: `${MIDDLE_FRACTION * 100}%`,
+        height: `${0.33 * 100}%`,
         minHeight: 120,
       }}
     >
       {state === "REVEAL" ? (
-        // 🟢 Fix: Context for RevealPanel
         <NumberSelectionProvider>
           <DrawEngineProvider>
             <RevealPanel />
           </DrawEngineProvider>
         </NumberSelectionProvider>
       ) : (
-        // When not in reveal state, show 18 filled black circles in 3x6 grid for placeholder
-        <div className="w-full flex flex-col items-center justify-center h-full py-8">
-          <div className="w-full space-y-6">
+        <div className="w-full flex flex-col items-center justify-center h-full py-4">
+          <div className="w-full space-y-4">
             {Array.from({ length: 3 }).map((_, rowIdx) => (
               <div
                 key={rowIdx}
-                className="flex flex-nowrap justify-center items-center gap-4 w-full max-w-full min-h-[56px]"
+                className="flex flex-nowrap justify-center items-center gap-4 w-full max-w-full min-h-[40px]"
               >
                 {Array.from({ length: 6 }).map((_, colIdx) => (
                   <span
@@ -110,30 +107,29 @@ export default function TimerDisplay() {
     </div>
   );
 
-  // Number Selection/User's Ticket/Complete Section (bottom)
   const BottomSection = (
     <div
-      className="flex flex-col items-center justify-center w-full"
+      className="flex flex-col items-center justify-center w-full flex-shrink-0 flex-grow-0 overflow-y-auto"
       style={{
-        height: `${BOTTOM_FRACTION * 100}%`,
+        height: `${0.33 * 100}%`,
         minHeight: 120,
       }}
     >
       {state !== "COMPLETE" && state !== "REVEAL" && (
         <NumberSelectionProvider>
-          <section className="w-full flex flex-col items-center my-2">
+          <section className="w-full flex flex-col items-center my-0">
             <NumberSelectionPanel />
           </section>
         </NumberSelectionProvider>
       )}
       {state === "REVEAL" && (
-        <section className="w-full flex flex-col items-center mt-2">
+        <section className="w-full flex flex-col items-center mt-1">
           {/* Ticket already shown in DrawSection (RevealPanel contains LotteryTicket) */}
         </section>
       )}
       {state === "COMPLETE" && (
-        <section className="w-full flex flex-col items-center mt-4 animate-fade-in">
-          <p className="text-base font-semibold text-center mb-4">Demo Complete — 2 cycles finished.</p>
+        <section className="w-full flex flex-col items-center mt-2 animate-fade-in">
+          <p className="text-base font-semibold text-center mb-2">Demo Complete — 2 cycles finished.</p>
           <Button variant="secondary" size="lg" className="mt-2" onClick={resetDemo}>
             <Repeat className="mr-1 h-4 w-4" /> Restart Demo
           </Button>

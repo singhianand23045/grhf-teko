@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useDrawEngine } from "./DrawEngineContext";
 import { useNumberSelection } from "../number-select/NumberSelectionContext";
@@ -32,18 +31,17 @@ export default function RevealPanel() {
   const userSet = new Set(userNumbers);
 
   return (
-    <div className="flex flex-col items-center">
+    <div className="flex flex-col items-center w-full h-full overflow-y-auto">
       {/* Drawn Numbers Grid */}
-      <div className="w-full max-w-full min-h-[238px] flex flex-col justify-center items-center py-8">
-        <div className="w-full space-y-6">
+      <div className="w-full max-w-full min-h-[130px] flex flex-col justify-center items-center py-2">
+        <div className="w-full space-y-3">
           {drawnSets.map((set, rowIdx) => (
             <div
               key={rowIdx}
-              className="flex flex-nowrap justify-center items-center gap-4 w-full max-w-full min-h-[56px]"
+              className="flex flex-nowrap justify-center items-center gap-4 w-full max-w-full min-h-[40px]"
             >
               {set.map((n, colIdx) => {
                 if (n === undefined) {
-                  // Always show fixed, filled black circles for unrevealed slots and before reveal phase
                   return (
                     <span
                       key={colIdx}
@@ -60,7 +58,6 @@ export default function RevealPanel() {
                     ></span>
                   );
                 }
-                // Revealed numbers:
                 if (userSet.has(n)) {
                   return (
                     <span
@@ -101,14 +98,13 @@ export default function RevealPanel() {
           ))}
         </div>
       </div>
-      {/* User's Confirmed Numbers: always visible, well-separated */}
-      <div className="w-full max-w-md mt-6">
-        <LotteryTicket />
+      {/* Ticket: reduce margin for vertical fit */}
+      <div className="w-full max-w-md mt-2 mb-0">
+        <LotteryTicket compact />
       </div>
-      <div className="pt-6 text-center text-muted-foreground text-base">
+      <div className="pt-2 text-center text-muted-foreground text-base">
         Numbers revealed in order—good luck!
       </div>
     </div>
   );
 }
-
