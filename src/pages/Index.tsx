@@ -1,10 +1,7 @@
-
 import { TimerProvider, useTimer } from "@/features/timer/timer-context";
 import TimerDisplay from "@/features/timer/TimerDisplay";
 import { NumberSelectionProvider } from "@/features/number-select/NumberSelectionContext";
 import { WalletProvider } from "@/features/wallet/WalletContext";
-import WalletHistory from "@/features/wallet/WalletHistory";
-
 // Get logical dimensions
 const LOGICAL_WIDTH = 402;  // iPhone 16 Pro logical width
 const LOGICAL_HEIGHT = 874; // iPhone 16 Pro logical height
@@ -18,7 +15,7 @@ function ConditionalWalletHistory() {
   }
   return (
     <div className="mt-2 mb-4 w-full max-w-[440px]">
-      <WalletHistory />
+      {/* <WalletHistory /> */}
     </div>
   );
 }
@@ -40,7 +37,7 @@ const Index = () => {
             <NumberSelectionProvider>
               <main className="flex flex-col w-full items-center px-4 py-8 h-full">
                 <h1 className="font-extrabold tracking-tight text-3xl mb-12 mt-6 text-[#1a1855]">Lucky Dip Demo</h1>
-                <ConditionalWalletHistory />
+                {/* WalletHistory removed */}
                 <TimerDisplay />
               </main>
             </NumberSelectionProvider>
