@@ -47,16 +47,28 @@ function saveWalletToStorage(wallet: WalletType) {
 }
 
 export function WalletProvider({ children }: { children: React.ReactNode }) {
-  const [balance, setBalance] = useState<number>(() => loadWalletFromStorage().balance);
-  const [history, setHistory] = useState<TicketType[]>(() => loadWalletFromStorage().history);
+  // Only balance is persisted, not history.
+  const [balance, setBalance] = useState<number>(() => {
+    const data = localStorage.getItem(LOCAL_STORAGE_KEY);
+    if (data) {
+      try {
+        const parsed = JSON.parse(data);
+        if (typeof parsed.balance === "number") {
+          return parsed.balance;
+        }
+      } catch {}
+    }
+    return 1000;
+  });
+  const [history, setHistory] = useState<TicketType[]>([]);
 
-  // Save on change
+  // Save only balance on change
   useEffect(() => {
-    saveWalletToStorage({ balance, history });
-  }, [balance, history]);
+    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify({ balance }));
+  }, [balance]);
 
   // Add a ticket (draw result): handles the credit logic and updates state
-  function addTicket(ticket: Omit<TicketType, "id">) {
+  function addTicket(ticket: Omit<TicketType, "id" | "creditChange">) {
     let creditChange = ticket.matches === 6 ? 100 : -10;
     const newTicket: TicketType = {
       ...ticket,
@@ -71,7 +83,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
   function resetWallet() {
     setBalance(1000);
     setHistory([]);
-    saveWalletToStorage({ balance: 1000, history: [] });
+    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify({ balance: 1000 }));
   }
 
   return (
