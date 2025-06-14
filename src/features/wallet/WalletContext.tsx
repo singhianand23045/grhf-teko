@@ -23,6 +23,8 @@ type WalletContextType = {
 };
 
 const LOCAL_STORAGE_KEY = "wallet";
+// Set the default starting credits
+const STARTING_BALANCE = 100;
 
 // Payout map
 function getCreditsForMatches(matches: number) {
@@ -51,7 +53,7 @@ function loadWalletFromStorage(): WalletType {
       }
     } catch {}
   }
-  return { balance: 1000, history: [] };
+  return { balance: STARTING_BALANCE, history: [] };
 }
 
 function saveWalletToStorage(wallet: WalletType) {
@@ -70,7 +72,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
         }
       } catch {}
     }
-    return 1000;
+    return STARTING_BALANCE;
   });
   const [history, setHistory] = useState<TicketType[]>(() => {
     const data = localStorage.getItem(LOCAL_STORAGE_KEY);
@@ -136,9 +138,9 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
 
   // Reset wallet (for demo restart)
   function resetWallet() {
-    setBalance(1000);
+    setBalance(STARTING_BALANCE);
     setHistory([]);
-    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify({ balance: 1000, history: [] }));
+    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify({ balance: STARTING_BALANCE, history: [] }));
   }
 
   return (
