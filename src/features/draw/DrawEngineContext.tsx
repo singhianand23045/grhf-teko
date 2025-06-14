@@ -1,6 +1,8 @@
 import React, { createContext, useContext, useEffect, useRef, useState } from "react";
 import { useTimer } from "../timer/timer-context";
 import { generateDrawSets } from "./numberPool";
+import { useWallet } from "../wallet/WalletContext";
+import { useNumberSelection } from "../number-select/NumberSelectionContext";
 
 const SETS_COUNT = 6;
 const SET_SIZE = 6;
@@ -18,6 +20,9 @@ const DrawEngineContext = createContext<DrawEngineContextType | undefined>(undef
 
 export function DrawEngineProvider({ children }: { children: React.ReactNode }) {
   const { state, cycleIndex } = useTimer();
+  // Wallet & Confirmed numbers
+  const wallet = useWallet();
+  const { picked } = useNumberSelection();
   const [drawnNumbers, setDrawnNumbers] = useState<number[]>([]);
   const [isRevealDone, setIsRevealDone] = useState(false);
   
@@ -93,6 +98,29 @@ export function DrawEngineProvider({ children }: { children: React.ReactNode }) 
     }
     // eslint-disable-next-line
   }, [state, cycleIndex]);
+
+  // --- NEW: At end of reveal, evaluate matches, record ticket ---
+  useEffect(() => {
+    if (state === "REVEAL" && isRevealDone) {
+      // Only allow if 6 numbers picked, else skip (no entry, no charge)
+      if (picked?.length === 6) {
+        // The 18 drawn numbers for this cycle:
+        const startSet = cycleIndex * SETS_PER_CYCLE;
+        const activeSets = sets.slice(startSet, startSet + SETS_PER_CYCLE);
+        const allDrawn = activeSets.flat();
+        // Count matches in picked ticket (intersection)
+        const matches = picked.filter((n) => allDrawn.includes(n)).length;
+        // Add ticket to wallet/history
+        wallet.addTicket({
+          date: new Date().toISOString(),
+          numbers: picked,
+          matches,
+        });
+      }
+    }
+    // Only run once per reveal completion
+    // eslint-disable-next-line
+  }, [state, isRevealDone]);
   
   return (
     <DrawEngineContext.Provider
