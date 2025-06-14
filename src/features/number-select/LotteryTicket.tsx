@@ -1,3 +1,4 @@
+
 import React from "react";
 import { useNumberSelection } from "./NumberSelectionContext";
 
@@ -28,7 +29,7 @@ export default function LotteryTicket() {
               minWidth: 40,
               height: "clamp(2.2rem, 7vw, 3rem)",
               minHeight: 40,
-              fontSize: "clamp(1.1rem, 6vw, 1.45rem)",
+              fontSize: "clamp(0.9rem, 4.5vw, 1.1rem)",
               lineHeight: 1.1,
               padding: 0,
             }}

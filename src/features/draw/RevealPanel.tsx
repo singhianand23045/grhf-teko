@@ -53,7 +53,7 @@ export default function RevealPanel() {
                         minWidth: 40,
                         height: "clamp(2.2rem, 7vw, 3rem)",
                         minHeight: 40,
-                        fontSize: "clamp(1.1rem, 6vw, 1.45rem)",
+                        fontSize: "clamp(0.9rem, 4.5vw, 1.1rem)",
                         lineHeight: 1.1,
                       }}
                       aria-hidden
@@ -67,11 +67,11 @@ export default function RevealPanel() {
                       key={colIdx}
                       className="flex items-center justify-center rounded-full bg-green-500 text-white font-black shadow-green-300 shadow-lg border-[2px] border-green-700 select-none transition-all aspect-square animate-scale-in"
                       style={{
-                        width: "clamp(2rem, 9vw, 2.25rem)",
-                        minWidth: 28,
-                        height: "clamp(2rem, 9vw, 2.25rem)",
-                        minHeight: 28,
-                        fontSize: "clamp(0.90rem, 4vw, 1.1rem)",
+                        width: "clamp(2.2rem, 7vw, 3rem)",
+                        minWidth: 40,
+                        height: "clamp(2.2rem, 7vw, 3rem)",
+                        minHeight: 40,
+                        fontSize: "clamp(0.9rem, 4.5vw, 1.1rem)",
                         lineHeight: 1.1,
                         padding: 0,
                       }}
@@ -89,7 +89,7 @@ export default function RevealPanel() {
                       minWidth: 40,
                       height: "clamp(2.2rem, 7vw, 3rem)",
                       minHeight: 40,
-                      fontSize: "clamp(1.1rem, 6vw, 1.45rem)",
+                      fontSize: "clamp(0.9rem, 4.5vw, 1.1rem)",
                       lineHeight: 1.1,
                     }}
                   >
