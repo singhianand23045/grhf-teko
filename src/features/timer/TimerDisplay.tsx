@@ -7,35 +7,52 @@ import { NumberSelectionProvider } from "../number-select/NumberSelectionContext
 import NumberSelectionPanel from "../number-select/NumberSelectionPanel";
 import { DrawEngineProvider } from "../draw/DrawEngineContext";
 import RevealPanel from "../draw/RevealPanel";
+import LotteryTicket from "../number-select/LotteryTicket";
 
 // For screen proportions
 const LOGICAL_HEIGHT = 874; // Should match page layout
-const LOGICAL_WIDTH = 402;
+
+/**
+ * Calculate section heights:
+ * - Timer: 1/8 = ~12.5%
+ * - Draw (Reveal): 33%
+ * - Number Selection/Confirmed: 33%
+ * - Remaining height (if any) distributed evenly by flex.
+ */
 
 export default function TimerDisplay() {
   const { countdown, state, resetDemo } = useTimer();
 
-  // 1. Timer/Countdown on the left (desktop), full width above other on mobile
+  // Height fractions
+  const TIMER_FRACTION = 1 / 8; // 12.5%
+  const MIDDLE_FRACTION = 0.33; // 33%
+  const BOTTOM_FRACTION = 0.33; // 33%
+
+  // Timer Section (top)
   const TimerSection = (
-    <div className="flex flex-col items-center justify-center h-full w-full">
+    <div
+      className="flex items-center justify-center w-full"
+      style={{
+        height: `${TIMER_FRACTION * 100}%`,
+        minHeight: 46,
+        maxHeight: 120,
+      }}
+    >
       <Card
-        className="flex items-center justify-center bg-gradient-to-b from-[#f4f4fa] to-[#e3e7fb] border-2 border-white shadow-xl rounded-xl"
-        // width: 1/2 of container, height: 1/8 of full height (responsive), min sizes for mobile
+        className="flex items-center justify-center bg-gradient-to-b from-[#f4f4fa] to-[#e3e7fb] border-2 border-white shadow-xl rounded-xl w-1/2"
         style={{
-          width: `min(50%, 210px)`,
-          height: `min(12.5%, 84px)`, // 1/8 of 674px is ~84px
+          width: `50%`,
           minWidth: 116,
-          minHeight: 46,
           maxWidth: 210,
-          maxHeight: 84,
+          height: "100%",
+          minHeight: 46,
           padding: 0,
         }}
       >
         <span
           className="font-mono font-extrabold tracking-widest text-[#24266e] select-none animate-fade-in"
-          // font size: visually balanced and smaller than before
           style={{
-            fontSize: "clamp(1.6rem, 5vw, 2.7rem)", // ~25-43px
+            fontSize: "clamp(1.3rem, 4vw, 2rem)",
             lineHeight: 1.1,
           }}
           data-testid="timer"
@@ -46,49 +63,71 @@ export default function TimerDisplay() {
     </div>
   );
 
-  // Main content, selection and draw (right on desktop, below timer on mobile)
-  const MainSection = (
-    <div className="flex flex-col flex-1 items-center w-full justify-start">
-      <NumberSelectionProvider>
-        {/* Number Selection section */}
-        {state !== "COMPLETE" && state !== "REVEAL" && (
-          <section className="w-full flex flex-col items-center my-3">
-            <h2 className="text-lg font-semibold mb-3 text-[#257a2a] tracking-wide">Number Selection</h2>
-            <NumberSelectionPanel />
-          </section>
-        )}
-        {/* Draw Engine & Reveal section (with drawn numbers grid + user's ticket, never overlapping) */}
-        {state === "REVEAL" && (
-          <section className="w-full flex flex-col items-center mt-3 mb-2">
-            <DrawEngineProvider>
-              <RevealPanel />
-            </DrawEngineProvider>
-          </section>
-        )}
-      </NumberSelectionProvider>
-      {/* Demo complete section */}
-      {state === "COMPLETE" && (
-        <section className="w-full flex flex-col items-center mt-10 animate-fade-in">
-          <p className="text-base font-semibold text-center mb-4">Demo Complete — 2 cycles finished.</p>
-          <Button variant="secondary" size="lg" className="mt-2" onClick={resetDemo}>
-            <Repeat className="mr-1 h-4 w-4" /> Restart Demo
-          </Button>
-        </section>
+  // Drawn Numbers/Reveal Section (middle)
+  const DrawSection = (
+    <div
+      className="flex flex-col items-center justify-center w-full"
+      style={{
+        height: `${MIDDLE_FRACTION * 100}%`,
+        minHeight: 120,
+      }}
+    >
+      {state === "REVEAL" ? (
+        <DrawEngineProvider>
+          <RevealPanel />
+        </DrawEngineProvider>
+      ) : (
+        // When not in reveal state, maintain space with a placeholder
+        <div className="w-full flex items-center justify-center h-full">
+          <div className="text-muted-foreground text-base opacity-60">Drawn numbers will appear here</div>
+        </div>
       )}
     </div>
   );
 
-  // Responsive flex container: row (desktop), column (mobile)
+  // Number Selection/User's Ticket/Complete Section (bottom)
+  const BottomSection = (
+    <div
+      className="flex flex-col items-center justify-center w-full"
+      style={{
+        height: `${BOTTOM_FRACTION * 100}%`,
+        minHeight: 120,
+      }}
+    >
+      <NumberSelectionProvider>
+        {state !== "COMPLETE" && state !== "REVEAL" && (
+          <section className="w-full flex flex-col items-center my-2">
+            <NumberSelectionPanel />
+          </section>
+        )}
+        {state === "REVEAL" && (
+          <section className="w-full flex flex-col items-center mt-2">
+            <LotteryTicket />
+          </section>
+        )}
+        {state === "COMPLETE" && (
+          <section className="w-full flex flex-col items-center mt-4 animate-fade-in">
+            <p className="text-base font-semibold text-center mb-4">Demo Complete — 2 cycles finished.</p>
+            <Button variant="secondary" size="lg" className="mt-2" onClick={resetDemo}>
+              <Repeat className="mr-1 h-4 w-4" /> Restart Demo
+            </Button>
+          </section>
+        )}
+      </NumberSelectionProvider>
+    </div>
+  );
+
   return (
-    <div className="flex flex-col lg:flex-row items-stretch w-full h-full justify-between space-y-3 lg:space-y-0 lg:space-x-5 px-1">
-      {/* Timer left, rest right */}
-      <div className="w-full lg:w-1/2 flex items-start justify-center">
-        {TimerSection}
-      </div>
-      <div className="w-full lg:w-1/2 flex flex-col">
-        {MainSection}
-      </div>
+    <div
+      className="flex flex-col w-full h-full"
+      style={{
+        height: "100%",
+        minHeight: LOGICAL_HEIGHT,
+      }}
+    >
+      {TimerSection}
+      {DrawSection}
+      {BottomSection}
     </div>
   );
 }
-
