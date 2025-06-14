@@ -199,8 +199,6 @@ export default function TimerDisplay() {
       {Spacer}
       {/* Drawn numbers or reveal+ticket */}
       {state === "REVEAL" ? RevealSectionWithTicket : DrawSection}
-      {/* 1% spacer between drawn numbers and credits */}
-      {state !== "COMPLETE" && DrawCreditsSpacer}
       {/* CreditsBar always between drawn numbers and confirmed section; hide only during demo complete */}
       {state !== "COMPLETE" && <CreditsBar />}
       {Spacer}
