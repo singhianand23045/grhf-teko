@@ -5,9 +5,8 @@ import { useWallet } from "./WalletContext";
 export default function WalletHistory() {
   const { history } = useWallet();
   if (history.length === 0) {
-    return (
-      <div className="text-gray-500 text-center text-sm py-4">No draws yet</div>
-    );
+    // Render nothing if history is empty
+    return null;
   }
   return (
     <div className="max-h-56 overflow-y-auto w-full px-2">

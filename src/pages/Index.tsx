@@ -25,7 +25,7 @@ const Index = () => {
             <NumberSelectionProvider>
               <main className="flex flex-col w-full items-center px-4 py-8 h-full">
                 <h1 className="font-extrabold tracking-tight text-3xl mb-12 mt-6 text-[#1a1855]">Lucky Dip Demo</h1>
-                <BalanceLabel />
+                {/* Removed <BalanceLabel /> */}
                 <div className="mt-2 mb-4 w-full max-w-[440px]">
                   <WalletHistory />
                 </div>
