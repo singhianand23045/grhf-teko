@@ -72,9 +72,12 @@ export default function TimerDisplay() {
       }}
     >
       {state === "REVEAL" ? (
-        <DrawEngineProvider>
-          <RevealPanel />
-        </DrawEngineProvider>
+        // 🟢 Fix: Context for RevealPanel
+        <NumberSelectionProvider>
+          <DrawEngineProvider>
+            <RevealPanel />
+          </DrawEngineProvider>
+        </NumberSelectionProvider>
       ) : (
         // When not in reveal state, show 18 filled black circles in 3x6 grid for placeholder
         <div className="w-full flex flex-col items-center justify-center h-full py-8">
@@ -116,26 +119,26 @@ export default function TimerDisplay() {
         minHeight: 120,
       }}
     >
-      <NumberSelectionProvider>
-        {state !== "COMPLETE" && state !== "REVEAL" && (
+      {state !== "COMPLETE" && state !== "REVEAL" && (
+        <NumberSelectionProvider>
           <section className="w-full flex flex-col items-center my-2">
             <NumberSelectionPanel />
           </section>
-        )}
-        {state === "REVEAL" && (
-          <section className="w-full flex flex-col items-center mt-2">
-            <LotteryTicket />
-          </section>
-        )}
-        {state === "COMPLETE" && (
-          <section className="w-full flex flex-col items-center mt-4 animate-fade-in">
-            <p className="text-base font-semibold text-center mb-4">Demo Complete — 2 cycles finished.</p>
-            <Button variant="secondary" size="lg" className="mt-2" onClick={resetDemo}>
-              <Repeat className="mr-1 h-4 w-4" /> Restart Demo
-            </Button>
-          </section>
-        )}
-      </NumberSelectionProvider>
+        </NumberSelectionProvider>
+      )}
+      {state === "REVEAL" && (
+        <section className="w-full flex flex-col items-center mt-2">
+          {/* Ticket already shown in DrawSection (RevealPanel contains LotteryTicket) */}
+        </section>
+      )}
+      {state === "COMPLETE" && (
+        <section className="w-full flex flex-col items-center mt-4 animate-fade-in">
+          <p className="text-base font-semibold text-center mb-4">Demo Complete — 2 cycles finished.</p>
+          <Button variant="secondary" size="lg" className="mt-2" onClick={resetDemo}>
+            <Repeat className="mr-1 h-4 w-4" /> Restart Demo
+          </Button>
+        </section>
+      )}
     </div>
   );
 
