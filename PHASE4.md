@@ -28,15 +28,15 @@
     - **Deduct 10 credits** from the balance upon confirmation, regardless of results.
     - **Winnings are calculated per row:**  
       - After all 18 numbers are drawn for a cycle (3 rows of 6), compare the user's 6 numbers to each row individually:
-        - For each row (draw), count how many confirmed numbers match the 6 numbers from that row only.
-        - For each row, award credits according to payout rules:
+        - **For each row (draw), count how many confirmed numbers match the 6 numbers from that row only.**
+        - **For each row, award credits according to payout rules:**
           - 6 matches: **+1000 credits**
           - 5 matches: **+100 credits**
           - 4 matches: **+40 credits**
           - 3 matches: **+20 credits**
           - 2 matches: **+10 credits**
           - 1 or 0 matches: **0 credits**
-        - Sum the total winnings **across all three rows** for the cycle.
+        - **Sum the total winnings across all three rows for the cycle.**
       - The message "Congrats! You won XX credits!" and wallet adjustment should reflect this summed total.
     - If the user wins in multiple draws, winnings are added for each draw.
   - No credits are deducted for non-valid entries (unconfirmed or <6 selections).
@@ -50,7 +50,8 @@
   - This Credits section must show an "Add credits" label aligned to the extreme left, and the credits/balance remaining (e.g., "1750 credits") aligned to the extreme right.
   - The visual layout should resemble the "add to balance" bar in the Robinhood app.
   - The Credits section must always be visible except during demo restart.
-  - After each draw, a feedback message appears above the drawn numbers section for 5 seconds summarizing the result: either "Congrats! You won [sum of winnings] credits!" (for any win) or "Try again. Win next time!" (if lost).
+  - After each draw, a feedback message appears above drawn numbers for 5 seconds summarizing the result: either "Congrats! You won [sum of winnings] credits!" (for any win) or "Try again. Win next time!" (if lost).
+  - **Winnings are NOT calculated based on the total matches among all 18 numbers in the grid; winnings must be computed per row and then summed.**
 
 ---
 
@@ -61,13 +62,13 @@
 - [ ] Submitting a ticket with 6 numbers but **not confirming** before cut-off results in **no deduction**, entry is discarded, and no ticket is recorded.
 - [ ] After each draw, the user's ticket is checked **independently against each of the 3 rows (draws) in the grid**.
   - For each row, winnings are calculated using the payout rules.
-  - These winnings are **summed across the 3 rows** and awarded as the total for that cycle.
+  - **These winnings are summed across the 3 rows and awarded as the total for that cycle.**
 - [ ] Multiple wins in multiple draws are credited to balance additively.
 - [ ] The wallet balance is restored correctly on app reload.
 - [ ] Ticket selection resets automatically at the start of each new draw cycle; previous balance remains unchanged.
 - [ ] The Credits section appears at all times (except demo restart), is visually separated, takes up 5% of the total logical height, and "Add credits" and the credit number are properly positioned.
 - [ ] The outcome message (win/loss, credit total) appears above drawn numbers for exactly 5 seconds after each draw, styled distinctly, and disappears automatically.
-- [ ] The message and credit amount reflect the sum of winnings from all three individual rows, not just overall matches across all 18 numbers.
+- [ ] The message and credit amount reflect the **sum of winnings from all three individual rows, not just overall matches across all 18 numbers.**
 
 ---
 
@@ -78,9 +79,9 @@
 - [ ] Submitting a ticket with <6 numbers does not affect balance.
 - [ ] Submitting and confirming a ticket with exactly 6 numbers immediately subtracts 10 credits from balance and records the ticket (regardless of matches).
 - [ ] Submitting a ticket with 6 numbers and matches:  
-    - Evaluates ticket independently for each row;  
-    - Awards winnings for each row using payout rules;  
-    - Records the sum of winnings as the credit change for that draw.
+    - **Evaluates ticket independently for each row;**
+    - **Awards winnings for each row using payout rules;**
+    - **Records the sum of winnings as the credit change for that draw.**
 - [ ] The result message and credited amount reflect the sum of all row winnings.
 - [ ] Submitting 6 numbers but not confirming: balance/history unchanged, nothing recorded.
 - [ ] Multiple wins in multiple draws are credited to balance additively.

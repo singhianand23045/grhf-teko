@@ -34,7 +34,7 @@ In each cycle, a set of 18 numbers (3 sets of 6) is revealed on screen in a time
 - **Winnings are calculated independently for each row:**  
   - After all numbers are revealed, compare the user's 6 confirmed numbers to the numbers in each row (3 rows = 3 draws).
   - For each row, count how many confirmed numbers match the 6 numbers from that row only, and determine winnings for that row based on payout rules.
-  - The final winnings for the cycle are the **sum of winnings from all three rows**.
+  - **The final winnings for the cycle are the sum of winnings from all three rows.**
 - If the user has won credits, show: **"Congrats! You won [sum of winnings] credits!"**
 - If the user has not won, show: **"Try again. Win next time!"**
 - Message is visually distinct, centered, and never overlaps or shrinks the drawn numbers grid. After 5 seconds, it disappears automatically.
@@ -59,7 +59,7 @@ In each cycle, a set of 18 numbers (3 sets of 6) is revealed on screen in a time
 - The display of the drawn numbers never overshadows or obscures the user's confirmed numbers, and their space is never reduced or taken over by the draw results.
 - The timer, drawn numbers, and confirmed numbers are presented in visually separate sections that do not overflow into each other's areas.
 - Proper win/loss message (with credit sum if win) is shown for 5 seconds above drawn numbers at the end of each draw, then disappears.
-- **The user's confirmed numbers are checked independently against each row (draw), winnings for each row are determined and summed, and this total is shown in the feedback message.**
+- **The user's confirmed numbers are checked independently against each row (draw), winnings for each row are determined and summed, and this total is shown in the feedback message. Winnings are not determined by the total number matched in the overall grid, but by the sum of matches per row.**
 
 ---
 
@@ -67,4 +67,5 @@ In each cycle, a set of 18 numbers (3 sets of 6) is revealed on screen in a time
 
 - [ ] After each draw, correct result message (win/loss) appears for exactly 5 seconds, is visually distinct and correctly placed.
 - [ ] The sum of winnings from all three rows is shown if the user wins, not just the total matches across all 18 numbers.
+- [ ] The per-row calculation is used: for each of the 3 rows (draws), award is determined and the total is the sum of all row results.
 
