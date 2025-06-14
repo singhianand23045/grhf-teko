@@ -139,9 +139,13 @@ export default function TimerDisplay() {
           </section>
         </NumberSelectionProvider>
       )}
-      {/* During reveal, confirmed numbers shown within RevealPanel, so keep section empty for now */}
+      {/* During reveal: show ticket below grid with compact mode */}
       {state === "REVEAL" && (
-        <section className="w-full flex flex-col items-center mt-1"></section>
+        <NumberSelectionProvider>
+          <section className="w-full flex flex-col items-center mt-1">
+            <LotteryTicket compact />
+          </section>
+        </NumberSelectionProvider>
       )}
       {/* Complete: restart demo */}
       {state === "COMPLETE" && (

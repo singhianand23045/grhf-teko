@@ -1,7 +1,7 @@
+
 import React from "react";
 import { useDrawEngine } from "./DrawEngineContext";
 import { useNumberSelection } from "../number-select/NumberSelectionContext";
-import LotteryTicket from "../number-select/LotteryTicket";
 import { useTimer } from "../timer/timer-context";
 
 export default function RevealPanel() {
@@ -98,10 +98,7 @@ export default function RevealPanel() {
           ))}
         </div>
       </div>
-      {/* Ticket: very reduced margin/padding for compact fit */}
-      <div className="w-full max-w-md mt-1 mb-0">
-        <LotteryTicket compact />
-      </div>
+      {/* Info below grid, NO ticket! */}
       <div className="pt-1 text-center text-muted-foreground text-base">
         Numbers revealed in order—good luck!
       </div>
