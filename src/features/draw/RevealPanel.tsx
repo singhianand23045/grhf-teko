@@ -33,8 +33,8 @@ export default function RevealPanel() {
   return (
     <div className="flex flex-col items-center w-full h-full overflow-y-auto">
       {/* Drawn Numbers Grid */}
-      <div className="w-full max-w-full min-h-[130px] flex flex-col justify-center items-center py-2">
-        <div className="w-full space-y-3">
+      <div className="w-full max-w-full min-h-[130px] flex flex-col justify-center items-center py-1">
+        <div className="w-full space-y-2">
           {drawnSets.map((set, rowIdx) => (
             <div
               key={rowIdx}
@@ -98,11 +98,11 @@ export default function RevealPanel() {
           ))}
         </div>
       </div>
-      {/* Ticket: reduce margin for vertical fit */}
-      <div className="w-full max-w-md mt-2 mb-0">
+      {/* Ticket: very reduced margin/padding for compact fit */}
+      <div className="w-full max-w-md mt-1 mb-0">
         <LotteryTicket compact />
       </div>
-      <div className="pt-2 text-center text-muted-foreground text-base">
+      <div className="pt-1 text-center text-muted-foreground text-base">
         Numbers revealed in order—good luck!
       </div>
     </div>

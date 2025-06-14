@@ -25,7 +25,7 @@ export default function TimerDisplay() {
 
   const TIMER_HEIGHT = 0.10;
   const SPACER_HEIGHT = 0.03;
-  const DRAW_SECTION_HEIGHT = 0.20; // Updated from 0.33 to 0.20
+  const DRAW_SECTION_HEIGHT = 0.20; // 20%
   // Remaining = 1 - (TIMER+SPACER+DRAW+SPACER) = 0.61
 
   // Timer Section (top)
@@ -74,13 +74,15 @@ export default function TimerDisplay() {
     ></div>
   );
 
-  // Drawn Numbers (Draw/Reveal) Section (middle)
+  // Drawn Numbers Section (middle)
   const DrawSection = (
     <div
-      className="flex flex-col items-center justify-center w-full flex-shrink-0 flex-grow-0 overflow-y-auto"
+      className="flex flex-col items-center justify-center w-full flex-shrink-0 flex-grow-0 overflow-y-hidden"
       style={{
         height: `${DRAW_SECTION_HEIGHT * 100}%`,
         minHeight: 100,
+        maxHeight: `${DRAW_SECTION_HEIGHT * 100}%`,
+        flexBasis: `${DRAW_SECTION_HEIGHT * 100}%`,
       }}
     >
       {state === "REVEAL" ? (
@@ -124,7 +126,7 @@ export default function TimerDisplay() {
   // Takes all remaining height at the bottom!
   const ConfirmedSection = (
     <div
-      className="flex flex-col items-center justify-center w-full flex-grow overflow-y-auto"
+      className="flex flex-col items-center justify-center w-full flex-grow overflow-y-hidden"
       style={{
         minHeight: 80,
       }}

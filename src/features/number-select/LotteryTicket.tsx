@@ -7,16 +7,18 @@ export default function LotteryTicket({ compact = false }: { compact?: boolean }
 
   return (
     <div
-      className={`w-full flex flex-col items-center justify-center px-2 ${compact ? "mt-0 mb-0" : ""}`}
-      style={compact ? { marginTop: 0, marginBottom: 0 } : {}}
+      className={`w-full flex flex-col items-center justify-center px-2 ${compact ? "" : "mt-2 mb-2"}`}
+      style={compact ? { marginTop: 0, marginBottom: 0, paddingTop: 0, paddingBottom: 0 } : {}}
     >
       <div className={`mb-2 font-bold text-lg tracking-wide text-[#217d37] ${compact ? "mt-0" : ""}`}>
         Your Numbers
       </div>
       <div
-        className="flex flex-nowrap justify-center items-center gap-4 bg-gradient-to-r from-green-100/70 via-white to-green-100/70 rounded-2xl shadow-inner px-1 py-3 w-full"
+        className="flex flex-nowrap justify-center items-center gap-4 bg-gradient-to-r from-green-100/70 via-white to-green-100/70 rounded-2xl shadow-inner px-1 py-2 w-full"
         style={{
           minHeight: 44,
+          paddingTop: compact ? 0 : undefined,
+          paddingBottom: compact ? 0 : undefined,
         }}
       >
         {sorted.map((n) => (
