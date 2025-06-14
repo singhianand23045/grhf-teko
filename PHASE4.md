@@ -26,13 +26,18 @@
   - Start with `balance = 100` credits for every new player/session.
   - For each draw in which the player participates (i.e., submits and confirms a 6-number ticket):
     - **Deduct 10 credits** from the balance upon confirmation, regardless of results.
-    - After the draw, **award credits based on number of matches**:
-      - 6 matches: **+1000 credits**
-      - 5 matches: **+100 credits**
-      - 4 matches: **+40 credits**
-      - 3 matches: **+20 credits**
-      - 2 matches: **+10 credits**
-      - 1 or 0 matches: **0 credits**
+    - **Winnings are calculated per row:**  
+      - After all 18 numbers are drawn for a cycle (3 rows of 6), compare the user's 6 numbers to each row individually:
+        - For each row (draw), count how many confirmed numbers match the 6 numbers from that row only.
+        - For each row, award credits according to payout rules:
+          - 6 matches: **+1000 credits**
+          - 5 matches: **+100 credits**
+          - 4 matches: **+40 credits**
+          - 3 matches: **+20 credits**
+          - 2 matches: **+10 credits**
+          - 1 or 0 matches: **0 credits**
+        - Sum the total winnings **across all three rows** for the cycle.
+      - The message "Congrats! You won XX credits!" and wallet adjustment should reflect this summed total.
     - If the user wins in multiple draws, winnings are added for each draw.
   - No credits are deducted for non-valid entries (unconfirmed or <6 selections).
   - Balance is updated after each result.
@@ -53,19 +58,16 @@
 
 - [ ] Submitting fewer than 6 numbers for a draw does **not** deduct credits or submit a ticket.
 - [ ] Submitting and **confirming 6 numbers** for a draw deducts **10 credits** regardless of outcome; ticket is recorded and eligible for winnings.
-- [ ] Submitting 6 numbers but **not confirming** before cut-off results in **no deduction**, entry is discarded, and no ticket is recorded.
-- [ ] If a user's confirmed ticket matches numbers, winnings are awarded as follows:
-    - 6/6: +1000 credits
-    - 5/6: +100 credits
-    - 4/6: +40 credits
-    - 3/6: +20 credits
-    - 2/6: +10 credits
-    - 1 or 0/6: no credit awarded
+- [ ] Submitting a ticket with 6 numbers but **not confirming** before cut-off results in **no deduction**, entry is discarded, and no ticket is recorded.
+- [ ] After each draw, the user's ticket is checked **independently against each of the 3 rows (draws) in the grid**.
+  - For each row, winnings are calculated using the payout rules.
+  - These winnings are **summed across the 3 rows** and awarded as the total for that cycle.
 - [ ] Multiple wins in multiple draws are credited to balance additively.
 - [ ] The wallet balance is restored correctly on app reload.
 - [ ] Ticket selection resets automatically at the start of each new draw cycle; previous balance remains unchanged.
 - [ ] The Credits section appears at all times (except demo restart), is visually separated, takes up 5% of the total logical height, and "Add credits" and the credit number are properly positioned.
 - [ ] The outcome message (win/loss, credit total) appears above drawn numbers for exactly 5 seconds after each draw, styled distinctly, and disappears automatically.
+- [ ] The message and credit amount reflect the sum of winnings from all three individual rows, not just overall matches across all 18 numbers.
 
 ---
 
@@ -75,7 +77,11 @@
 
 - [ ] Submitting a ticket with <6 numbers does not affect balance.
 - [ ] Submitting and confirming a ticket with exactly 6 numbers immediately subtracts 10 credits from balance and records the ticket (regardless of matches).
-- [ ] Submitting a ticket with 6 numbers and matches awards winnings according to the rules above, and records the ticket with correct values.
+- [ ] Submitting a ticket with 6 numbers and matches:  
+    - Evaluates ticket independently for each row;  
+    - Awards winnings for each row using payout rules;  
+    - Records the sum of winnings as the credit change for that draw.
+- [ ] The result message and credited amount reflect the sum of all row winnings.
 - [ ] Submitting 6 numbers but not confirming: balance/history unchanged, nothing recorded.
 - [ ] Multiple wins in multiple draws are credited to balance additively.
 - [ ] Balance is restored after simulating an app reload.
@@ -86,4 +92,5 @@
 - [ ] On app launch or reload, wallet is consistent with prior play.
 - [ ] The credits section always appears, takes up 5% of the total logical height, and "Add credits" and the credit number are properly positioned.
 - [ ] The correct feedback message is displayed at the right time, with correct text and duration, and does not interfere with grid layout.
+- [ ] Feedback message and credited amount are correct for sum of all per-row winnings.
 
