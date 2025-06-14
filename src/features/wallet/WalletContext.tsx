@@ -18,7 +18,7 @@ export type TicketType = {
 type WalletContextType = {
   balance: number;
   history: TicketType[];
-  addTicket: (ticket: Omit<TicketType, "id">) => void;
+  addTicket: (ticket: Omit<TicketType, "id" | "creditChange">) => void;
   resetWallet: () => void;
 };
 
