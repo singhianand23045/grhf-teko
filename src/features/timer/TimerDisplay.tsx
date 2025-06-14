@@ -3,6 +3,9 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useTimer } from "./timer-context";
 import { Repeat } from "lucide-react";
+// PHASE 2:
+import { NumberSelectionProvider } from "../number-select/NumberSelectionContext";
+import NumberSelectionPanel from "../number-select/NumberSelectionPanel";
 
 export default function TimerDisplay() {
   const { countdown, state, resetDemo } = useTimer();
@@ -17,6 +20,12 @@ export default function TimerDisplay() {
           >
             {countdown}
           </div>
+          {/* PHASE 2: Numbers selection panel */}
+          {state !== "COMPLETE" && (
+            <NumberSelectionProvider>
+              <NumberSelectionPanel />
+            </NumberSelectionProvider>
+          )}
           {state === "COMPLETE" && (
             <div className="w-full flex flex-col items-center animate-fade-in">
               <p className="text-base font-semibold text-center mb-4">Demo Complete — 2 cycles finished.</p>
