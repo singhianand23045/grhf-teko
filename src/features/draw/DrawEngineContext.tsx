@@ -130,7 +130,6 @@ export function DrawEngineProvider({ children }: { children: React.ReactNode }) 
         revealTimeouts.current = [];
       };
     } else if (
-      state !== "REVEAL" &&
       pendingTicketRef.current &&
       !pendingTicketRef.current.entered
     ) {
