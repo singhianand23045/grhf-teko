@@ -1,10 +1,12 @@
+
 import React from "react";
 import { useDrawEngine } from "./DrawEngineContext";
 import { useNumberSelection } from "../number-select/NumberSelectionContext";
 import { useTimer } from "../timer/timer-context";
+import ResultBar from "./ResultBar";
 
 export default function RevealPanel() {
-  const { drawnNumbers } = useDrawEngine();
+  const { drawnNumbers, revealResult } = useDrawEngine();
   const { picked: userNumbers } = useNumberSelection();
   const { state } = useTimer();
 
@@ -31,6 +33,8 @@ export default function RevealPanel() {
 
   return (
     <div className="flex flex-col items-center w-full h-full overflow-y-hidden">
+      {/* ResultBar: above numbers grid, only visible during 5s after reveal */}
+      <ResultBar visible={revealResult.show} creditsWon={revealResult.credits} />
       {/* Drawn Numbers Grid */}
       <div className="w-full max-w-full flex flex-col justify-center items-center py-0">
         <div className="w-full space-y-1">
@@ -41,11 +45,11 @@ export default function RevealPanel() {
             >
               {set.map((n, colIdx) => {
                 const baseCircleStyle = {
-                  width: "clamp(1.1rem, 4vw, 2rem)",     // reduce size
+                  width: "clamp(1.1rem, 4vw, 2rem)",
                   minWidth: 28,
                   height: "clamp(1.1rem, 4vw, 2rem)",
                   minHeight: 28,
-                  fontSize: "clamp(0.7rem, 2.5vw, 1.05rem)",  // smaller font
+                  fontSize: "clamp(0.7rem, 2.5vw, 1.05rem)",
                   lineHeight: 1.05,
                   padding: 0,
                 };

@@ -8,12 +8,26 @@ const SETS_COUNT = 6;
 const SET_SIZE = 6;
 const SETS_PER_CYCLE = 3; // 18 numbers (3x6) per cycle
 
+// Add payout rules (matches -> credits)
+const getCreditsForMatches = (matches: number): number => {
+  switch (matches) {
+    case 6: return 1000;
+    case 5: return 100;
+    case 4: return 40;
+    case 3: return 20;
+    case 2: return 10;
+    default: return 0;
+  }
+};
+
 interface DrawEngineContextType {
   drawnNumbers: number[];
   isRevealDone: boolean;
   startReveal: (cycleIndex: number, revealDurationSec: number) => void;
   instantlyFinishReveal: () => void;
   sets: number[][];
+  revealResult: { show: boolean; credits: number | null };
+  triggerResultBar: () => void;
 }
 
 const DrawEngineContext = createContext<DrawEngineContextType | undefined>(undefined);
@@ -25,6 +39,8 @@ export function DrawEngineProvider({ children }: { children: React.ReactNode }) 
   const { picked } = useNumberSelection();
   const [drawnNumbers, setDrawnNumbers] = useState<number[]>([]);
   const [isRevealDone, setIsRevealDone] = useState(false);
+   const [resultBar, setResultBar] = useState<{ show: boolean; credits: number | null }>({ show: false, credits: null });
+  const resultTimeout = useRef<NodeJS.Timeout | null>(null);
 
   // Generate 6 sets of 6 numbers, once per session
   const setsRef = useRef<number[][] | null>(null);
@@ -249,6 +265,52 @@ export function DrawEngineProvider({ children }: { children: React.ReactNode }) 
     // eslint-disable-next-line
   }, [state, cycleIndex, wallet]);
 
+  // When all drawn numbers revealed, at timer = 0:25, show result message for 5s
+  useEffect(() => {
+    // Only show after all numbers revealed during REVEAL phase
+    if (isRevealDone) {
+      // Calculate credits for user ticket vs drawnNumbers (if a user ticket exists for this cycle)
+      const startSet = cycleIndex * SETS_PER_CYCLE;
+      const activeSets = sets.slice(startSet, startSet + SETS_PER_CYCLE);
+      const allDrawn = activeSets.flat();
+
+      let userNumbers: number[] = [];
+      if (
+        lastPickedPerCycle.current[cycleIndex] &&
+        lastPickedPerCycle.current[cycleIndex].length === 6
+      ) {
+        userNumbers = lastPickedPerCycle.current[cycleIndex];
+      }
+
+      // Sum winnings for user's ticket (if one exists, only 1 entry max allowed)
+      const matches = userNumbers.filter((n) => allDrawn.includes(n)).length;
+      const winnings = getCreditsForMatches(matches);
+
+      // Show bar
+      setResultBar({ show: true, credits: winnings });
+
+      // Hide after 5 seconds
+      if (resultTimeout.current) clearTimeout(resultTimeout.current);
+      resultTimeout.current = setTimeout(() => {
+        setResultBar({ show: false, credits: null });
+      }, 5000);
+    }
+    // Clean up timeout if component unmounts
+    return () => {
+      if (resultTimeout.current) clearTimeout(resultTimeout.current);
+    };
+    // eslint-disable-next-line
+  }, [isRevealDone, cycleIndex, sets]);
+
+  // Helper for explicit triggering (could be used for test)
+  function triggerResultBar() {
+    setResultBar((curr) => ({ show: true, credits: curr.credits }));
+    if (resultTimeout.current) clearTimeout(resultTimeout.current);
+    resultTimeout.current = setTimeout(() => {
+      setResultBar({ show: false, credits: null });
+    }, 5000);
+  }
+
   return (
     <DrawEngineContext.Provider
       value={{
@@ -257,6 +319,8 @@ export function DrawEngineProvider({ children }: { children: React.ReactNode }) 
         startReveal,
         instantlyFinishReveal,
         sets,
+        revealResult: resultBar,
+        triggerResultBar,
       }}
     >
       {children}
