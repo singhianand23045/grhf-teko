@@ -11,9 +11,9 @@ import RevealPanel from "../draw/RevealPanel";
 export default function TimerDisplay() {
   const { countdown, state, resetDemo } = useTimer();
 
-  // Section 1: Scheduler & Timer Display
+  // Scheduler & Timer section (always at top)
   const TimerSection = (
-    <section className="w-full flex flex-col items-center mb-5">
+    <section className="w-full flex flex-col items-center mb-6">
       <h2 className="text-xl font-semibold text-[#1a1855] mb-2 tracking-wider">Scheduler & Timer</h2>
       <Card className="w-full max-w-xs shadow-xl rounded-xl bg-gradient-to-b from-[#f4f4fa] to-[#e3e7fb] border-2 border-white">
         <div className="flex flex-col items-center py-7 px-4">
@@ -28,11 +28,10 @@ export default function TimerDisplay() {
     </section>
   );
 
-  // Section 2: Number Selection UI
-  // Shown ONLY if NOT (COMPLETE or REVEAL)
+  // Number Selection section
   const SelectionSection = (
     state !== "COMPLETE" && state !== "REVEAL" && (
-      <section className="w-full mt-4 mb-5 flex flex-col items-center">
+      <section className="w-full flex flex-col items-center my-3">
         <h2 className="text-lg font-semibold mb-3 text-[#257a2a] tracking-wide">Number Selection</h2>
         <NumberSelectionProvider>
           <NumberSelectionPanel />
@@ -41,25 +40,21 @@ export default function TimerDisplay() {
     )
   );
 
-  // Section 3: Draw Engine & Reveal
-  // RevealPanel is visible only in REVEAL state (and provider must be present)
-  const RevealSection = (
+  // Draw Engine & Reveal section (with drawn numbers grid + user's ticket, never overlapping)
+  const DrawSection = (
     state === "REVEAL" && (
-      <section className="w-full mt-2 flex flex-col items-center">
-        <h2 className="text-lg font-semibold mb-3 text-[#25606b] tracking-wide">Draw Engine &amp; Reveal</h2>
-        <NumberSelectionProvider>
-          <DrawEngineProvider>
-            <RevealPanel />
-          </DrawEngineProvider>
-        </NumberSelectionProvider>
+      <section className="w-full flex flex-col items-center mt-3 mb-2">
+        <DrawEngineProvider>
+          <RevealPanel />
+        </DrawEngineProvider>
       </section>
     )
   );
 
-  // Section for when the demo is complete
+  // Demo complete section
   const CompleteSection = (
     state === "COMPLETE" && (
-      <section className="w-full flex flex-col items-center mt-8 animate-fade-in">
+      <section className="w-full flex flex-col items-center mt-10 animate-fade-in">
         <p className="text-base font-semibold text-center mb-4">Demo Complete — 2 cycles finished.</p>
         <Button variant="secondary" size="lg" className="mt-2" onClick={resetDemo}>
           <Repeat className="mr-1 h-4 w-4" /> Restart Demo
@@ -69,10 +64,14 @@ export default function TimerDisplay() {
   );
 
   return (
-    <div className="flex flex-col items-center w-full h-full justify-between">
+    <div className="flex flex-col items-center w-full h-full justify-between space-y-3 px-1">
+      {/* 1. Timer/Countdown Always on Top */}
       {TimerSection}
+      {/* 2. Number Selection Panel, only in "OPEN" or "CUT_OFF" */}
       {SelectionSection}
-      {RevealSection}
+      {/* 3. Drawn Numbers Grid + Ticket, only in REVEAL */}
+      {DrawSection}
+      {/* 4. Complete Message, only in COMPLETE */}
       {CompleteSection}
     </div>
   );
