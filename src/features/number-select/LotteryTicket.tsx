@@ -13,10 +13,10 @@ export default function LotteryTicket() {
         Your Numbers
       </div>
       <div
-        className="flex flex-nowrap justify-center items-center gap-2 bg-gradient-to-r from-green-100/70 via-white to-green-100/70 rounded-2xl shadow-inner px-1 py-4 w-full"
+        className="flex flex-nowrap justify-center items-center gap-4 bg-gradient-to-r from-green-100/70 via-white to-green-100/70 rounded-2xl shadow-inner px-1 py-4 w-full"
         // Height limited to help always keep them centered
         style={{
-          minHeight: 44,
+          minHeight: 56,
         }}
       >
         {sorted.map((n) => (
@@ -24,11 +24,11 @@ export default function LotteryTicket() {
             key={n}
             className="flex items-center justify-center rounded-full bg-green-500 text-white font-black shadow-green-300 shadow-lg border-[2px] border-green-700 select-none lottery-num transition-all aspect-square"
             style={{
-              width: "clamp(2rem, 9vw, 2.25rem)",  // fixed and small for circles
-              minWidth: 28,
-              height: "clamp(2rem, 9vw, 2.25rem)",
-              minHeight: 28,
-              fontSize: "clamp(0.90rem, 4vw, 1.1rem)", // noticeably smaller
+              width: "clamp(2.2rem, 7vw, 3rem)",
+              minWidth: 40,
+              height: "clamp(2.2rem, 7vw, 3rem)",
+              minHeight: 40,
+              fontSize: "clamp(1.1rem, 6vw, 1.45rem)",
               lineHeight: 1.1,
               padding: 0,
             }}
