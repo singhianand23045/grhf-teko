@@ -81,10 +81,10 @@ export default function TimerDisplay() {
         <div
           className="flex flex-col items-center justify-center w-full flex-shrink-0 flex-grow-0 overflow-y-hidden"
           style={{
-            height: `${DRAW_SECTION_HEIGHT * 100}%`,
-            minHeight: 100,
-            maxHeight: `${DRAW_SECTION_HEIGHT * 100}%`,
-            flexBasis: `${DRAW_SECTION_HEIGHT * 100}%`,
+            height: "20%",              // force 20% of parent at all times
+            minHeight: 85,              // safely allow a bit less
+            maxHeight: "20%",
+            flexBasis: "20%",
           }}
         >
           <RevealPanel />

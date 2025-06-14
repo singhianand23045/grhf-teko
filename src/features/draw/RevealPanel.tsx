@@ -30,29 +30,31 @@ export default function RevealPanel() {
   const userSet = new Set(userNumbers);
 
   return (
-    <div className="flex flex-col items-center w-full h-full overflow-y-auto">
+    <div className="flex flex-col items-center w-full h-full overflow-y-hidden">
       {/* Drawn Numbers Grid */}
-      <div className="w-full max-w-full min-h-[130px] flex flex-col justify-center items-center py-1">
-        <div className="w-full space-y-2">
+      <div className="w-full max-w-full flex flex-col justify-center items-center py-0">
+        <div className="w-full space-y-1">
           {drawnSets.map((set, rowIdx) => (
             <div
               key={rowIdx}
-              className="flex flex-nowrap justify-center items-center gap-4 w-full max-w-full min-h-[40px]"
+              className="flex flex-nowrap justify-center items-center gap-2 w-full max-w-full min-h-[30px]"
             >
               {set.map((n, colIdx) => {
+                const baseCircleStyle = {
+                  width: "clamp(1.1rem, 4vw, 2rem)",     // reduce size
+                  minWidth: 28,
+                  height: "clamp(1.1rem, 4vw, 2rem)",
+                  minHeight: 28,
+                  fontSize: "clamp(0.7rem, 2.5vw, 1.05rem)",  // smaller font
+                  lineHeight: 1.05,
+                  padding: 0,
+                };
                 if (n === undefined) {
                   return (
                     <span
                       key={colIdx}
                       className="flex items-center justify-center rounded-full bg-black border-2 border-black select-none aspect-square transition-all"
-                      style={{
-                        width: "clamp(2.2rem, 7vw, 3rem)",
-                        minWidth: 40,
-                        height: "clamp(2.2rem, 7vw, 3rem)",
-                        minHeight: 40,
-                        fontSize: "clamp(0.9rem, 4.5vw, 1.1rem)",
-                        lineHeight: 1.1,
-                      }}
+                      style={baseCircleStyle}
                       aria-hidden
                     ></span>
                   );
@@ -62,15 +64,7 @@ export default function RevealPanel() {
                     <span
                       key={colIdx}
                       className="flex items-center justify-center rounded-full bg-green-500 text-white font-black shadow-green-300 shadow-lg border-[2px] border-green-700 select-none transition-all aspect-square animate-scale-in"
-                      style={{
-                        width: "clamp(2.2rem, 7vw, 3rem)",
-                        minWidth: 40,
-                        height: "clamp(2.2rem, 7vw, 3rem)",
-                        minHeight: 40,
-                        fontSize: "clamp(0.9rem, 4.5vw, 1.1rem)",
-                        lineHeight: 1.1,
-                        padding: 0,
-                      }}
+                      style={baseCircleStyle}
                     >
                       {n}
                     </span>
@@ -80,14 +74,7 @@ export default function RevealPanel() {
                   <span
                     key={colIdx}
                     className="flex items-center justify-center rounded-full bg-white text-black font-black border-[2.5px] border-black shadow-md select-none aspect-square animate-scale-in transition-all"
-                    style={{
-                      width: "clamp(2.2rem, 7vw, 3rem)",
-                      minWidth: 40,
-                      height: "clamp(2.2rem, 7vw, 3rem)",
-                      minHeight: 40,
-                      fontSize: "clamp(0.9rem, 4.5vw, 1.1rem)",
-                      lineHeight: 1.1,
-                    }}
+                    style={baseCircleStyle}
                   >
                     {n}
                   </span>
