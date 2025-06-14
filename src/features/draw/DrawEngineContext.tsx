@@ -143,7 +143,7 @@ export function DrawEngineProvider({ children }: { children: React.ReactNode }) 
 
   // New: Commit ticket to wallet/credit only AFTER REVEAL phase ends (when timer ticks to next cycle)
   useEffect(() => {
-    // When leaving REVEAL (transition to OPEN/CUT_OFF/COMPLETE), if a pending ticket exists and not yet entered, add it
+    // When leaving REVEAL (transition to OPEN/CUT_OFF/COMPLETE), if a pending ticket exists and not yet entered, add it.
     if (
       state !== "REVEAL" &&
       pendingTicketRef.current &&
@@ -152,8 +152,13 @@ export function DrawEngineProvider({ children }: { children: React.ReactNode }) 
       wallet.addTicket(pendingTicketRef.current.ticket);
       pendingTicketRef.current.entered = true;
     }
-    // When cycling to new cycle, also clear any "old" pending ticket
-    if (state === "OPEN" && pendingTicketRef.current) {
+
+    // Only clear after ensuring ticket has been entered (not before!)
+    if (
+      state === "OPEN" &&
+      pendingTicketRef.current &&
+      pendingTicketRef.current.entered
+    ) {
       pendingTicketRef.current = null;
     }
     // eslint-disable-next-line
