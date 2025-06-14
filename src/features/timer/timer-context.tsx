@@ -2,7 +2,7 @@
 import React, { createContext, useContext, useEffect, useRef, useState } from "react";
 
 // PHASE 1 STATE MACHINE CONSTANTS
-const LOOP_DURATION_SEC = 4 * 60; // 4 minutes
+const LOOP_DURATION_SEC = 2 * 60; // 2 minutes
 const CUT_OFF_START = 60; // 1:00 (starts at 1:00 ends at 0:46)
 const CUT_OFF_END = 45; // 0:45 (ends at 0:45, reveal starts at 0:45)
 const MAX_CYCLES = 2;
