@@ -161,14 +161,15 @@ export function DrawEngineProvider({ children }: { children: React.ReactNode }) 
     // eslint-disable-next-line
   }, [state, cycleIndex, picked, sets, wallet]);
 
+  // UseEffect for handling "REVEAL" phase: ensure startReveal is called ONLY ONCE per cycle
   useEffect(() => {
-    // Log to debug ticket handling and wallet state
-    console.log("[DrawEngineContext] Effect triggered. state:", state, "pendingTicketRef:", pendingTicketRef.current);
-
+    // Only trigger reveal when entering "REVEAL" state and reveal hasn't started for this cycle
     if (
-      state === "REVEAL"
+      state === "REVEAL" &&
+      revealStartedForCycle.current !== cycleIndex
     ) {
       startReveal(cycleIndex);
+
       const handleVisibility = () => {
         if (
           document.visibilityState === "visible" &&
@@ -180,9 +181,7 @@ export function DrawEngineProvider({ children }: { children: React.ReactNode }) 
       };
       document.addEventListener("visibilitychange", handleVisibility);
 
-      // DEFERS TICKET capture: don't add to wallet yet; instead save "pending" info if needed
-      // Only run if 6 picked, and user hasn't already submitted for this cycle
-      // --- FIX: Use cached numbers, fallback to picked (to survive provider reset) ---
+      // --- All pending ticket logic (cache, etc) ---
       const ticketNumbers =
         lastPickedPerCycle.current[cycleIndex] && lastPickedPerCycle.current[cycleIndex].length === 6
           ? lastPickedPerCycle.current[cycleIndex]
@@ -193,11 +192,9 @@ export function DrawEngineProvider({ children }: { children: React.ReactNode }) 
         (!pendingTicketRef.current ||
           pendingTicketRef.current.cycle !== cycleIndex)
       ) {
-        // The 18 drawn numbers for this cycle:
         const startSet = cycleIndex * SETS_PER_CYCLE;
         const activeSets = sets.slice(startSet, startSet + SETS_PER_CYCLE);
         const allDrawn = activeSets.flat();
-        // Count matches in ticketNumbers (intersection)
         const matches = ticketNumbers.filter((n) => allDrawn.includes(n)).length;
 
         pendingTicketRef.current = {
@@ -206,7 +203,6 @@ export function DrawEngineProvider({ children }: { children: React.ReactNode }) 
             date: new Date().toISOString(),
             numbers: ticketNumbers,
             matches: 0, // <--- FIXED: Add this field
-            // matches will be updated after REVEAL
           },
           entered: false, // pending
         };
@@ -226,6 +222,7 @@ export function DrawEngineProvider({ children }: { children: React.ReactNode }) 
         revealTimeouts.current = [];
       };
     } else if (
+      // When leaving REVEAL or no valid entry
       pendingTicketRef.current &&
       !pendingTicketRef.current.entered
     ) {
@@ -240,8 +237,9 @@ export function DrawEngineProvider({ children }: { children: React.ReactNode }) 
       console.log("[DrawEngineContext] Clearing pending ticket ref");
       pendingTicketRef.current = null;
     }
+    // Previous bug: DO NOT add wallet to the dependencies!
     // eslint-disable-next-line
-  }, [state, cycleIndex, wallet]);
+  }, [state, cycleIndex /*, wallet intentionally removed!*/]);
 
   // New: Commit ticket to wallet/credit only AFTER REVEAL phase ends (when timer ticks to next cycle)
   useEffect(() => {
