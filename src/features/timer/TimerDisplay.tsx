@@ -12,28 +12,29 @@ import LotteryTicket from "../number-select/LotteryTicket";
 const LOGICAL_HEIGHT = 874; // Should match page layout
 
 /**
- * Calculate section heights:
- * - Timer: 1/8 = ~12.5%
- * - Draw (Reveal): 33%
- * - Number Selection/Confirmed: 33%
- * - Remaining height (if any) distributed evenly by flex.
+ * New layout:
+ * - Timer: 10%
+ * - Spacer: 3%
+ * - Drawn numbers: 33%
+ * - Spacer: 3%
+ * - Confirmed/user numbers: rest
  */
 
 export default function TimerDisplay() {
   const { countdown, state, resetDemo } = useTimer();
 
-  // Height fractions
-  const TIMER_FRACTION = 1 / 8; // 12.5%
-  const MIDDLE_FRACTION = 0.33; // 33%
-  const BOTTOM_FRACTION = 0.33; // 33%
+  const TIMER_HEIGHT = 0.10;
+  const SPACER_HEIGHT = 0.03;
+  const DRAW_SECTION_HEIGHT = 0.33;
+  // Remaining = 1 - (TIMER+SPACER+DRAW+SPACER) = 0.51
 
   // Timer Section (top)
   const TimerSection = (
     <div
       className="flex items-center justify-center w-full flex-shrink-0 flex-grow-0"
       style={{
-        height: `${1 / 8 * 100}%`,
-        minHeight: 46,
+        height: `${TIMER_HEIGHT * 100}%`,
+        minHeight: 40,
         maxHeight: 120,
       }}
     >
@@ -44,7 +45,7 @@ export default function TimerDisplay() {
           minWidth: 116,
           maxWidth: 210,
           height: "100%",
-          minHeight: 46,
+          minHeight: 40,
           padding: 0,
         }}
       >
@@ -62,12 +63,24 @@ export default function TimerDisplay() {
     </div>
   );
 
+  // Spacer Section (white, fixed height)
+  const Spacer = (
+    <div
+      className="w-full flex-shrink-0 flex-grow-0 bg-white"
+      style={{
+        height: `${SPACER_HEIGHT * 100}%`,
+        minHeight: Math.floor(LOGICAL_HEIGHT * SPACER_HEIGHT),
+      }}
+    ></div>
+  );
+
+  // Drawn Numbers (Draw/Reveal) Section (middle)
   const DrawSection = (
     <div
       className="flex flex-col items-center justify-center w-full flex-shrink-0 flex-grow-0 overflow-y-auto"
       style={{
-        height: `${0.33 * 100}%`,
-        minHeight: 120,
+        height: `${DRAW_SECTION_HEIGHT * 100}%`,
+        minHeight: 100,
       }}
     >
       {state === "REVEAL" ? (
@@ -107,14 +120,16 @@ export default function TimerDisplay() {
     </div>
   );
 
-  const BottomSection = (
+  // Confirmed numbers / user's ticket / bottom panel
+  // Takes all remaining height at the bottom!
+  const ConfirmedSection = (
     <div
-      className="flex flex-col items-center justify-center w-full flex-shrink-0 flex-grow-0 overflow-y-auto"
+      className="flex flex-col items-center justify-center w-full flex-grow overflow-y-auto"
       style={{
-        height: `${0.33 * 100}%`,
-        minHeight: 120,
+        minHeight: 80,
       }}
     >
+      {/* During selection */}
       {state !== "COMPLETE" && state !== "REVEAL" && (
         <NumberSelectionProvider>
           <section className="w-full flex flex-col items-center my-0">
@@ -122,11 +137,11 @@ export default function TimerDisplay() {
           </section>
         </NumberSelectionProvider>
       )}
+      {/* During reveal, confirmed numbers shown within RevealPanel, so keep section empty for now */}
       {state === "REVEAL" && (
-        <section className="w-full flex flex-col items-center mt-1">
-          {/* Ticket already shown in DrawSection (RevealPanel contains LotteryTicket) */}
-        </section>
+        <section className="w-full flex flex-col items-center mt-1"></section>
       )}
+      {/* Complete: restart demo */}
       {state === "COMPLETE" && (
         <section className="w-full flex flex-col items-center mt-2 animate-fade-in">
           <p className="text-base font-semibold text-center mb-2">Demo Complete — 2 cycles finished.</p>
@@ -147,8 +162,10 @@ export default function TimerDisplay() {
       }}
     >
       {TimerSection}
+      {Spacer}
       {DrawSection}
-      {BottomSection}
+      {Spacer}
+      {ConfirmedSection}
     </div>
   );
 }
