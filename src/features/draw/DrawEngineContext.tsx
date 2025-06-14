@@ -205,7 +205,8 @@ export function DrawEngineProvider({ children }: { children: React.ReactNode }) 
           ticket: {
             date: new Date().toISOString(),
             numbers: ticketNumbers,
-            // matches not passed here, handled later in context
+            matches: 0, // <--- FIXED: Add this field
+            // matches will be updated after REVEAL
           },
           entered: false, // pending
         };
