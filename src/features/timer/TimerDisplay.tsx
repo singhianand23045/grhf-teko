@@ -25,8 +25,8 @@ export default function TimerDisplay() {
 
   const TIMER_HEIGHT = 0.10;
   const SPACER_HEIGHT = 0.03;
-  const DRAW_SECTION_HEIGHT = 0.33;
-  // Remaining = 1 - (TIMER+SPACER+DRAW+SPACER) = 0.51
+  const DRAW_SECTION_HEIGHT = 0.20; // Updated from 0.33 to 0.20
+  // Remaining = 1 - (TIMER+SPACER+DRAW+SPACER) = 0.61
 
   // Timer Section (top)
   const TimerSection = (
