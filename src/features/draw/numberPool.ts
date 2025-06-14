@@ -1,17 +1,29 @@
 
 /**
- * Generates a cryptographically secure shuffled array of numbers (1..n).
- * @param n How many numbers to generate (e.g. 36)
+ * Generates 6 sets of 6 unique numbers from 1 to 27 for draws.
+ * Numbers are unique within a set, but can appear in multiple sets.
+ * @returns number[][]
  */
-export function generateSecureShuffle(n: number, max: number): number[] {
-  const arr = Array.from({ length: max }, (_, i) => i + 1);
-  // Fisher-Yates shuffle using window.crypto
-  for (let i = max - 1; i > 0 && i >= (max - n); i--) {
-    // get random value between 0 and i
-    const randArr = new Uint32Array(1);
-    window.crypto.getRandomValues(randArr);
-    const j = randArr[0] % (i + 1);
-    [arr[i], arr[j]] = [arr[j], arr[i]];
+export function generateDrawSets(): number[][] {
+  const max = 27;
+  const setSize = 6;
+  const sets = 6;
+
+  function getUniqueSet() {
+    const pool = Array.from({ length: max }, (_, i) => i + 1);
+    // Shuffle pool using Fisher-Yates + crypto
+    for (let i = pool.length - 1; i > 0; i--) {
+      const randArr = new Uint32Array(1);
+      window.crypto.getRandomValues(randArr);
+      const j = randArr[0] % (i + 1);
+      [pool[i], pool[j]] = [pool[j], pool[i]];
+    }
+    return pool.slice(0, setSize);
   }
-  return arr.slice(0, n);
+
+  const result: number[][] = [];
+  for (let i = 0; i < sets; i++) {
+    result.push(getUniqueSet());
+  }
+  return result;
 }

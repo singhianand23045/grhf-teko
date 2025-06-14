@@ -1,19 +1,18 @@
+
 import React, { createContext, useContext, useEffect, useRef, useState } from "react";
 import { useTimer } from "../timer/timer-context";
-import { generateSecureShuffle } from "./numberPool";
+import { generateDrawSets } from "./numberPool";
 
-// The master number pool (could be generated/shuffled -- here we fix it for demo)
-// const NUMBER_POOL = Array.from({ length: 54 }, (_, i) => i + 1);
-
-const NUMBER_POOL_SIZE = 36;
-const NUMBER_POOL_MAX = 54;
+const SETS_COUNT = 6;
+const SET_SIZE = 6;
+const SETS_PER_CYCLE = 3; // 18 numbers (3x6) per cycle
 
 interface DrawEngineContextType {
   drawnNumbers: number[];
   isRevealDone: boolean;
   startReveal: (cycleIndex: number, revealDurationSec: number) => void;
   instantlyFinishReveal: () => void;
-  numberPool: number[]; // Add for possible debugging or UI
+  sets: number[][];
 }
 
 const DrawEngineContext = createContext<DrawEngineContextType | undefined>(undefined);
@@ -23,12 +22,12 @@ export function DrawEngineProvider({ children }: { children: React.ReactNode }) 
   const [drawnNumbers, setDrawnNumbers] = useState<number[]>([]);
   const [isRevealDone, setIsRevealDone] = useState(false);
   
-  // Number pool initialized ONLY ONCE for the session
-  const poolRef = useRef<number[] | null>(null);
-  if (poolRef.current === null) {
-    poolRef.current = generateSecureShuffle(NUMBER_POOL_SIZE, NUMBER_POOL_MAX);
+  // Generate 6 sets of 6 numbers, once per session
+  const setsRef = useRef<number[][] | null>(null);
+  if (!setsRef.current) {
+    setsRef.current = generateDrawSets();
   }
-  const numberPool = poolRef.current;
+  const sets = setsRef.current; // Array< [6 numbers], ... > length 6
 
   const revealTimeouts = useRef<NodeJS.Timeout[]>([]);
   const revealStartedForCycle = useRef<number | null>(null);
@@ -37,13 +36,15 @@ export function DrawEngineProvider({ children }: { children: React.ReactNode }) 
   const startReveal = (cycle: number, revealDurationSec: number) => {
     revealTimeouts.current.forEach(clearTimeout);
     revealTimeouts.current = [];
-
-    const offset = cycle * 18;
-    const poolSlice = numberPool.slice(offset, offset + 18);
+    // cycle 0: sets 0‒2, cycle 1: sets 3‒5
+    const startSet = cycle * SETS_PER_CYCLE;
+    const activeSets = sets.slice(startSet, startSet + SETS_PER_CYCLE);
+    // Flatten the active sets
+    const poolSlice = activeSets.flat();
     setDrawnNumbers([]);
     setIsRevealDone(false);
 
-    const perNumber = revealDurationSec / 18;
+    const perNumber = revealDurationSec / poolSlice.length;
     for (let i = 0; i < poolSlice.length; i++) {
       revealTimeouts.current.push(
         setTimeout(() => {
@@ -59,8 +60,9 @@ export function DrawEngineProvider({ children }: { children: React.ReactNode }) 
     revealTimeouts.current.forEach(clearTimeout);
     revealTimeouts.current = [];
     const cycle = revealStartedForCycle.current ?? cycleIndex;
-    const offset = cycle * 18;
-    setDrawnNumbers(numberPool.slice(offset, offset + 18));
+    const startSet = cycle * SETS_PER_CYCLE;
+    const activeSets = sets.slice(startSet, startSet + SETS_PER_CYCLE);
+    setDrawnNumbers(activeSets.flat());
     setIsRevealDone(true);
   };
 
@@ -77,7 +79,7 @@ export function DrawEngineProvider({ children }: { children: React.ReactNode }) 
     startReveal(cycleIndex, revealDurationSec);
 
     const handleVisibility = () => {
-      if (document.visibilityState === "visible" && state === "REVEAL" && drawnNumbers.length < 18) {
+      if (document.visibilityState === "visible" && state === "REVEAL" && drawnNumbers.length < SETS_PER_CYCLE * SET_SIZE) {
         instantlyFinishReveal();
       }
     };
@@ -98,7 +100,7 @@ export function DrawEngineProvider({ children }: { children: React.ReactNode }) 
         isRevealDone,
         startReveal,
         instantlyFinishReveal,
-        numberPool,
+        sets,
       }}
     >
       {children}
