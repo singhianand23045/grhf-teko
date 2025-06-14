@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useEffect, useRef, useState } from "react";
 import { useTimer } from "../timer/timer-context";
 import { generateDrawSets } from "./numberPool";
@@ -32,8 +31,12 @@ export function DrawEngineProvider({ children }: { children: React.ReactNode }) 
   const revealTimeouts = useRef<NodeJS.Timeout[]>([]);
   const revealStartedForCycle = useRef<number | null>(null);
 
-  // Reveal logic: sequentially unveil numbers over revealDurationSec.
-  const startReveal = (cycle: number, revealDurationSec: number) => {
+  // Reveal logic: reveal all numbers in 9 seconds, one every 0.5s (18 numbers)
+  const REVEAL_TOTAL_NUMBERS = SETS_PER_CYCLE * SET_SIZE; // 18
+  const REVEAL_DURATION_SEC = 9; // 0:45 to 0:36 = 9 seconds
+  const REVEAL_PER_NUMBER_SEC = REVEAL_DURATION_SEC / REVEAL_TOTAL_NUMBERS; // 0.5s per number
+
+  const startReveal = (cycle: number) => {
     revealTimeouts.current.forEach(clearTimeout);
     revealTimeouts.current = [];
     // cycle 0: sets 0‒2, cycle 1: sets 3‒5
@@ -44,13 +47,12 @@ export function DrawEngineProvider({ children }: { children: React.ReactNode }) 
     setDrawnNumbers([]);
     setIsRevealDone(false);
 
-    const perNumber = revealDurationSec / poolSlice.length;
     for (let i = 0; i < poolSlice.length; i++) {
       revealTimeouts.current.push(
         setTimeout(() => {
           setDrawnNumbers((prev) => [...prev, poolSlice[i]]);
           if (i === poolSlice.length - 1) setIsRevealDone(true);
-        }, perNumber * 1000 * i)
+        }, REVEAL_PER_NUMBER_SEC * 1000 * i)
       );
     }
     revealStartedForCycle.current = cycle;
@@ -67,32 +69,31 @@ export function DrawEngineProvider({ children }: { children: React.ReactNode }) 
   };
 
   useEffect(() => {
-    if (state !== "REVEAL") {
-      revealTimeouts.current.forEach(clearTimeout);
-      revealTimeouts.current = [];
+    if (state === "REVEAL") {
+      startReveal(cycleIndex);
+      const handleVisibility = () => {
+        if (document.visibilityState === "visible" && state === "REVEAL" && drawnNumbers.length < REVEAL_TOTAL_NUMBERS) {
+          instantlyFinishReveal();
+        }
+      };
+      document.addEventListener("visibilitychange", handleVisibility);
+
+      return () => {
+        document.removeEventListener("visibilitychange", handleVisibility);
+        revealTimeouts.current.forEach(clearTimeout);
+        revealTimeouts.current = [];
+      };
+    } else if (state === "OPEN" || state === "CUT_OFF" || state === "COMPLETE") {
+      // Only clear when leaving REVEAL (i.e., going to OPEN, CUT_OFF, or COMPLETE)
       setDrawnNumbers([]);
       setIsRevealDone(false);
       revealStartedForCycle.current = null;
-      return;
-    }
-    const revealDurationSec = 45;
-    startReveal(cycleIndex, revealDurationSec);
-
-    const handleVisibility = () => {
-      if (document.visibilityState === "visible" && state === "REVEAL" && drawnNumbers.length < SETS_PER_CYCLE * SET_SIZE) {
-        instantlyFinishReveal();
-      }
-    };
-    document.addEventListener("visibilitychange", handleVisibility);
-
-    return () => {
-      document.removeEventListener("visibilitychange", handleVisibility);
       revealTimeouts.current.forEach(clearTimeout);
       revealTimeouts.current = [];
-    };
+    }
     // eslint-disable-next-line
   }, [state, cycleIndex]);
-
+  
   return (
     <DrawEngineContext.Provider
       value={{
