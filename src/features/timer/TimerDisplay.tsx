@@ -75,35 +75,33 @@ export default function TimerDisplay() {
 
   // Drawn+Ticket: Only during REVEAL, keep both in shared contexts vertically stacked
   const RevealSectionWithTicket = (
-    <NumberSelectionProvider>
-      <DrawEngineProvider>
-        <div className="flex flex-col w-full h-full">
-          {/* Drawn numbers grid */}
-          <div
-            className="flex flex-col items-center justify-center w-full flex-shrink-0 flex-grow-0 overflow-y-hidden"
-            style={{
-              height: `${DRAW_SECTION_HEIGHT * 100}%`,
-              minHeight: 100,
-              maxHeight: `${DRAW_SECTION_HEIGHT * 100}%`,
-              flexBasis: `${DRAW_SECTION_HEIGHT * 100}%`,
-            }}
-          >
-            <RevealPanel />
-          </div>
-          {/* Confirmed numbers, take rest of available space below */}
-          <div
-            className="flex-grow flex flex-col items-center justify-center min-h-[80px] overflow-y-hidden"
-            style={{
-              minHeight: 80,
-            }}
-          >
-            <section className="w-full flex flex-col items-center mt-1">
-              <LotteryTicket compact />
-            </section>
-          </div>
+    <DrawEngineProvider>
+      <div className="flex flex-col w-full h-full">
+        {/* Drawn numbers grid */}
+        <div
+          className="flex flex-col items-center justify-center w-full flex-shrink-0 flex-grow-0 overflow-y-hidden"
+          style={{
+            height: `${DRAW_SECTION_HEIGHT * 100}%`,
+            minHeight: 100,
+            maxHeight: `${DRAW_SECTION_HEIGHT * 100}%`,
+            flexBasis: `${DRAW_SECTION_HEIGHT * 100}%`,
+          }}
+        >
+          <RevealPanel />
         </div>
-      </DrawEngineProvider>
-    </NumberSelectionProvider>
+        {/* Confirmed numbers, take rest of available space below */}
+        <div
+          className="flex-grow flex flex-col items-center justify-center min-h-[80px] overflow-y-hidden"
+          style={{
+            minHeight: 80,
+          }}
+        >
+          <section className="w-full flex flex-col items-center mt-1">
+            <LotteryTicket compact />
+          </section>
+        </div>
+      </div>
+    </DrawEngineProvider>
   );
 
   // Drawn Numbers Section (before reveal)
@@ -158,11 +156,9 @@ export default function TimerDisplay() {
     >
       {/* During selection */}
       {state !== "COMPLETE" && state !== "REVEAL" && (
-        <NumberSelectionProvider>
-          <section className="w-full flex flex-col items-center my-0">
-            <NumberSelectionPanel />
-          </section>
-        </NumberSelectionProvider>
+        <section className="w-full flex flex-col items-center my-0">
+          <NumberSelectionPanel />
+        </section>
       )}
       {/* Complete: restart demo */}
       {state === "COMPLETE" && (
