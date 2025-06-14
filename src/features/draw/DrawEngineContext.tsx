@@ -287,6 +287,11 @@ export function DrawEngineProvider({ children }: { children: React.ReactNode }) 
       const matches = userNumbers.filter((n) => allDrawn.includes(n)).length;
       const winnings = getCreditsForMatches(matches);
 
+      // --- FIXED: Award wallet winnings when reveal is done ---
+      if (userNumbers.length === 6 && winnings > 0) {
+        wallet.awardTicketWinnings(allDrawn);
+      }
+
       // Show bar
       setResultBar({ show: true, credits: winnings });
 
@@ -301,7 +306,7 @@ export function DrawEngineProvider({ children }: { children: React.ReactNode }) 
       if (resultTimeout.current) clearTimeout(resultTimeout.current);
     };
     // eslint-disable-next-line
-  }, [isRevealDone, cycleIndex, sets]);
+  }, [isRevealDone, cycleIndex, sets, wallet]);
 
   // Helper for explicit triggering (could be used for test)
   function triggerResultBar() {
