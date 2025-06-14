@@ -7,6 +7,7 @@ import NumberSelectionPanel from "../number-select/NumberSelectionPanel";
 import { DrawEngineProvider } from "../draw/DrawEngineContext";
 import RevealPanel from "../draw/RevealPanel";
 import LotteryTicket from "../number-select/LotteryTicket";
+import CreditsBar from "../wallet/CreditsBar";
 
 // For screen proportions
 const LOGICAL_HEIGHT = 874; // Should match page layout
@@ -172,6 +173,7 @@ export default function TimerDisplay() {
     </div>
   );
 
+  // Insert CreditsBar between draw and confirmed numbers, always present except on demo complete
   return (
     <div
       className="flex flex-col w-full h-full"
@@ -182,10 +184,12 @@ export default function TimerDisplay() {
     >
       {TimerSection}
       {Spacer}
-      {/* During REVEAL, show both drawn numbers and confirmed numbers from the same providers */}
+      {/* Drawn numbers or reveal+ticket */}
       {state === "REVEAL" ? RevealSectionWithTicket : DrawSection}
+      {/* CreditsBar always between drawn numbers and confirmed section; hide only during demo complete */}
+      {state !== "COMPLETE" && <CreditsBar />}
       {Spacer}
-      {/* During REVEAL, confirmed numbers are shown in RevealSectionWithTicket, so skip ConfirmedSection */}
+      {/* Confirmed or selection */}
       {state !== "REVEAL" && ConfirmedSection}
     </div>
   );

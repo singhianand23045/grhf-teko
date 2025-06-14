@@ -110,7 +110,7 @@ export function DrawEngineProvider({ children }: { children: React.ReactNode }) 
         const allDrawn = activeSets.flat();
         // Count matches in picked ticket (intersection)
         const matches = picked.filter((n) => allDrawn.includes(n)).length;
-        // Add ticket to wallet/history (BUILD ERROR FIX: do not include creditChange)
+        // Add ticket to wallet/history, omit creditChange for correct typing
         wallet.addTicket({
           date: new Date().toISOString(),
           numbers: picked,
