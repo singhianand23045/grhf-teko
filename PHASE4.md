@@ -8,6 +8,7 @@
 - **As a player**, I want my balance to be preserved if I reload or reopen the app, so my progress is never lost.
 - **As a player**, I want my ticket selection to reset for the next draw cycle, so I can choose new numbers each round.
 - **As a player**, I want my credits/balance to be visible in a dedicated section between the drawn numbers and my confirmed numbers, where I can always see and easily add to my balance.
+- **As a player**, I want a clear, timely message after each draw stating if I won and how much, or encouraging me to try again if I lost.
 
 ---
 
@@ -44,6 +45,7 @@
   - This Credits section must show an "Add credits" label aligned to the extreme left, and the credits/balance remaining (e.g., "1750 credits") aligned to the extreme right.
   - The visual layout should resemble the "add to balance" bar in the Robinhood app.
   - The Credits section must always be visible except during demo restart.
+  - After each draw, a feedback message appears above the drawn numbers section for 5 seconds summarizing the result: either "Congrats! You won [sum of winnings] credits!" (for any win) or "Try again. Win next time!" (if lost).
 
 ---
 
@@ -63,6 +65,7 @@
 - [ ] The wallet balance is restored correctly on app reload.
 - [ ] Ticket selection resets automatically at the start of each new draw cycle; previous balance remains unchanged.
 - [ ] The Credits section appears at all times (except demo restart), is visually separated, takes up 5% of the total logical height, and "Add credits" and the credit number are properly positioned.
+- [ ] The outcome message (win/loss, credit total) appears above drawn numbers for exactly 5 seconds after each draw, styled distinctly, and disappears automatically.
 
 ---
 
@@ -82,4 +85,5 @@
 
 - [ ] On app launch or reload, wallet is consistent with prior play.
 - [ ] The credits section always appears, takes up 5% of the total logical height, and "Add credits" and the credit number are properly positioned.
+- [ ] The correct feedback message is displayed at the right time, with correct text and duration, and does not interfere with grid layout.
 

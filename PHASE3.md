@@ -28,6 +28,15 @@ In each cycle, a set of 18 numbers (3 sets of 6) is revealed on screen in a time
 
 ---
 
+### Result Feedback Messaging
+
+- Immediately after all numbers are revealed and results determined (at timer 0:25), display a message bar positioned above the drawn numbers grid for 5 seconds (until 0:20).
+- If the user has won credits, show: **"Congrats! You won [sum of winnings] credits!"**
+- If the user has not won, show: **"Try again. Win next time!"**
+- Message is visually distinct, centered, and never overlaps or shrinks the drawn numbers grid. After 5 seconds, it disappears automatically.
+
+---
+
 ## Demo Flow
 
 **Cycle 1:**
@@ -45,3 +54,11 @@ In each cycle, a set of 18 numbers (3 sets of 6) is revealed on screen in a time
 - The user's confirmed numbers are always visible on the screen, regardless of the draw phase.
 - The display of the drawn numbers never overshadows or obscures the user's confirmed numbers, and their space is never reduced or taken over by the draw results.
 - The timer, drawn numbers, and confirmed numbers are presented in visually separate sections that do not overflow into each other's areas.
+- Proper win/loss message (with credit sum if win) is shown for 5 seconds above drawn numbers at the end of each draw, then disappears.
+
+---
+
+## Tests
+
+- [ ] After each draw, correct result message (win/loss) appears for exactly 5 seconds, is visually distinct and correctly placed.
+
