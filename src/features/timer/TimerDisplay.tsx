@@ -74,6 +74,19 @@ export default function TimerDisplay() {
     ></div>
   );
 
+  // NEW: 1% Spacer between drawn numbers and credits
+  const DrawCreditsSpacer = (
+    <div
+      className="w-full flex-shrink-0 flex-grow-0 bg-transparent"
+      style={{
+        height: "1%",
+        minHeight: Math.floor(LOGICAL_HEIGHT * 0.01),
+        maxHeight: Math.ceil(LOGICAL_HEIGHT * 0.01 * 3),
+      }}
+      aria-hidden
+    />
+  );
+
   // Drawn+Ticket: Only during REVEAL, keep both in shared contexts vertically stacked
   const RevealSectionWithTicket = (
     <DrawEngineProvider>
@@ -186,6 +199,8 @@ export default function TimerDisplay() {
       {Spacer}
       {/* Drawn numbers or reveal+ticket */}
       {state === "REVEAL" ? RevealSectionWithTicket : DrawSection}
+      {/* 1% spacer between drawn numbers and credits */}
+      {state !== "COMPLETE" && DrawCreditsSpacer}
       {/* CreditsBar always between drawn numbers and confirmed section; hide only during demo complete */}
       {state !== "COMPLETE" && <CreditsBar />}
       {Spacer}
