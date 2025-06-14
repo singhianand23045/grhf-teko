@@ -18,16 +18,9 @@ interface TimerContextType {
 
 const TimerContext = createContext<TimerContextType | undefined>(undefined);
 
-function getNextDrawAlignedTo4Min(now: Date) {
-  const next = new Date(now);
-  const m = next.getMinutes();
-  // Next multiple of 4
-  const nextMin = m - (m % 4) + 4;
-  next.setMinutes(nextMin, 0, 0);
-  if (next <= now) {
-    next.setMinutes(next.getMinutes() + 4, 0, 0);
-  }
-  return next;
+function getNextDrawAppLocal(now: Date) {
+  // For completeness only; not used for timer, but as a display value (could be current time + remaining seconds)
+  return new Date(now.getTime() + LOOP_DURATION_SEC * 1000);
 }
 
 function formatCountdown(sec: number) {
@@ -37,9 +30,10 @@ function formatCountdown(sec: number) {
 }
 
 export const TimerProvider = ({ children }: { children: React.ReactNode }) => {
-  const [nextDrawTime, setNextDrawTime] = useState<Date>(() => getNextDrawAlignedTo4Min(new Date()));
-  const [secondsLeft, setSecondsLeft] = useState<number>(() => Math.max(0, Math.round((getNextDrawAlignedTo4Min(new Date()).getTime() - Date.now()) / 1000)));
+  // No more alignment to any wall clock; timer is always relative to in-app state!
+  const [secondsLeft, setSecondsLeft] = useState<number>(LOOP_DURATION_SEC);
   const [cycleIndex, setCycleIndex] = useState<number>(0);
+  const [nextDrawTime, setNextDrawTime] = useState<Date>(() => getNextDrawAppLocal(new Date()));
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   // Derived state calculation
@@ -49,41 +43,38 @@ export const TimerProvider = ({ children }: { children: React.ReactNode }) => {
   else if (secondsLeft <= CUT_OFF_END) state = "REVEAL";
 
   const resetDemo = () => {
-    // restart at next multiple of 4 min
-    const now = new Date();
-    const next = getNextDrawAlignedTo4Min(now);
-    setNextDrawTime(next);
-    setSecondsLeft(Math.max(0, Math.round((next.getTime() - now.getTime()) / 1000)));
+    setSecondsLeft(LOOP_DURATION_SEC);
     setCycleIndex(0);
+    setNextDrawTime(getNextDrawAppLocal(new Date()));
   };
 
   useEffect(() => {
     if (cycleIndex >= MAX_CYCLES) return; // stop timer at demo complete
 
     function tick() {
-      const now = Date.now();
-      const diffSec = Math.max(0, Math.round((nextDrawTime.getTime() - now) / 1000));
-      setSecondsLeft(diffSec);
-
-      if (diffSec === 0) {
-        // Loop
+      setSecondsLeft(prev => {
+        if (prev > 0) return prev - 1;
+        // If timer has reached zero, start next cycle if any
+        // Use setTimeout to increment cycle after a brief moment
         setTimeout(() => {
-          setCycleIndex((i) => i + 1);
-          if (cycleIndex + 1 < MAX_CYCLES) {
-            const newNext = getNextDrawAlignedTo4Min(new Date());
-            setNextDrawTime(newNext);
-            setSecondsLeft(Math.max(0, Math.round((newNext.getTime() - Date.now()) / 1000)));
-          }
+          setCycleIndex(i => {
+            const newIndex = i + 1;
+            if (newIndex < MAX_CYCLES) {
+              setSecondsLeft(LOOP_DURATION_SEC);
+              setNextDrawTime(getNextDrawAppLocal(new Date()));
+            }
+            return newIndex;
+          });
         }, 0);
-      }
+        return 0;
+      });
     }
 
-    intervalRef.current = setInterval(tick, 100);
+    intervalRef.current = setInterval(tick, 1000); // 1 second granularity
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current);
     };
-    // eslint-disable-next-line
-  }, [nextDrawTime, cycleIndex]);
+  }, [cycleIndex]);
 
   return (
     <TimerContext.Provider
@@ -105,3 +96,4 @@ export function useTimer() {
   if (!ctx) throw new Error("useTimer must be used within TimerProvider");
   return ctx;
 }
+
