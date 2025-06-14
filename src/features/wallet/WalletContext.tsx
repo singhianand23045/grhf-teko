@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useEffect, useRef, useState } from "react";
 
 // Types
@@ -19,7 +18,7 @@ type WalletContextType = {
   balance: number;
   history: TicketType[];
   addConfirmedTicket: (ticket: Omit<TicketType, "id" | "creditChange" | "matches">) => void;
-  awardTicketWinnings: (cycleNumbers: number[]) => void;
+  awardTicketWinnings: (cycleRows: number[][], rowWinnings: number[], totalWinnings: number) => void;
   resetWallet: () => void;
 };
 
@@ -104,25 +103,33 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
     console.log("[WalletContext] Confirmed ticket & deducted: ", newTicket);
   }
 
-  // STEP 2: After REVEAL — find *most recent* ticket, update with real matches and add payout
-  function awardTicketWinnings(cycleNumbers: number[]) {
-    // Find most recent ticket for this cycle (should be the most recent in history where matches === 0)
+  // STEP 2: After REVEAL — find *most recent* ticket, update matches & add payout
+  function awardTicketWinnings(cycleRows: number[][], rowWinnings: number[], totalWinnings: number) {
     setHistory(prevHistory => {
       if (!prevHistory.length) return prevHistory;
       const [latest, ...rest] = prevHistory;
-      if (latest.matches !== 0) return prevHistory; // Already awarded
-      // Count matches
-      const matches = latest.numbers.filter((n) => cycleNumbers.includes(n)).length;
-      const winnings = getCreditsForMatches(matches);
-      if (winnings > 0) {
-        setBalance(prev => prev + winnings);
+      if (latest.matches !== 0 || latest.creditChange !== -10) return prevHistory; // Only award once
+
+      // For display/history: count TOTAL matched numbers (any row, overlapping possible), 
+      // but for actual winnings, use per-row sum
+      let totalMatches = 0;
+      if (cycleRows.length === 3) {
+        for (let i = 0; i < 3; i++) {
+          totalMatches += cycleRows[i].filter((n) => latest.numbers.includes(n)).length;
+        }
       }
+
+      // Award credits (already deducted -10 on confirm, only add winnings)
+      if (totalWinnings > 0) {
+        setBalance(prev => prev + totalWinnings);
+      }
+
       const updatedTicket: TicketType = {
         ...latest,
-        matches,
-        creditChange: -10 + winnings,
+        matches: totalMatches, // for .history/support info
+        creditChange: -10 + totalWinnings,
       };
-      console.log("[WalletContext] Awarded payout. New ticket: ", updatedTicket);
+      console.log("[WalletContext] Awarded payout for all 3 rows: ", {rowWinnings, totalWinnings, updatedTicket});
       return [updatedTicket, ...rest];
     });
   }

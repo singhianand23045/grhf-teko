@@ -268,11 +268,11 @@ export function DrawEngineProvider({ children }: { children: React.ReactNode }) 
   useEffect(() => {
     // Only show after all numbers revealed during REVEAL phase
     if (isRevealDone) {
-      // Calculate credits for user ticket vs drawnNumbers (if a user ticket exists for this cycle)
+      // Which sets for this cycle?
       const startSet = cycleIndex * SETS_PER_CYCLE;
-      const activeSets = sets.slice(startSet, startSet + SETS_PER_CYCLE);
-      const allDrawn = activeSets.flat();
+      const activeSets = sets.slice(startSet, startSet + SETS_PER_CYCLE); // 3×6 = 18
 
+      // User's confirmed ticket (if any):
       let userNumbers: number[] = [];
       if (
         lastPickedPerCycle.current[cycleIndex] &&
@@ -281,19 +281,30 @@ export function DrawEngineProvider({ children }: { children: React.ReactNode }) 
         userNumbers = lastPickedPerCycle.current[cycleIndex];
       }
 
-      // Sum winnings for user's ticket (if one exists, only 1 entry max allowed)
-      const matches = userNumbers.filter((n) => allDrawn.includes(n)).length;
-      const winnings = getCreditsForMatches(matches);
+      // --- PHASE 3+4: Calculate winnings independently for each row ---
+      let rowWinnings = [0, 0, 0];
+      if (userNumbers.length === 6) {
+        for (let i = 0; i < SETS_PER_CYCLE; i++) {
+          // Each row is a 6-number set
+          const drawnRow = activeSets[i];
+          const matches = drawnRow.filter((n) => userNumbers.includes(n)).length;
+          rowWinnings[i] = getCreditsForMatches(matches);
+        }
+      }
+      const totalWinnings = rowWinnings.reduce((sum, w) => sum + w, 0);
 
-      // --- FIXED: Award wallet winnings when reveal is done ---
-      if (userNumbers.length === 6 && winnings > 0) {
-        wallet.awardTicketWinnings(allDrawn);
+      // Award wallet only if ticket exists (confirmed 6 numbers last this cycle)
+      if (userNumbers.length === 6) {
+        wallet.awardTicketWinnings(
+          activeSets, // pass all three rows as an array of arrays (for multi-row)
+          rowWinnings, // pass detailed row winnings
+          totalWinnings // the sum
+        );
       }
 
-      // Show bar
-      setResultBar({ show: true, credits: winnings });
+      // Show bar with summed winnings for 5s
+      setResultBar({ show: true, credits: totalWinnings });
 
-      // Hide after 5 seconds
       if (resultTimeout.current) clearTimeout(resultTimeout.current);
       resultTimeout.current = setTimeout(() => {
         setResultBar({ show: false, credits: null });
@@ -303,7 +314,7 @@ export function DrawEngineProvider({ children }: { children: React.ReactNode }) 
     return () => {
       if (resultTimeout.current) clearTimeout(resultTimeout.current);
     };
-    // eslint-disable-next-line
+// eslint-disable-next-line
   }, [isRevealDone, cycleIndex, sets, wallet]);
 
   // Helper for explicit triggering (could be used for test)
