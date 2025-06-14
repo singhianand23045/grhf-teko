@@ -3,19 +3,21 @@ import React from "react";
 import { useDrawEngine } from "./DrawEngineContext";
 import { useNumberSelection } from "../number-select/NumberSelectionContext";
 import LotteryTicket from "../number-select/LotteryTicket";
+import { useTimer } from "../timer/timer-context";
 
 export default function RevealPanel() {
   const { drawnNumbers } = useDrawEngine();
   const { picked: userNumbers } = useNumberSelection();
+  const { state } = useTimer();
 
   // Always maintain 18 slots (3 rows × 6 columns)
-  // If no drawnNumbers yet, all slots must be undefined to show black circles
+  // PHASE LOGIC: only fill with numbers if state is "REVEAL", otherwise all slots undefined for black circles
   const slots: (number | undefined)[] =
-    drawnNumbers.length === 0
-      ? Array(18).fill(undefined)
-      : Array.from({ length: 18 }, (_, idx) =>
+    state === "REVEAL"
+      ? Array.from({ length: 18 }, (_, idx) =>
           drawnNumbers[idx] !== undefined ? drawnNumbers[idx] : undefined
-        );
+        )
+      : Array(18).fill(undefined);
 
   // Break into 3 sets of 6 numbers each for display
   const drawnSets: (number | undefined)[][] = [[], [], []];
@@ -59,7 +61,6 @@ export default function RevealPanel() {
                   );
                 }
                 // Revealed numbers:
-                // If it's a user's number, use "ticket" style (green, same as user's), else white circle, black border, black text
                 if (userSet.has(n)) {
                   return (
                     <span
