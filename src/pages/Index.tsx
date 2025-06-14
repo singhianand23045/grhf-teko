@@ -1,12 +1,15 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import { TimerProvider } from "@/features/timer/timer-context";
+import TimerDisplay from "@/features/timer/TimerDisplay";
 
 const Index = () => {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">Welcome to Your Blank App</h1>
-        <p className="text-xl text-muted-foreground">Start building your amazing project here!</p>
-      </div>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-tr from-blue-100 via-indigo-100 to-blue-50">
+      <TimerProvider>
+        <main className="flex flex-col w-full items-center px-4">
+          <h1 className="font-extrabold tracking-tight text-3xl mb-7 mt-4 text-[#1a1855]">Lucky Dip Demo</h1>
+          <TimerDisplay />
+        </main>
+      </TimerProvider>
     </div>
   );
 };
