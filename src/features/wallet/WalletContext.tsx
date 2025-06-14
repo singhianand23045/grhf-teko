@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useEffect, useRef, useState } from "react";
 
 // Types
@@ -11,17 +12,30 @@ export type TicketType = {
   date: string;          // ISO string
   numbers: number[];     // picked ticket numbers
   matches: number;       // 0-6
-  creditChange: number;  // -10 or 100
+  creditChange: number;  // -10 + payout (so: could be 990, 90, 30, 10, 0, -10)
 };
 
 type WalletContextType = {
   balance: number;
   history: TicketType[];
-  addTicket: (ticket: Omit<TicketType, "id" | "creditChange">) => void;
+  addConfirmedTicket: (ticket: Omit<TicketType, "id" | "creditChange" | "matches">) => void;
+  awardTicketWinnings: (cycleNumbers: number[]) => void;
   resetWallet: () => void;
 };
 
 const LOCAL_STORAGE_KEY = "wallet";
+
+// Payout map
+function getCreditsForMatches(matches: number) {
+  switch (matches) {
+    case 6: return 1000;
+    case 5: return 100;
+    case 4: return 40;
+    case 3: return 20;
+    case 2: return 10;
+    default: return 0;
+  }
+}
 
 const WalletContext = createContext<WalletContextType | undefined>(undefined);
 
@@ -46,7 +60,7 @@ function saveWalletToStorage(wallet: WalletType) {
 }
 
 export function WalletProvider({ children }: { children: React.ReactNode }) {
-  // Only balance is persisted, not history.
+  // Persist both balance and history.
   const [balance, setBalance] = useState<number>(() => {
     const data = localStorage.getItem(LOCAL_STORAGE_KEY);
     if (data) {
@@ -59,35 +73,69 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
     }
     return 1000;
   });
-  const [history, setHistory] = useState<TicketType[]>([]);
+  const [history, setHistory] = useState<TicketType[]>(() => {
+    const data = localStorage.getItem(LOCAL_STORAGE_KEY);
+    if (data) {
+      try {
+        const parsed = JSON.parse(data);
+        if (Array.isArray(parsed.history)) {
+          return parsed.history;
+        }
+      } catch {}
+    }
+    return [];
+  });
 
-  // Save only balance on change
+  // Persist **both** balance and history when either changes.
   useEffect(() => {
-    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify({ balance }));
-  }, [balance]);
+    saveWalletToStorage({ balance, history });
+  }, [balance, history]);
 
-  // Add a ticket (draw result): handles the credit logic and updates state
-  function addTicket(ticket: Omit<TicketType, "id" | "creditChange">) {
-    let creditChange = ticket.matches === 6 ? 100 : -10;
+  // STEP 1: CONFIRM ticket — deduct 10 credits immediately, store ticket with matches: 0, creditChange: -10
+  function addConfirmedTicket(ticketCore: Omit<TicketType, "id" | "creditChange" | "matches">) {
     const newTicket: TicketType = {
-      ...ticket,
+      ...ticketCore,
       id: Math.random().toString(36).slice(2) + Date.now(),
-      creditChange,
+      matches: 0,
+      creditChange: -10,
     };
-    console.log("[WalletContext] addTicket:", { ticket, creditChange, newBalance: balance + creditChange });
+    setBalance((prev) => prev - 10);
     setHistory(prev => [newTicket, ...prev]);
-    setBalance(prev => prev + creditChange);
+    console.log("[WalletContext] Confirmed ticket & deducted: ", newTicket);
+  }
+
+  // STEP 2: After REVEAL — find *most recent* ticket, update with real matches and add payout
+  function awardTicketWinnings(cycleNumbers: number[]) {
+    // Find most recent ticket for this cycle (should be the most recent in history where matches === 0)
+    setHistory(prevHistory => {
+      if (!prevHistory.length) return prevHistory;
+      const [latest, ...rest] = prevHistory;
+      if (latest.matches !== 0) return prevHistory; // Already awarded
+      // Count matches
+      const matches = latest.numbers.filter((n) => cycleNumbers.includes(n)).length;
+      const winnings = getCreditsForMatches(matches);
+      if (winnings > 0) {
+        setBalance(prev => prev + winnings);
+      }
+      const updatedTicket: TicketType = {
+        ...latest,
+        matches,
+        creditChange: -10 + winnings,
+      };
+      console.log("[WalletContext] Awarded payout. New ticket: ", updatedTicket);
+      return [updatedTicket, ...rest];
+    });
   }
 
   // Reset wallet (for demo restart)
   function resetWallet() {
     setBalance(1000);
     setHistory([]);
-    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify({ balance: 1000 }));
+    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify({ balance: 1000, history: [] }));
   }
 
   return (
-    <WalletContext.Provider value={{ balance, history, addTicket, resetWallet }}>
+    <WalletContext.Provider value={{ balance, history, addConfirmedTicket, awardTicketWinnings, resetWallet }}>
       {children}
     </WalletContext.Provider>
   );
