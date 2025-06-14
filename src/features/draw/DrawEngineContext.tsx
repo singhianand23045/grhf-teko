@@ -36,6 +36,9 @@ export function DrawEngineProvider({ children }: { children: React.ReactNode }) 
   const revealTimeouts = useRef<NodeJS.Timeout[]>([]);
   const revealStartedForCycle = useRef<number | null>(null);
 
+  // --- NEW: Keep last picked numbers per cycle regardless of provider reset ---
+  const lastPickedPerCycle = useRef<{ [cycle: number]: number[] }>({});
+
   // Helper: track pending wallet action per cycle for ticket entry
   // Each element: { cycleIndex, ticketData }
   const pendingTicketRef = useRef<{
@@ -81,12 +84,22 @@ export function DrawEngineProvider({ children }: { children: React.ReactNode }) 
     setIsRevealDone(true);
   };
 
+  // Save picked numbers in lastPickedPerCycle whenever they update, for current cycle
+  useEffect(() => {
+    // Only save if picked is 6 numbers (i.e., a complete pick)
+    if (picked && picked.length === 6) {
+      lastPickedPerCycle.current[cycleIndex] = picked.slice();
+      console.log("[DrawEngineContext] Caching picked numbers for cycle", cycleIndex, "->", picked.slice());
+    }
+  }, [picked, cycleIndex]);
+
   useEffect(() => {
     // Log to debug ticket handling and wallet state
     console.log("[DrawEngineContext] Effect triggered. state:", state, "pendingTicketRef:", pendingTicketRef.current);
 
     if (
-      state === "REVEAL") {
+      state === "REVEAL"
+    ) {
       startReveal(cycleIndex);
       const handleVisibility = () => {
         if (
@@ -101,8 +114,14 @@ export function DrawEngineProvider({ children }: { children: React.ReactNode }) 
 
       // DEFERS TICKET capture: don't add to wallet yet; instead save "pending" info if needed
       // Only run if 6 picked, and user hasn't already submitted for this cycle
+      // --- FIX: Use cached numbers, fallback to picked (to survive provider reset) ---
+      const ticketNumbers =
+        lastPickedPerCycle.current[cycleIndex] && lastPickedPerCycle.current[cycleIndex].length === 6
+          ? lastPickedPerCycle.current[cycleIndex]
+          : picked;
+
       if (
-        picked?.length === 6 &&
+        ticketNumbers.length === 6 &&
         (!pendingTicketRef.current ||
           pendingTicketRef.current.cycle !== cycleIndex)
       ) {
@@ -110,18 +129,26 @@ export function DrawEngineProvider({ children }: { children: React.ReactNode }) 
         const startSet = cycleIndex * SETS_PER_CYCLE;
         const activeSets = sets.slice(startSet, startSet + SETS_PER_CYCLE);
         const allDrawn = activeSets.flat();
-        // Count matches in picked ticket (intersection)
-        const matches = picked.filter((n) => allDrawn.includes(n)).length;
+        // Count matches in ticketNumbers (intersection)
+        const matches = ticketNumbers.filter((n) => allDrawn.includes(n)).length;
 
         pendingTicketRef.current = {
           cycle: cycleIndex,
           ticket: {
             date: new Date().toISOString(),
-            numbers: picked,
+            numbers: ticketNumbers,
             matches,
           },
           entered: false, // pending
         };
+        console.log(
+          "[DrawEngineContext] Created pending ticket for cycle",
+          cycleIndex,
+          "numbers:",
+          ticketNumbers,
+          "matches:",
+          matches
+        );
       }
 
       return () => {
