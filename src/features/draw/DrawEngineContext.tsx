@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useEffect, useRef, useState } from "react";
 import { useTimer } from "../timer/timer-context";
 import { generateDrawSets } from "./numberPool";
@@ -83,7 +82,11 @@ export function DrawEngineProvider({ children }: { children: React.ReactNode }) 
   };
 
   useEffect(() => {
-    if (state === "REVEAL") {
+    // Log to debug ticket handling and wallet state
+    console.log("[DrawEngineContext] Effect triggered. state:", state, "pendingTicketRef:", pendingTicketRef.current);
+
+    if (
+      state === "REVEAL") {
       startReveal(cycleIndex);
       const handleVisibility = () => {
         if (
@@ -127,19 +130,23 @@ export function DrawEngineProvider({ children }: { children: React.ReactNode }) 
         revealTimeouts.current = [];
       };
     } else if (
-      state === "OPEN" ||
-      state === "CUT_OFF" ||
-      state === "COMPLETE"
+      state !== "REVEAL" &&
+      pendingTicketRef.current &&
+      !pendingTicketRef.current.entered
     ) {
-      // Only clear when leaving REVEAL
-      setDrawnNumbers([]);
-      setIsRevealDone(false);
-      revealStartedForCycle.current = null;
-      revealTimeouts.current.forEach(clearTimeout);
-      revealTimeouts.current = [];
+      console.log("[DrawEngineContext] Adding ticket to wallet:", pendingTicketRef.current.ticket);
+      wallet.addTicket(pendingTicketRef.current.ticket);
+      pendingTicketRef.current.entered = true;
+    } else if (
+      state === "OPEN" &&
+      pendingTicketRef.current &&
+      pendingTicketRef.current.entered
+    ) {
+      console.log("[DrawEngineContext] Clearing pending ticket ref");
+      pendingTicketRef.current = null;
     }
     // eslint-disable-next-line
-  }, [state, cycleIndex]);
+  }, [state, cycleIndex, wallet]);
 
   // New: Commit ticket to wallet/credit only AFTER REVEAL phase ends (when timer ticks to next cycle)
   useEffect(() => {
@@ -184,4 +191,3 @@ export function useDrawEngine() {
   if (!ctx) throw new Error("useDrawEngine must be used within DrawEngineProvider");
   return ctx;
 }
-

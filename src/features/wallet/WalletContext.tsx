@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useEffect, useRef, useState } from "react";
 
 // Types
@@ -75,6 +74,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
       id: Math.random().toString(36).slice(2) + Date.now(),
       creditChange,
     };
+    console.log("[WalletContext] addTicket:", { ticket, creditChange, newBalance: balance + creditChange });
     setHistory(prev => [newTicket, ...prev]);
     setBalance(prev => prev + creditChange);
   }
