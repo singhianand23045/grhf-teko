@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useDrawEngine } from "./DrawEngineContext";
 import { useNumberSelection } from "../number-select/NumberSelectionContext";
@@ -99,9 +98,6 @@ export default function RevealPanel() {
         </div>
       </div>
       {/* Info below grid, NO ticket! */}
-      <div className="pt-1 text-center text-muted-foreground text-base">
-        Numbers revealed in order—good luck!
-      </div>
     </div>
   );
 }
