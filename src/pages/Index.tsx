@@ -1,12 +1,27 @@
-import { TimerProvider } from "@/features/timer/timer-context";
+
+import { TimerProvider, useTimer } from "@/features/timer/timer-context";
 import TimerDisplay from "@/features/timer/TimerDisplay";
-import { NumberSelectionProvider } from "@/features/number-select/NumberSelectionContext"; // ADD THIS IMPORT
+import { NumberSelectionProvider } from "@/features/number-select/NumberSelectionContext";
 import { WalletProvider } from "@/features/wallet/WalletContext";
-import BalanceLabel from "@/features/wallet/BalanceLabel";
 import WalletHistory from "@/features/wallet/WalletHistory";
 
+// Get logical dimensions
 const LOGICAL_WIDTH = 402;  // iPhone 16 Pro logical width
 const LOGICAL_HEIGHT = 874; // iPhone 16 Pro logical height
+
+// Helper component to handle wallet history conditionally
+function ConditionalWalletHistory() {
+  // This provider hook must be inside the TimerProvider tree!
+  const { state } = useTimer();
+  if (state === "REVEAL" || state === "COMPLETE") {
+    return null;
+  }
+  return (
+    <div className="mt-2 mb-4 w-full max-w-[440px]">
+      <WalletHistory />
+    </div>
+  );
+}
 
 const Index = () => {
   return (
@@ -25,10 +40,7 @@ const Index = () => {
             <NumberSelectionProvider>
               <main className="flex flex-col w-full items-center px-4 py-8 h-full">
                 <h1 className="font-extrabold tracking-tight text-3xl mb-12 mt-6 text-[#1a1855]">Lucky Dip Demo</h1>
-                {/* Removed <BalanceLabel /> */}
-                <div className="mt-2 mb-4 w-full max-w-[440px]">
-                  <WalletHistory />
-                </div>
+                <ConditionalWalletHistory />
                 <TimerDisplay />
               </main>
             </NumberSelectionProvider>

@@ -2,23 +2,22 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useTimer } from "./timer-context";
 import { Repeat } from "lucide-react";
-import { NumberSelectionProvider } from "../number-select/NumberSelectionContext";
-import NumberSelectionPanel from "../number-select/NumberSelectionPanel";
 import { DrawEngineProvider } from "../draw/DrawEngineContext";
 import RevealPanel from "../draw/RevealPanel";
 import LotteryTicket from "../number-select/LotteryTicket";
+import NumberSelectionPanel from "../number-select/NumberSelectionPanel";
 import CreditsBar from "../wallet/CreditsBar";
 
 // For screen proportions
 const LOGICAL_HEIGHT = 874; // Should match page layout
 
 /**
- * New layout:
+ * Layout:
  * - Timer: 10%
  * - Spacer: 3%
  * - Drawn numbers: 33%
- * - Spacer: 3%
- * - Confirmed/user numbers: rest
+ * - Credits: 5%
+ * - Confirmed/user numbers: 40%
  */
 
 export default function TimerDisplay() {
@@ -26,7 +25,7 @@ export default function TimerDisplay() {
 
   const TIMER_HEIGHT = 0.10;
   const SPACER_HEIGHT = 0.03;
-  const DRAW_SECTION_HEIGHT = 0.20; // 20%
+  const DRAW_SECTION_HEIGHT = 0.20; // 20%, but visually still looks like the main draw area
 
   // Timer Section (top)
   const TimerSection = (
@@ -74,19 +73,6 @@ export default function TimerDisplay() {
     ></div>
   );
 
-  // NEW: 1% Spacer between drawn numbers and credits
-  const DrawCreditsSpacer = (
-    <div
-      className="w-full flex-shrink-0 flex-grow-0 bg-transparent"
-      style={{
-        height: "1%",
-        minHeight: Math.floor(LOGICAL_HEIGHT * 0.01),
-        maxHeight: Math.ceil(LOGICAL_HEIGHT * 0.01 * 3),
-      }}
-      aria-hidden
-    />
-  );
-
   // Drawn+Ticket: Only during REVEAL, keep both in shared contexts vertically stacked
   const RevealSectionWithTicket = (
     <DrawEngineProvider>
@@ -96,21 +82,23 @@ export default function TimerDisplay() {
           className="flex flex-col items-center justify-center w-full flex-shrink-0 flex-grow-0 overflow-y-hidden"
           style={{
             height: "20%",              // force 20% of parent at all times
-            minHeight: 85,              // safely allow a bit less
+            minHeight: 85,              
             maxHeight: "20%",
             flexBasis: "20%",
           }}
         >
           <RevealPanel />
         </div>
-        {/* Confirmed numbers, take rest of available space below */}
+        {/* Confirmed numbers section: always 40% height, sits just below credits */}
         <div
-          className="flex-grow flex flex-col items-center justify-center min-h-[80px] overflow-y-hidden"
+          className="flex-shrink-0 flex-grow-0 flex flex-col items-center justify-center overflow-y-hidden"
           style={{
-            minHeight: 80,
+            height: "40%",
+            minHeight: Math.floor(LOGICAL_HEIGHT * 0.4),
+            maxHeight: Math.ceil(LOGICAL_HEIGHT * 0.4),
           }}
         >
-          <section className="w-full flex flex-col items-center mt-1">
+          <section className="w-full flex flex-col items-center mt-1 h-full">
             <LotteryTicket compact />
           </section>
         </div>
@@ -159,24 +147,25 @@ export default function TimerDisplay() {
     </div>
   );
 
-  // Confirmed numbers / user's ticket / bottom panel
-  // Takes all remaining height at the bottom!
+  // Confirmed numbers / user's ticket / bottom panel — always 40% of height
   const ConfirmedSection = (
     <div
-      className="flex flex-col items-center justify-center w-full flex-grow overflow-y-hidden"
+      className="flex flex-col items-center justify-center w-full flex-shrink-0 flex-grow-0 overflow-y-hidden"
       style={{
-        minHeight: 80,
+        height: "40%",
+        minHeight: Math.floor(LOGICAL_HEIGHT * 0.4),
+        maxHeight: Math.ceil(LOGICAL_HEIGHT * 0.4),
       }}
     >
       {/* During selection */}
       {state !== "COMPLETE" && state !== "REVEAL" && (
-        <section className="w-full flex flex-col items-center my-0">
+        <section className="w-full flex flex-col items-center my-0 h-full">
           <NumberSelectionPanel />
         </section>
       )}
       {/* Complete: restart demo */}
       {state === "COMPLETE" && (
-        <section className="w-full flex flex-col items-center mt-2 animate-fade-in">
+        <section className="w-full flex flex-col items-center mt-2 animate-fade-in h-full">
           <p className="text-base font-semibold text-center mb-2">Demo Complete — 2 cycles finished.</p>
           <Button variant="secondary" size="lg" className="mt-2" onClick={resetDemo}>
             <Repeat className="mr-1 h-4 w-4" /> Restart Demo
@@ -186,7 +175,8 @@ export default function TimerDisplay() {
     </div>
   );
 
-  // Insert CreditsBar between draw and confirmed numbers, always present except on demo complete
+  /* CreditsBar sits always between drawn numbers and confirmed section;
+     Hide only during demo complete */
   return (
     <div
       className="flex flex-col w-full h-full"
@@ -201,8 +191,8 @@ export default function TimerDisplay() {
       {state === "REVEAL" ? RevealSectionWithTicket : DrawSection}
       {/* CreditsBar always between drawn numbers and confirmed section; hide only during demo complete */}
       {state !== "COMPLETE" && <CreditsBar />}
-      {Spacer}
-      {/* Confirmed or selection */}
+      {/* No spacer below credits bar */}
+      {/* Confirmed or selection (always 40% height, directly below credits) */}
       {state !== "REVEAL" && ConfirmedSection}
     </div>
   );
