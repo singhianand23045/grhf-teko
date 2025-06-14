@@ -125,10 +125,10 @@ export function DrawEngineProvider({ children }: { children: React.ReactNode }) 
       const ticket = {
         date: new Date().toISOString(),
         numbers: picked.slice(),
-        matches: 0, // unknown until REVEAL
+        // matches and creditChange are handled by context
       };
       // Immediate -10 credit, will update with matches (if needed) in REVEAL
-      wallet.addTicket(ticket);
+      wallet.addConfirmedTicket(ticket);
       ticketCommittedCycle.current = cycleIndex;
       lastPickedPerCycle.current[cycleIndex] = picked.slice();
       console.log("[DrawEngineContext] Committed ticket for cycle", cycleIndex, ticket);
@@ -205,7 +205,7 @@ export function DrawEngineProvider({ children }: { children: React.ReactNode }) 
           ticket: {
             date: new Date().toISOString(),
             numbers: ticketNumbers,
-            matches,
+            // matches not passed here, handled later in context
           },
           entered: false, // pending
         };
@@ -229,7 +229,7 @@ export function DrawEngineProvider({ children }: { children: React.ReactNode }) 
       !pendingTicketRef.current.entered
     ) {
       console.log("[DrawEngineContext] Adding ticket to wallet:", pendingTicketRef.current.ticket);
-      wallet.addTicket(pendingTicketRef.current.ticket);
+      wallet.addConfirmedTicket(pendingTicketRef.current.ticket);
       pendingTicketRef.current.entered = true;
     } else if (
       state === "OPEN" &&
@@ -250,7 +250,7 @@ export function DrawEngineProvider({ children }: { children: React.ReactNode }) 
       pendingTicketRef.current &&
       !pendingTicketRef.current.entered
     ) {
-      wallet.addTicket(pendingTicketRef.current.ticket);
+      wallet.addConfirmedTicket(pendingTicketRef.current.ticket);
       pendingTicketRef.current.entered = true;
     }
 
