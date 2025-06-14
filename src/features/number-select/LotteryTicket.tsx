@@ -14,19 +14,22 @@ export default function LotteryTicket() {
         Your Numbers
       </div>
       <div
-        className="flex flex-nowrap justify-center items-center gap-3 bg-gradient-to-r from-green-100/70 via-white to-green-100/70 rounded-2xl shadow-inner px-2 py-6 max-w-full overflow-x-auto"
-        style={{ width: "100%", maxWidth: 400 }}
+        className="flex flex-nowrap justify-center items-center gap-2 bg-gradient-to-r from-green-100/70 via-white to-green-100/70 rounded-2xl shadow-inner px-1 py-4 w-full"
+        style={{
+          minHeight: 56,
+        }}
       >
         {sorted.map((n) => (
           <span
             key={n}
-            className="flex items-center justify-center rounded-full bg-green-500 text-white text-2xl font-black shadow-green-300 shadow-lg border-[3px] border-green-700 select-none lottery-num"
+            className="flex items-center justify-center rounded-full bg-green-500 text-white font-black shadow-green-300 shadow-lg border-[2px] border-green-700 select-none lottery-num transition-all"
             style={{
-              width: "min(3.3rem, 16vw)",
-              height: "min(3.3rem, 16vw)",
-              minWidth: 44,
-              minHeight: 44,
-              fontSize: "clamp(1.1rem, 6vw, 2rem)"
+              width: "clamp(2.2rem, 13vw, 3rem)",
+              height: "clamp(2.2rem, 13vw, 3rem)",
+              minWidth: 28,
+              minHeight: 28,
+              fontSize: "clamp(1rem, 5vw, 1.5rem)",
+              lineHeight: 1.1,
             }}
           >
             {n}
