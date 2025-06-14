@@ -1,5 +1,5 @@
 
-# Phase 3 Spec: Demo Draw Reveal Experience (Updated)
+# Phase 3 Spec: Draw Reveal Experience
 
 ## Overview
 

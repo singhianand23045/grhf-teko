@@ -1,5 +1,5 @@
 
-# Phase 2: Number Selection UI – Final Spec
+# Phase 2 Spec: Number Selection UI
 
 ## User Stories
 

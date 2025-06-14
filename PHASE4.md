@@ -1,5 +1,4 @@
-
-## Phase 4 Specification: Result & Wallet – Credit Accounting, Match Algorithm, CoreData Wallet/History
+## Phase 4 Spec: Result & Wallet
 
 ### 1. User Stories
 

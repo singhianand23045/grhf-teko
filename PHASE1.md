@@ -1,26 +1,56 @@
+# Phase 1 Spec — Timer & Scheduler
 
-# Phase 1 Specification
+## User Stories
 
-## Timer, Draw Scheduling, and Number Selection
+- As a player, I want to know when the entry cut-off period starts and ends, so I am aware of the last chance to enter before the draw closes.
+- As an observer, I want the timer UI to visually indicate the cut-off phase, so I can understand the transition from open entries to the reveal.
 
-### User Stories
+## Functional Requirements
 
-- As a player, I want to see a visible timer counting down to the next draw.
-- As a player, I want to select 6 numbers from a pool before cut-off.
-- As a player, I want picking to be locked during cut-off and draw phases.
+### Timer Cycles
 
-### Functional Requirements
+- The app timer runs for 2 cycles, each of exactly 4:00 minutes (as in Phase 1).
+- The timer always starts from 4:00, counts to 0:00, and restarts for a new cycle after completion, up to 2 times.
 
-- Timer is visible and clearly indicates the time left until the next draw.
-- Draws are scheduled to occur at regular intervals (e.g., every 2 minutes).
-- Number selection interface allows picking up to 6 numbers (from a pool of 27).
-- Number picking is disabled when cut-off or reveal starts; only enabled in OPEN state.
-- Timer state machine transitions through OPEN, CUT_OFF, REVEAL, and (optionally) COMPLETE.
+### State Phases
 
-### Acceptance Criteria
+- Each cycle has the following phases determined by time remaining:
+  - **OPEN:** 4:00 to 1:00 (inclusive)
+  - **CUT_OFF:** 1:00 to 0:45 (inclusive)
+  - **REVEAL/END:** 0:44 to 0:00
+- States transition automatically according to seconds left.
 
-- [x] Timer counts down and resets correctly each cycle.
-- [x] Number picking is only enabled while the state is OPEN.
-- [x] UI clearly indicates when the draw is in progress vs. selection phase.
+### UI Updates
 
----
+- The current phase (**OPEN**, **CUT_OFF**, or **REVEAL/END**) is visually indicated:
+  - When in **CUT_OFF**, the timer UI displays a prominent warning or label (e.g., “Entries Closed” or “Cut-off! Last Chance!”) and changes style/color to draw attention.
+  - In **OPEN** and **REVEAL**, the label and color are normal/default.
+- The countdown timer remains large and visible throughout.
+- On completion of 2 cycles, an overlay “Demo Complete” is shown, with a reset button.
+
+### Reset Behavior
+
+- The reset button restarts the timer at the beginning of the first cycle in the **OPEN** phase.
+
+## Acceptance Criteria
+
+- [ ] The timer starts at 4:00 independently of system time each cycle and counts down to 0:00.
+- [ ] The “cut-off” state is triggered and visually indicated when the timer reaches 1:00, lasting through 0:45 inclusive.
+- [ ] The timer UI shows distinct visual styling (e.g., color or label) during the cut-off phase.
+- [ ] After two cycles, “Demo Complete” is shown, and the timer does not continue.
+- [ ] Clicking reset restarts the timer and clears any overlays or labels, returning to the original OPEN state.
+
+## Tests
+
+### Timer State Test
+
+- At 1:01, the state is “OPEN”.
+- At 1:00, the state transitions to “CUT_OFF”.
+- At 0:45, the state is still “CUT_OFF”.
+- At 0:44, the state becomes “REVEAL”.
+
+### UI Test
+
+- The cut-off label/color appear only between 1:00 and 0:45 in each cycle.
+- Overlay appears exactly after the second cycle ends.
+- Reset returns to 4:00 in OPEN phase, with no cut-off/reveal visuals.
