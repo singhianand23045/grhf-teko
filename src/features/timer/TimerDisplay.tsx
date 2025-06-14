@@ -1,4 +1,3 @@
-
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useTimer } from "./timer-context";
@@ -77,9 +76,32 @@ export default function TimerDisplay() {
           <RevealPanel />
         </DrawEngineProvider>
       ) : (
-        // When not in reveal state, maintain space with a placeholder
-        <div className="w-full flex items-center justify-center h-full">
-          <div className="text-muted-foreground text-base opacity-60">Drawn numbers will appear here</div>
+        // When not in reveal state, show 18 filled black circles in 3x6 grid for placeholder
+        <div className="w-full flex flex-col items-center justify-center h-full py-8">
+          <div className="w-full space-y-6">
+            {Array.from({ length: 3 }).map((_, rowIdx) => (
+              <div
+                key={rowIdx}
+                className="flex flex-nowrap justify-center items-center gap-4 w-full max-w-full min-h-[56px]"
+              >
+                {Array.from({ length: 6 }).map((_, colIdx) => (
+                  <span
+                    key={colIdx}
+                    className="flex items-center justify-center rounded-full bg-black border-2 border-black select-none aspect-square transition-all"
+                    style={{
+                      width: "clamp(2.2rem, 7vw, 3rem)",
+                      minWidth: 40,
+                      height: "clamp(2.2rem, 7vw, 3rem)",
+                      minHeight: 40,
+                      fontSize: "clamp(0.9rem, 4.5vw, 1.1rem)",
+                      lineHeight: 1.1,
+                    }}
+                    aria-hidden
+                  />
+                ))}
+              </div>
+            ))}
+          </div>
         </div>
       )}
     </div>
