@@ -50,6 +50,11 @@ export function NumberSelectionProvider({ children }: { children: React.ReactNod
   const canPick = timerState === "OPEN" && !isConfirmed;
   const canConfirm = timerState === "OPEN" && picked.length === 6 && !isConfirmed;
 
+  // Debugging: Log whenever picked changes
+  React.useEffect(() => {
+    console.log("[NumberSelectionProvider] Picked numbers:", picked, "isConfirmed:", isConfirmed, "timerState:", timerState, "cycleIndex:", cycleIndex);
+  }, [picked, isConfirmed, timerState, cycleIndex]);
+
   return (
     <NumberSelectionContext.Provider
       value={{ picked, setPicked, isConfirmed, confirm, reset, canPick, canConfirm }}

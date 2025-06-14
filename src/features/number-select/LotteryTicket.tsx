@@ -5,7 +5,11 @@ export default function LotteryTicket({ compact = false }: { compact?: boolean }
   const { picked } = useNumberSelection();
   const sorted = [...picked].sort((a, b) => a - b);
 
+  // Debugging output
+  console.log("[LotteryTicket] Rendered: picked =", picked);
+
   return (
+    
     <div
       className={`w-full flex flex-col items-center justify-center px-2 ${compact ? "" : "mt-2 mb-2"}`}
       style={compact ? { marginTop: 0, marginBottom: 0, paddingTop: 0, paddingBottom: 0 } : {}}
@@ -43,5 +47,6 @@ export default function LotteryTicket({ compact = false }: { compact?: boolean }
         Numbers locked in until next round!
       </div>
     </div>
+    
   );
 }
