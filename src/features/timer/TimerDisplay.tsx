@@ -28,27 +28,25 @@ export default function TimerDisplay() {
     </section>
   );
 
-  // Number Selection section
-  const SelectionSection = (
-    state !== "COMPLETE" && state !== "REVEAL" && (
-      <section className="w-full flex flex-col items-center my-3">
-        <h2 className="text-lg font-semibold mb-3 text-[#257a2a] tracking-wide">Number Selection</h2>
-        <NumberSelectionProvider>
+  // Wrap selection and reveal sections in one provider so useNumberSelection is available in both
+  const SelectionAndDrawSections = (
+    <NumberSelectionProvider>
+      {/* Number Selection section */}
+      {state !== "COMPLETE" && state !== "REVEAL" && (
+        <section className="w-full flex flex-col items-center my-3">
+          <h2 className="text-lg font-semibold mb-3 text-[#257a2a] tracking-wide">Number Selection</h2>
           <NumberSelectionPanel />
-        </NumberSelectionProvider>
-      </section>
-    )
-  );
-
-  // Draw Engine & Reveal section (with drawn numbers grid + user's ticket, never overlapping)
-  const DrawSection = (
-    state === "REVEAL" && (
-      <section className="w-full flex flex-col items-center mt-3 mb-2">
-        <DrawEngineProvider>
-          <RevealPanel />
-        </DrawEngineProvider>
-      </section>
-    )
+        </section>
+      )}
+      {/* Draw Engine & Reveal section (with drawn numbers grid + user's ticket, never overlapping) */}
+      {state === "REVEAL" && (
+        <section className="w-full flex flex-col items-center mt-3 mb-2">
+          <DrawEngineProvider>
+            <RevealPanel />
+          </DrawEngineProvider>
+        </section>
+      )}
+    </NumberSelectionProvider>
   );
 
   // Demo complete section
@@ -67,10 +65,8 @@ export default function TimerDisplay() {
     <div className="flex flex-col items-center w-full h-full justify-between space-y-3 px-1">
       {/* 1. Timer/Countdown Always on Top */}
       {TimerSection}
-      {/* 2. Number Selection Panel, only in "OPEN" or "CUT_OFF" */}
-      {SelectionSection}
-      {/* 3. Drawn Numbers Grid + Ticket, only in REVEAL */}
-      {DrawSection}
+      {/* 2 & 3. Number Selection Panel (OPEN/CUT_OFF) and Drawn Numbers Grid + Ticket (REVEAL) */}
+      {SelectionAndDrawSections}
       {/* 4. Complete Message, only in COMPLETE */}
       {CompleteSection}
     </div>
