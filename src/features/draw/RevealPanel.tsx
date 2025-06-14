@@ -17,13 +17,13 @@ export default function RevealPanel() {
   }
 
   return (
-    <div className="flex flex-col items-center py-3 w-full animate-fade-in">
-      <div className="font-bold text-lg text-[#217d37] pb-1">Lucky Numbers</div>
-      <div className="space-y-2 w-full max-w-full">
+    <div className="flex flex-col items-center py-8 min-h-[600px] w-full animate-fade-in">
+      <div className="font-bold text-2xl text-[#217d37] pb-3">Lucky Numbers</div>
+      <div className="space-y-6 w-full max-w-full mb-6">
         {drawnSets.map((set, i) => (
           <div
             key={i}
-            className="flex flex-nowrap justify-center items-center gap-2 bg-gradient-to-r from-green-100/80 via-white to-green-100/80 rounded-xl shadow-inner px-1 py-2 w-full max-w-full min-h-[44px]"
+            className="flex flex-nowrap justify-center items-center gap-4 bg-gradient-to-r from-green-100/80 via-white to-green-100/80 rounded-xl shadow-inner px-1 py-6 w-full max-w-full min-h-[56px]"
           >
             {set.map((n, j) =>
               n !== undefined ? (
@@ -31,11 +31,11 @@ export default function RevealPanel() {
                   key={j}
                   className="flex items-center justify-center rounded-full bg-green-600 text-white font-black shadow-green-300 shadow-lg border-[2px] border-green-900 select-none transition-all aspect-square animate-scale-in"
                   style={{
-                    width: "clamp(2.1rem, 6vw, 2.6rem)",
-                    minWidth: 32,
-                    height: "clamp(2.1rem, 6vw, 2.6rem)",
-                    minHeight: 32,
-                    fontSize: "clamp(1rem, 5vw, 1.25rem)",
+                    width: "clamp(2.2rem, 7vw, 3rem)",
+                    minWidth: 40,
+                    height: "clamp(2.2rem, 7vw, 3rem)",
+                    minHeight: 40,
+                    fontSize: "clamp(1.1rem, 6vw, 1.45rem)",
                     lineHeight: 1.1,
                   }}
                 >
@@ -46,11 +46,11 @@ export default function RevealPanel() {
                   key={j}
                   className="flex items-center justify-center rounded-full bg-gray-200 text-gray-300 font-black border-[2px] border-gray-300 select-none aspect-square opacity-80"
                   style={{
-                    width: "clamp(2.1rem, 6vw, 2.6rem)",
-                    minWidth: 32,
-                    height: "clamp(2.1rem, 6vw, 2.6rem)",
-                    minHeight: 32,
-                    fontSize: "clamp(1rem, 5vw, 1.25rem)",
+                    width: "clamp(2.2rem, 7vw, 3rem)",
+                    minWidth: 40,
+                    height: "clamp(2.2rem, 7vw, 3rem)",
+                    minHeight: 40,
+                    fontSize: "clamp(1.1rem, 6vw, 1.45rem)",
                     lineHeight: 1.1,
                   }}
                   aria-hidden
@@ -62,10 +62,12 @@ export default function RevealPanel() {
           </div>
         ))}
       </div>
-      <div className="pt-4 w-full">
-        <LotteryTicket />
+      <div className="pt-12 w-full flex justify-center">
+        <div className="w-full max-w-md">
+          <LotteryTicket />
+        </div>
       </div>
-      <div className="pt-3 text-center text-muted-foreground text-sm">
+      <div className="pt-8 text-center text-muted-foreground text-base">
         Numbers revealed in order—good luck!
       </div>
     </div>
