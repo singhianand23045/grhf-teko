@@ -8,67 +8,87 @@ import NumberSelectionPanel from "../number-select/NumberSelectionPanel";
 import { DrawEngineProvider } from "../draw/DrawEngineContext";
 import RevealPanel from "../draw/RevealPanel";
 
+// For screen proportions
+const LOGICAL_HEIGHT = 874; // Should match page layout
+const LOGICAL_WIDTH = 402;
+
 export default function TimerDisplay() {
   const { countdown, state, resetDemo } = useTimer();
 
-  // Scheduler & Timer section (always at top)
+  // 1. Timer/Countdown on the left (desktop), full width above other on mobile
   const TimerSection = (
-    <section className="w-full flex flex-col items-center mb-6">
-      <h2 className="text-xl font-semibold text-[#1a1855] mb-2 tracking-wider">Scheduler & Timer</h2>
-      <Card className="w-full max-w-xs shadow-xl rounded-xl bg-gradient-to-b from-[#f4f4fa] to-[#e3e7fb] border-2 border-white">
-        <div className="flex flex-col items-center py-7 px-4">
-          <span
-            className="text-[64px] font-mono font-extrabold tracking-widest text-[#24266e] select-none animate-fade-in"
-            data-testid="timer"
-          >
-            {countdown}
-          </span>
-        </div>
+    <div className="flex flex-col items-center justify-center h-full w-full">
+      <Card
+        className="flex items-center justify-center bg-gradient-to-b from-[#f4f4fa] to-[#e3e7fb] border-2 border-white shadow-xl rounded-xl"
+        // width: 1/2 of container, height: 1/8 of full height (responsive), min sizes for mobile
+        style={{
+          width: `min(50%, 210px)`,
+          height: `min(12.5%, 84px)`, // 1/8 of 674px is ~84px
+          minWidth: 116,
+          minHeight: 46,
+          maxWidth: 210,
+          maxHeight: 84,
+          padding: 0,
+        }}
+      >
+        <span
+          className="font-mono font-extrabold tracking-widest text-[#24266e] select-none animate-fade-in"
+          // font size: visually balanced and smaller than before
+          style={{
+            fontSize: "clamp(1.6rem, 5vw, 2.7rem)", // ~25-43px
+            lineHeight: 1.1,
+          }}
+          data-testid="timer"
+        >
+          {countdown}
+        </span>
       </Card>
-    </section>
+    </div>
   );
 
-  // Wrap selection and reveal sections in one provider so useNumberSelection is available in both
-  const SelectionAndDrawSections = (
-    <NumberSelectionProvider>
-      {/* Number Selection section */}
-      {state !== "COMPLETE" && state !== "REVEAL" && (
-        <section className="w-full flex flex-col items-center my-3">
-          <h2 className="text-lg font-semibold mb-3 text-[#257a2a] tracking-wide">Number Selection</h2>
-          <NumberSelectionPanel />
+  // Main content, selection and draw (right on desktop, below timer on mobile)
+  const MainSection = (
+    <div className="flex flex-col flex-1 items-center w-full justify-start">
+      <NumberSelectionProvider>
+        {/* Number Selection section */}
+        {state !== "COMPLETE" && state !== "REVEAL" && (
+          <section className="w-full flex flex-col items-center my-3">
+            <h2 className="text-lg font-semibold mb-3 text-[#257a2a] tracking-wide">Number Selection</h2>
+            <NumberSelectionPanel />
+          </section>
+        )}
+        {/* Draw Engine & Reveal section (with drawn numbers grid + user's ticket, never overlapping) */}
+        {state === "REVEAL" && (
+          <section className="w-full flex flex-col items-center mt-3 mb-2">
+            <DrawEngineProvider>
+              <RevealPanel />
+            </DrawEngineProvider>
+          </section>
+        )}
+      </NumberSelectionProvider>
+      {/* Demo complete section */}
+      {state === "COMPLETE" && (
+        <section className="w-full flex flex-col items-center mt-10 animate-fade-in">
+          <p className="text-base font-semibold text-center mb-4">Demo Complete — 2 cycles finished.</p>
+          <Button variant="secondary" size="lg" className="mt-2" onClick={resetDemo}>
+            <Repeat className="mr-1 h-4 w-4" /> Restart Demo
+          </Button>
         </section>
       )}
-      {/* Draw Engine & Reveal section (with drawn numbers grid + user's ticket, never overlapping) */}
-      {state === "REVEAL" && (
-        <section className="w-full flex flex-col items-center mt-3 mb-2">
-          <DrawEngineProvider>
-            <RevealPanel />
-          </DrawEngineProvider>
-        </section>
-      )}
-    </NumberSelectionProvider>
+    </div>
   );
 
-  // Demo complete section
-  const CompleteSection = (
-    state === "COMPLETE" && (
-      <section className="w-full flex flex-col items-center mt-10 animate-fade-in">
-        <p className="text-base font-semibold text-center mb-4">Demo Complete — 2 cycles finished.</p>
-        <Button variant="secondary" size="lg" className="mt-2" onClick={resetDemo}>
-          <Repeat className="mr-1 h-4 w-4" /> Restart Demo
-        </Button>
-      </section>
-    )
-  );
-
+  // Responsive flex container: row (desktop), column (mobile)
   return (
-    <div className="flex flex-col items-center w-full h-full justify-between space-y-3 px-1">
-      {/* 1. Timer/Countdown Always on Top */}
-      {TimerSection}
-      {/* 2 & 3. Number Selection Panel (OPEN/CUT_OFF) and Drawn Numbers Grid + Ticket (REVEAL) */}
-      {SelectionAndDrawSections}
-      {/* 4. Complete Message, only in COMPLETE */}
-      {CompleteSection}
+    <div className="flex flex-col lg:flex-row items-stretch w-full h-full justify-between space-y-3 lg:space-y-0 lg:space-x-5 px-1">
+      {/* Timer left, rest right */}
+      <div className="w-full lg:w-1/2 flex items-start justify-center">
+        {TimerSection}
+      </div>
+      <div className="w-full lg:w-1/2 flex flex-col">
+        {MainSection}
+      </div>
     </div>
   );
 }
+
