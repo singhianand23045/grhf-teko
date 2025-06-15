@@ -33,6 +33,23 @@ interface DrawEngineContextType {
 
 const DrawEngineContext = createContext<DrawEngineContextType | undefined>(undefined);
 
+function incrementTicketCountForCycle(cycle: number, debugSource = "unknown") {
+  if (!cycleTicketCountRef.current[cycle]) {
+    cycleTicketCountRef.current[cycle] = 1;
+    console.log(`[DrawEngineContext] First ticket for cycle ${cycle} from ${debugSource} - count=1`);
+  } else {
+    cycleTicketCountRef.current[cycle]++;
+    console.log(`[DrawEngineContext] Additional ticket for cycle ${cycle} from ${debugSource} - count=${cycleTicketCountRef.current[cycle]}`);
+  }
+  console.log("[DrawEngineContext] cycleTicketCountRef after increment:", {...cycleTicketCountRef.current});
+}
+
+function resetTicketCountForCycle(cycle: number) {
+  console.log(`[DrawEngineContext] Resetting ticket count for cycle ${cycle}`);
+  delete cycleTicketCountRef.current[cycle];
+  console.log("[DrawEngineContext] cycleTicketCountRef after reset:", {...cycleTicketCountRef.current});
+}
+
 export function DrawEngineProvider({ children }: { children: React.ReactNode }) {
   const { state, cycleIndex } = useTimer();
   // Wallet & Confirmed numbers
@@ -69,21 +86,7 @@ export function DrawEngineProvider({ children }: { children: React.ReactNode }) 
   } | null>(null);
 
   // Helper: count ticket per cycle, initialize if missing
-  function incrementTicketCountForCycle(cycle: number) {
-    if (!cycleTicketCountRef.current[cycle]) {
-      cycleTicketCountRef.current[cycle] = 1;
-      console.log(`[DrawEngineContext] First ticket for cycle ${cycle} - count=${cycleTicketCountRef.current[cycle]}`);
-    } else {
-      cycleTicketCountRef.current[cycle]++;
-      console.log(`[DrawEngineContext] Additional ticket for cycle ${cycle} - count=${cycleTicketCountRef.current[cycle]}`);
-    }
-    console.log("[DrawEngineContext] cycleTicketCountRef after increment:", {...cycleTicketCountRef.current});
-  }
-  function resetTicketCountForCycle(cycle: number) {
-    console.log(`[DrawEngineContext] Resetting ticket count for cycle ${cycle}`);
-    delete cycleTicketCountRef.current[cycle];
-    console.log("[DrawEngineContext] cycleTicketCountRef after reset:", {...cycleTicketCountRef.current});
-  }
+  
 
   // Reveal logic: reveal all numbers in 9 seconds, one every 0.5s (18 numbers)
   const REVEAL_TOTAL_NUMBERS = SETS_PER_CYCLE * SET_SIZE; // 18
@@ -137,20 +140,18 @@ export function DrawEngineProvider({ children }: { children: React.ReactNode }) 
   // PHASE 1: On ticket confirmation, deduct credits but don't increment jackpot yet
   useEffect(() => {
     if (picked.length === 6 && cycleIndex !== ticketCommittedCycle.current) {
-      // Only commit once per cycle!
-      const startSet = cycleIndex * SETS_PER_CYCLE;
-      const activeSets = sets.slice(startSet, startSet + SETS_PER_CYCLE);
-      const allDrawn = activeSets.flat();
-      const ticket = {
+      console.log(`[DrawEngineContext] Committing ticket (picked/confirmed) for cycle ${cycleIndex}:`, picked);
+      wallet.addConfirmedTicket({
         date: new Date().toISOString(),
         numbers: picked.slice(),
-      };
-      wallet.addConfirmedTicket(ticket);
+      });
       // Don't increase jackpot here!
-      incrementTicketCountForCycle(cycleIndex);
+      incrementTicketCountForCycle(cycleIndex, "picked-confirm");
       ticketCommittedCycle.current = cycleIndex;
       lastPickedPerCycle.current[cycleIndex] = picked.slice();
-      console.log("[DrawEngineContext] Committed ticket for cycle", cycleIndex, picked);
+      console.log("[DrawEngineContext] Committed ticket for cycle", cycleIndex, picked, ", ticketCommittedCycle now:", ticketCommittedCycle.current);
+    } else {
+      console.log(`[DrawEngineContext] Not committing ticket (picked.length: ${picked.length}, cycleIndex: ${cycleIndex}, ticketCommittedCycle: ${ticketCommittedCycle.current})`);
     }
     // eslint-disable-next-line
   }, [picked, cycleIndex, wallet, jackpotContext]);
@@ -293,8 +294,9 @@ export function DrawEngineProvider({ children }: { children: React.ReactNode }) 
       const tickets = cycleTicketCountRef.current[prevCycle] || 0;
       console.log(`[DrawEngineContext] Previous cycle ${prevCycle} had ${tickets} tickets`);
       if (tickets > 0) {
-        console.log(`[DrawEngineContext] Adding $${tickets} to jackpot for cycle ${prevCycle}`);
+        console.log(`[DrawEngineContext] Adding $${tickets} to jackpot for cycle ${prevCycle}! Jackpot before: ${jackpotContext.jackpot}`);
         jackpotContext.addToJackpot(tickets);
+        console.log(`[DrawEngineContext] Jackpot should now be: ${jackpotContext.jackpot + tickets} (pending re-render)`);
         resetTicketCountForCycle(prevCycle);
       }
     }
