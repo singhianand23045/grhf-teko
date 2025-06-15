@@ -80,13 +80,12 @@ export default function RevealPanel() {
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  // boxSizing removed to fix TS error
                 };
                 if (n === undefined) {
                   return (
                     <span
                       key={colIdx}
-                      className="flex items-center justify-center rounded-full bg-black border-2 border-black select-none aspect-square transition-all"
+                      className="flex items-center justify-center rounded-full bg-robinhood-black border-2 border-robinhood-black select-none aspect-square transition-all"
                       style={baseCircleStyle}
                       aria-hidden
                     ></span>
@@ -96,7 +95,7 @@ export default function RevealPanel() {
                   return (
                     <span
                       key={colIdx}
-                      className="flex items-center justify-center rounded-full bg-green-500 text-white font-black shadow-green-300 shadow-lg border-[2px] border-green-700 select-none transition-all aspect-square animate-scale-in"
+                      className="flex items-center justify-center rounded-full bg-robinhood-green text-white font-black shadow-robinhood-green/30 shadow-lg border-2 border-robinhood-green select-none transition-all aspect-square animate-scale-in"
                       style={baseCircleStyle}
                     >
                       {n}
@@ -106,7 +105,7 @@ export default function RevealPanel() {
                 return (
                   <span
                     key={colIdx}
-                    className="flex items-center justify-center rounded-full bg-white text-black font-black border-[2.5px] border-black shadow-md select-none aspect-square animate-scale-in transition-all"
+                    className="flex items-center justify-center rounded-full bg-white text-robinhood-black font-black border-2.5 border-robinhood-black shadow-md select-none aspect-square animate-scale-in transition-all"
                     style={baseCircleStyle}
                   >
                     {n}
