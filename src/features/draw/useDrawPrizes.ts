@@ -73,28 +73,31 @@ export function useDrawPrizes({
         return;
       }
 
-      // Only now (once per cycle) deduct/add ticket, and process win logic
-      let ticketWasEntered = false;
-      if (
-        pendingTicketRef.current &&
-        pendingTicketRef.current.cycle === cycleIndex &&
-        !pendingTicketRef.current.entered &&
-        userNumbers.length === 6
-      ) {
-        wallet.addConfirmedTicket({
-          date: pendingTicketRef.current.ticket.date,
-          numbers: pendingTicketRef.current.ticket.numbers,
-        });
-        pendingTicketRef.current.entered = true;
-        ticketWasEntered = true;
-      }
+      // REMOVE - ticket entry and deduction at result time!
+      // let ticketWasEntered = false;
+      // if (
+      //   pendingTicketRef.current &&
+      //   pendingTicketRef.current.cycle === cycleIndex &&
+      //   !pendingTicketRef.current.entered &&
+      //   userNumbers.length === 6
+      // ) {
+      //   wallet.addConfirmedTicket({
+      //     date: pendingTicketRef.current.ticket.date,
+      //     numbers: pendingTicketRef.current.ticket.numbers,
+      //   });
+      //   pendingTicketRef.current.entered = true;
+      //   ticketWasEntered = true;
+      // }
 
       // Calculate winnings; never grant both types for same ticket
       const { jackpotWon, rowWinnings, totalWinnings, resultType } =
         calculateWinnings(userNumbers, activeSets, jackpotContext.jackpot);
 
       // PHASE 5 handle: only award EITHER jackpot OR credits
-      if (userNumbers.length === 6 && ticketWasEntered) {
+      // Only grant winnings if there is a *confirmed* ticket for this cycle,
+      // i.e., userNumbers length === 6 and ticket was already entered at confirmation.
+      // (In the fixed logic, validation is handled at ticket entry. Award winnings only once.)
+      if (userNumbers.length === 6 /* && ticketWasEntered */) {
         if (jackpotWon) {
           // Award jackpot ONLY, then reset pool - NO regular credits
           wallet.awardTicketWinnings(activeSets, [0, 0, 0], jackpotContext.jackpot);
@@ -132,3 +135,4 @@ export function useDrawPrizes({
     cleanupResultBarTimeout
   ]);
 }
+
