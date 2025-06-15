@@ -11,29 +11,18 @@ type Args = {
   hideResultBar: () => void;
 };
 
+// Only hide the result bar if we have left the REVEAL state.
 export function useResultBarVisibility({
   state,
   cycleIndex,
   resultBar,
   hideResultBar
 }: Args) {
-  // Hide ResultBar immediately when not in REVEAL state
   useEffect(() => {
+    // Hide only if not in REVEAL (don't double hide on cycle change alone)
     if (state !== "REVEAL" && resultBar.show) {
       hideResultBar();
     }
-    if (state === "OPEN" && resultBar.show) {
-      hideResultBar();
-    }
-    if ((state === "CUT_OFF" || state === "COMPLETE") && resultBar.show) {
-      hideResultBar();
-    }
     // eslint-disable-next-line
-  }, [state, cycleIndex]);
-
-  // Always hide ResultBar on reset
-  useEffect(() => {
-    hideResultBar();
-    // eslint-disable-next-line
-  }, [cycleIndex]);
+  }, [state /* intentionally removed cycleIndex from deps */]);
 }
