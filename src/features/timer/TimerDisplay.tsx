@@ -23,7 +23,7 @@ const LOGICAL_HEIGHT = 874; // Should match page layout
 
 const JACKPOT_TIMER_HEIGHT = 0.15;
 const SPACER_HEIGHT = 0.02; // reduce a bit for extra space
-const DRAW_SECTION_HEIGHT = 0.35;
+const DRAW_SECTION_HEIGHT = 0.30; // changed from 0.35 to 0.30
 
 export default function TimerDisplay() {
   const { countdown, state, resetDemo } = useTimer();
@@ -76,7 +76,7 @@ export default function TimerDisplay() {
     ></div>
   );
 
-  // NOTE: set both sections to 35% height, both before and after reveal
+  // NOTE: set both sections to 30% height, both before and after reveal
   const RevealSectionWithTicket = (
     <DrawEngineProvider>
       <div className="flex flex-col w-full h-full">
