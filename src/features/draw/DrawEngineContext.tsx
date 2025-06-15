@@ -39,14 +39,12 @@ export function DrawEngineProvider({ children }: { children: React.ReactNode }) 
   // Count of tickets per cycle — for future multi-player
   const cycleTicketCountRef = useRef<{ [cycle: number]: number }>({});
 
-  // --- MOVED INSIDE DrawEngineProvider: helpers for ticket count ---
+  // Helpers for ticket count
   function incrementTicketCountForCycle(cycle: number, debugSource = "unknown") {
-    // Only allow a single ticket per user per cycle. (one increment per cycle)
     if (!cycleTicketCountRef.current[cycle]) {
       cycleTicketCountRef.current[cycle] = 1;
       console.log(`[DrawEngineContext] First ticket for cycle ${cycle} from ${debugSource} - count=1`);
     } else {
-      // Already has a ticket this cycle for this user—ignore (single-player mode)
       console.log(`[DrawEngineContext] Already have a ticket for cycle ${cycle} from ${debugSource} — no increment`);
     }
     console.log("[DrawEngineContext] cycleTicketCountRef after increment:", { ...cycleTicketCountRef.current });
@@ -58,11 +56,7 @@ export function DrawEngineProvider({ children }: { children: React.ReactNode }) 
     console.log("[DrawEngineContext] cycleTicketCountRef after reset:", { ...cycleTicketCountRef.current });
   }
 
-  // --- Remove the old, now redundant resultBar state and resultTimeout ref ---
-  // const [resultBar, setResultBar] = useState<{ show: boolean; credits: number | null }>({ show: false, credits: null });
-  // const resultTimeout = useRef<NodeJS.Timeout | null>(null);
-
-  // --- Use result bar custom hook instead ---
+  // Use the custom result bar hook instead of legacy state/timeout logic
   const {
     resultBar,
     showResultBar,
@@ -88,11 +82,10 @@ export function DrawEngineProvider({ children }: { children: React.ReactNode }) 
     revealStartedForCycle,
   } = useRevealAnimation(sets, SETS_PER_CYCLE, SET_SIZE);
 
-  // --- NEW: Keep last picked numbers per cycle regardless of provider reset ---
+  // Keep last picked numbers per cycle regardless of provider reset
   const lastPickedPerCycle = useRef<{ [cycle: number]: number[] }>({});
 
   // Helper: track pending wallet action per cycle for ticket entry
-  // Each element: { cycleIndex, ticketData }
   const pendingTicketRef = useRef<{
     cycle: number;
     ticket: { date: string; numbers: number[]; matches: number };
@@ -109,7 +102,6 @@ export function DrawEngineProvider({ children }: { children: React.ReactNode }) 
 
   // Save picked numbers in lastPickedPerCycle whenever they update, for current cycle
   useEffect(() => {
-    // Only save if picked is 6 numbers (i.e., a complete pick)
     if (picked && picked.length === 6) {
       lastPickedPerCycle.current[cycleIndex] = picked.slice();
       console.log("[DrawEngineContext] Caching picked numbers for cycle", cycleIndex, "->", picked.slice());
@@ -123,7 +115,6 @@ export function DrawEngineProvider({ children }: { children: React.ReactNode }) 
   useEffect(() => {
     if (cycleIndex === 0) {
       ticketCommittedCycle.current = null;
-      // Also fully reset all possible ticket counts to handle demo resets
       cycleTicketCountRef.current = {};
       console.log("[DrawEngineContext] Demo RESET: ticketCommittedCycle and all ticket counts reset");
     }
@@ -131,7 +122,6 @@ export function DrawEngineProvider({ children }: { children: React.ReactNode }) 
 
   // PHASE 1: On ticket confirmation, deduct credits but don't increment jackpot yet
   useEffect(() => {
-    // Confirm the ticket only ONCE per cycle per user
     if (
       picked.length === 6 &&
       ticketCommittedCycle.current !== cycleIndex
@@ -141,7 +131,6 @@ export function DrawEngineProvider({ children }: { children: React.ReactNode }) 
         date: new Date().toISOString(),
         numbers: picked.slice(),
       });
-      // Only increment if never done this cycle
       incrementTicketCountForCycle(cycleIndex, "picked-confirm");
       ticketCommittedCycle.current = cycleIndex;
       lastPickedPerCycle.current[cycleIndex] = picked.slice();
@@ -164,14 +153,7 @@ export function DrawEngineProvider({ children }: { children: React.ReactNode }) 
         const activeSets = sets.slice(startSet, startSet + SETS_PER_CYCLE);
         const allDrawn = activeSets.flat();
         const matches = pickedNumbers.filter((n) => allDrawn.includes(n)).length;
-
-        // Update ticket in history: payout if needed. We'll leave history with correct match/payout info, but don't double-charge or double-pay.
-        // As a prototype shortcut, don't update wallet balance here, since payout is handled in addTicket logic.
-        // Optionally: show winnings UI separately if needed.
-
         // NO wallet.addTicket here -- it's already deducted.
-        // Instead, update most recent ticket's matches for UX history display.
-        // Real app would trigger payout here for matches === 6 with extra credit.
       }
     }
     // eslint-disable-next-line
@@ -179,7 +161,6 @@ export function DrawEngineProvider({ children }: { children: React.ReactNode }) 
 
   // UseEffect for handling "REVEAL" phase: ensure startReveal is called ONLY ONCE per cycle
   useEffect(() => {
-    // Only trigger reveal when entering "REVEAL" state and reveal hasn't started for this cycle
     if (
       state === "REVEAL" &&
       revealStartedForCycle.current !== cycleIndex
@@ -197,7 +178,6 @@ export function DrawEngineProvider({ children }: { children: React.ReactNode }) 
       };
       document.addEventListener("visibilitychange", handleVisibility);
 
-      // --- All pending ticket logic (cache, etc) ---
       const ticketNumbers =
         lastPickedPerCycle.current[cycleIndex] && lastPickedPerCycle.current[cycleIndex].length === 6
           ? lastPickedPerCycle.current[cycleIndex]
@@ -218,9 +198,9 @@ export function DrawEngineProvider({ children }: { children: React.ReactNode }) 
           ticket: {
             date: new Date().toISOString(),
             numbers: ticketNumbers,
-            matches: 0, // <--- FIXED: Add this field
+            matches: 0,
           },
-          entered: false, // pending
+          entered: false,
         };
         console.log(
           "[DrawEngineContext] Created pending ticket for cycle",
@@ -237,7 +217,6 @@ export function DrawEngineProvider({ children }: { children: React.ReactNode }) 
         cleanupRevealTimeouts();
       };
     } else if (
-      // When leaving REVEAL or no valid entry
       pendingTicketRef.current &&
       !pendingTicketRef.current.entered
     ) {
@@ -252,13 +231,11 @@ export function DrawEngineProvider({ children }: { children: React.ReactNode }) 
       console.log("[DrawEngineContext] Clearing pending ticket ref");
       pendingTicketRef.current = null;
     }
-    // Previous bug: DO NOT add wallet to the dependencies!
     // eslint-disable-next-line
   }, [state, cycleIndex /*, wallet intentionally removed!*/]);
 
   // New: Commit ticket to wallet/credit only AFTER REVEAL phase ends (when timer ticks to next cycle)
   useEffect(() => {
-    // When leaving REVEAL (transition to OPEN/CUT_OFF/COMPLETE), if a pending ticket exists and not yet entered, add it.
     if (
       state !== "REVEAL" &&
       pendingTicketRef.current &&
@@ -268,7 +245,6 @@ export function DrawEngineProvider({ children }: { children: React.ReactNode }) 
       pendingTicketRef.current.entered = true;
     }
 
-    // Only clear after ensuring ticket has been entered (not before!)
     if (
       state === "OPEN" &&
       pendingTicketRef.current &&
@@ -279,15 +255,11 @@ export function DrawEngineProvider({ children }: { children: React.ReactNode }) 
     // eslint-disable-next-line
   }, [state, cycleIndex, wallet]);
 
-  // Apply jackpot handler effect (ticket/jackpot increment)
   useJackpotHandlers(cycleIndex, cycleTicketCountRef, resetTicketCountForCycle);
 
   // PHASE 5 Payoff Handling: 
-  // When all numbers are revealed, check for jackpot win and handle result/awards.
   useEffect(() => {
-    // Only show after all numbers revealed during REVEAL phase
     if (isRevealDone) {
-      // Which sets for this cycle?
       const startSet = cycleIndex * SETS_PER_CYCLE;
       const activeSets = sets.slice(startSet, startSet + SETS_PER_CYCLE);
 
@@ -296,7 +268,6 @@ export function DrawEngineProvider({ children }: { children: React.ReactNode }) 
         userNumbers = lastPickedPerCycle.current[cycleIndex];
       }
 
-      // --- Use the pure utility for result logic ---
       const { jackpotWon, rowWinnings, totalWinnings, resultType } = calculateWinnings(
         userNumbers,
         activeSets,
@@ -305,7 +276,6 @@ export function DrawEngineProvider({ children }: { children: React.ReactNode }) 
 
       if (userNumbers.length === 6) {
         if (jackpotWon) {
-          // Award jackpot only, NO regular credit payout
           wallet.awardTicketWinnings(activeSets, [0,0,0], totalWinnings);
           jackpotContext.resetJackpot();
         } else {
@@ -313,24 +283,13 @@ export function DrawEngineProvider({ children }: { children: React.ReactNode }) 
         }
       }
 
-      // Show correct banner for 5s using useResultBar
       showResultBar(resultType === "jackpot" ? jackpotContext.jackpot : totalWinnings);
     }
-    // Use the new cleanup function from the result bar hook:
     return () => {
       cleanupResultBarTimeout();
     };
     // eslint-disable-next-line
   }, [isRevealDone, cycleIndex, sets, wallet, jackpotContext]);
-
-  // --- Remove now-redundant manual triggerResultBar function ---
-  // function triggerResultBar() {
-  //   setResultBar((curr) => ({ show: true, credits: curr.credits }));
-  //   if (resultTimeout.current) clearTimeout(resultTimeout.current);
-  //   resultTimeout.current = setTimeout(() => {
-  //     setResultBar({ show: false, credits: null });
-  //   }, 5000);
-  // }
 
   return (
     <DrawEngineContext.Provider
