@@ -24,23 +24,23 @@ export function useTicketCommitManager(
     entered: boolean;
   } | null>(null);
 
-  // On demo reset, reset committed ticket cycle and pending ref
+  // *** FIX: Prevent phantom ticket deduction at new cycle by tracking prior confirmed state ***
+  const prevIsConfirmed = useRef<boolean>(false);
+
+  // Track whether we've committed a ticket for this cycle to avoid duplicates (extra defense).
   useEffect(() => {
-    if (cycleIndex === 0) {
-      ticketCommittedCycle.current = null;
-      pendingTicketRef.current = null;
-    }
+    // Reset on new cycle
+    ticketCommittedCycle.current = null;
+    pendingTicketRef.current = null;
+    prevIsConfirmed.current = false;
   }, [cycleIndex]);
 
-  // When user confirms a valid ticket (6 numbers), immediately deduct credits & commit ticket.
   useEffect(() => {
-    // Only commit if:
-    //  - Ticket is confirmed
-    //  - Picked length is 6
-    //  - Not already committed for this cycle
+    // Only commit if transitioning from NOT confirmed to confirmed (user action)
     if (
       picked.length === 6 &&
       isConfirmed &&
+      !prevIsConfirmed.current &&
       ticketCommittedCycle.current !== cycleIndex
     ) {
       // Commit ticket and deduct credits
@@ -57,10 +57,12 @@ export function useTicketCommitManager(
           date: new Date().toISOString(),
           numbers: picked.slice(),
         },
-        entered: true, // It is now fully entered
+        entered: true, // ticket was entered for this cycle
       };
       console.log("[useTicketCommitManager] Confirmed ticket and deducted credits for cycle", cycleIndex, picked);
     }
+
+    prevIsConfirmed.current = isConfirmed;
 
     // If not confirmed, reset pending ticket if present & not for the current cycle
     if (
