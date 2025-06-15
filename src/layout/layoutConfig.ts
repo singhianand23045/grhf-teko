@@ -25,19 +25,22 @@ export const layoutConfig: SectionLayoutConfig[] = [
     key: "jackpot",
     height: "15%",
     font: "font-bold text-yellow-700 text-6xl",
-    bg: "from-yellow-50 to-yellow-100"
+    // Unified background for consistency
+    bg: "from-white to-green-50"
   },
   {
     key: "timer",
     height: "15%",
     font: "font-mono font-extrabold text-blue-900 text-3xl",
-    bg: "from-blue-50 to-indigo-100"
+    // Unified background for consistency
+    bg: "from-white to-green-50"
   },
   {
     key: "drawNumbers",
     height: "30%",
     font: "font-normal text-indigo-900",
-    bg: "from-purple-50 to-indigo-50"
+    // Unified background for consistency
+    bg: "from-white to-green-50"
   },
   {
     key: "wallet",
