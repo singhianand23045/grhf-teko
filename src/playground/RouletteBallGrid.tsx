@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from "react";
 
 // Ball state per slot: spinning or stopped with a number
@@ -107,19 +106,44 @@ export default function RouletteBallGrid({
       const touchEndX = e.changedTouches[0].clientX;
       const dx = touchEndX - touchStartX.current;
       if (Math.abs(dx) > SWIPE_THRESHOLD) {
-        // left or right
-        setSpinSetting(spinSetting => {
-          let newSetting = spinSetting;
+        setSpinSetting((prev) => {
+          let next = prev;
           if (dx < 0) {
             // swipe left
-            if (spinSetting > -3) newSetting = spinSetting - 1;
+            if (prev > -3) {
+              // special case: going from right slow (1) to left slow (-1)
+              if (prev === 1) {
+                next = -1;
+              } else if (prev === 2) {
+                next = 1;
+              } else if (prev === 3) {
+                next = 2;
+              } else {
+                next = prev - 1;
+                if (next === 0) next = -1;
+              }
+            }
           } else {
             // swipe right
-            if (spinSetting < 3) newSetting = spinSetting + 1;
+            if (prev < 3) {
+              // special case: going from left slow (-1) to right slow (1)
+              if (prev === -1) {
+                next = 1;
+              } else if (prev === -2) {
+                next = -1;
+              } else if (prev === -3) {
+                next = -2;
+              } else {
+                next = prev + 1;
+                if (next === 0) next = 1;
+              }
+            }
           }
-          // skip 0
-          if (newSetting === 0) newSetting += dx < 0 ? -1 : 1;
-          return Math.max(-3, Math.min(3, newSetting));
+          // Clamp just in case
+          if (next < -3) next = -3;
+          if (next > 3) next = 3;
+          if (next === 0) next = prev < 0 ? -1 : 1; // just safety
+          return next;
         });
       }
       touchStartX.current = null;
@@ -327,5 +351,3 @@ export default function RouletteBallGrid({
     </div>
   );
 }
-
-// ... file end
