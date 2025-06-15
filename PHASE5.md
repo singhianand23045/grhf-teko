@@ -37,6 +37,16 @@
 
 ---
 
+## UI Display/Placement
+
+- At the top of the app, include a horizontal section split into two columns:
+  - **Left side:** Shows the current “Jackpot” amount, with clear labeling and prominent styling.
+  - **Right side:** Shows the draw timer as before.
+- This section should be visually balanced, sitting above the main game interface.
+- All other sections (draw numbers, credits bar, confirmed numbers, etc.) remain in their existing locations.
+
+---
+
 ## 3. Acceptance Criteria
 
 - [ ] Only tickets with exactly 6 confirmed selections are entered; others are ignored and do not affect wallet/jackpot.
@@ -66,3 +76,4 @@
 - [ ] Jackpot value increases correctly between draws with new entries, resets on jackpot win.
 - [ ] Correct result feedback banner displays for jackpot win, credit win, or loss, with correct values and only one type of win per ticket.
 - [ ] Selection panel resets after each draw.
+
