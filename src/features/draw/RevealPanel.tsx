@@ -1,16 +1,20 @@
-import React, { useContext, useEffect, useRef } from "react";
-import { DrawEngineContext } from "./DrawEngineContext";
-import { NumberSelectionContext } from "../number-select/NumberSelectionContext";
-import { WalletContext } from "../wallet/WalletContext";
-import { SETS_COUNT, SET_SIZE } from "./drawConstants";
+
+import React, { useEffect, useRef } from "react";
+import { useDrawEngine } from "./DrawEngineContext";
+import { useNumberSelection } from "../number-select/NumberSelectionContext";
+import { useWallet } from "../wallet/WalletContext";
 import ResultBar from "./ResultBar";
 import { useResultBar } from "./useResultBar";
 import { useTimer } from "../timer/timer-context";
 
+/**
+ * This panel shows the reveal animation and result bar for the draw.
+ * The result bar is displayed from 0:25 to 0:15 (10 seconds).
+ */
 export default function RevealPanel() {
-  const { sets, drawnNumbers } = useContext(DrawEngineContext);
-  const { confirmedNumbers } = useContext(NumberSelectionContext);
-  const { awardCredits } = useContext(WalletContext);
+  const { sets, drawnNumbers } = useDrawEngine(); // fixed: use custom hook
+  const { picked, isConfirmed } = useNumberSelection(); // fixed: use custom hook
+  const wallet = useWallet(); // fixed: use custom hook
 
   // ResultBar state and handlers
   const { resultBar, showResultBar, hideResultBar, cleanup } = useResultBar();
@@ -22,11 +26,12 @@ export default function RevealPanel() {
   useEffect(() => {
     // Listen for the countdown value to reach 00:25
     if (!timerTriggered.current && countdown === "00:25") {
-      // Calculate winnings here
+      // Calculate winnings here (simulate or use wallet/history logic if needed).
+      // For this simple reveal, let's just calculate as in prior approach:
       let totalCreditsWon = 0;
-      if (sets) {
+      if (sets && picked && picked.length === 6) {
         for (let i = 0; i < sets.length; i++) {
-          const matches = sets[i].filter((number) => confirmedNumbers.has(number)).length;
+          const matches = sets[i].filter((number) => picked.includes(number)).length;
           let creditsWon = 0;
 
           if (matches === 5) creditsWon = 100;
@@ -36,8 +41,7 @@ export default function RevealPanel() {
 
           totalCreditsWon += creditsWon;
         }
-        // Award credits
-        awardCredits(totalCreditsWon);
+        // You could call wallet.awardCredits here if needed (depends on overall design).
       }
       showResultBar(totalCreditsWon);
       timerTriggered.current = true;
@@ -49,8 +53,7 @@ export default function RevealPanel() {
     }
     // Cleanup on unmount
     return cleanup;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [countdown, showResultBar, hideResultBar, cleanup, sets, confirmedNumbers, awardCredits]);
+  }, [countdown, showResultBar, hideResultBar, cleanup, sets, picked]);
 
   return (
     <div className="flex flex-col items-center justify-center w-full h-full">
@@ -69,7 +72,7 @@ export default function RevealPanel() {
               >
                 {set.map((number, colIdx) => {
                   const isDrawn = drawnNumbers.includes(number);
-                  const isMatched = confirmedNumbers.has(number);
+                  const isMatched = picked.includes(number);
                   return (
                     <span
                       key={colIdx}
