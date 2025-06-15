@@ -1,4 +1,3 @@
-
 import { useTimer } from "../timer/timer-context";
 import LotteryTicket from "./LotteryTicket";
 import NumberSelectionPanel from "./NumberSelectionPanel";
@@ -25,14 +24,14 @@ export default function ConfirmedNumbersSection() {
           <NumberSelectionPanel />
         </section>
       )}
-      {/* During REVEAL and COMPLETE: show user ticket always */}
+      {/* During REVEAL and COMPLETE: always show full ticket, not compact */}
       {(state === "REVEAL" || state === "COMPLETE") && (
         <section className="w-full h-full flex flex-col items-center justify-center">
           <div className="flex flex-col items-center justify-center w-full max-w-md mx-auto">
             {state === "COMPLETE" && (
               <p className="text-base font-semibold text-center mb-2">Demo Complete — 2 cycles finished.</p>
             )}
-            <LotteryTicket compact />
+            <LotteryTicket />
             {state === "COMPLETE" && (
               <Button variant="secondary" size="lg" className="mt-2" onClick={resetDemo}>
                 <Repeat className="mr-1 h-4 w-4" /> Restart Demo
