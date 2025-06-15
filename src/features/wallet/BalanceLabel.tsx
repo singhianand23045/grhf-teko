@@ -10,13 +10,13 @@ export default function BalanceLabel() {
 
   React.useEffect(() => {
     motionValue.set(balance);
+    console.log("[BalanceLabel] Consumed balance value:", balance);
   }, [balance, motionValue]);
 
   return (
     <motion.div
       className="font-extrabold text-xl text-green-700 bg-gradient-to-r from-green-50 via-white to-green-50 px-5 py-2 rounded-full shadow pulse"
       style={{
-        // Remove .to usage (was not a valid API for spring)
         scale: 1
       }}
       aria-label="Balance"

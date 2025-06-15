@@ -8,6 +8,9 @@ const LOGICAL_HEIGHT = 874;
 
 export default function CreditsBar() {
   const { balance } = useWallet();
+  React.useEffect(() => {
+    console.log("[CreditsBar] Consumed balance value:", balance);
+  }, [balance]);
 
   return (
     <div
@@ -26,7 +29,6 @@ export default function CreditsBar() {
         className="pl-0 font-semibold text-green-800"
         tabIndex={0}
         aria-label="Add credits"
-        // For future extension, could open a modal
         onClick={() => {
           // Optionally implement adding credits if needed, currently no-op
         }}

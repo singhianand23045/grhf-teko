@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { getCreditsForMatches } from "../draw/getCreditsForMatches";
 
@@ -61,9 +60,13 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
   // Save wallet state when either balance or history changes
   useEffect(() => {
     saveWalletToStorage({ balance, history });
+    console.log("[WalletContext] useEffect saveWalletToStorage called. balance:", balance, "history:", history);
   }, [balance, history]);
 
-  // Step 1: Confirmation deducts credits and records ticket
+  useEffect(() => {
+    console.log("[WalletContext] Provider rendered with balance:", balance, "history:", history);
+  });
+
   function addConfirmedTicket(ticketCore: Omit<TicketType, "id" | "creditChange" | "matches">) {
     const newTicket: TicketType = {
       ...ticketCore,
@@ -78,15 +81,11 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
     });
     setHistory(prev => {
       const updated = [newTicket, ...prev];
-      console.log("[WalletContext] Confirmed ticket & deducted:", newTicket);
+      console.log("[WalletContext] Confirmed ticket & deducted:", newTicket, "Updated history:", updated);
       return updated;
     });
   }
 
-  /**
-   * Step 2: Award winnings by updating most recent pending ticket, if eligible.
-   * This function synchronizes updates to history and balance, ensuring both are in sync WITHOUT relying on setTimeout or batching.
-   */
   function awardTicketWinnings(cycleRows: number[][], rowWinnings: number[], totalWinnings: number) {
     setHistory(prevHistory => {
       if (!prevHistory.length) return prevHistory;
@@ -99,7 +98,6 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
       }
       const ticketToAward = prevHistory[idx];
 
-      // For display/history: count total matched numbers (across all rows)
       let totalMatches = 0;
       if (cycleRows.length === 3) {
         for (let i = 0; i < 3; i++) {
@@ -116,16 +114,13 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
       const updatedHistory = [...prevHistory];
       updatedHistory[idx] = updatedTicket;
 
-      // --- Synchronize balance ---
       setBalance((prevBal) => {
-        // Previous deduction already applied at confirmation.
-        // Here we only add winnings (if any) to current balance.
         const newBal = prevBal + totalWinnings;
         console.log("[WalletContext] Awarding winnings:", totalWinnings, "Old balance:", prevBal, "New balance:", newBal);
         return newBal;
       });
 
-      console.log("[WalletContext] Awarded payout for ticket:", updatedTicket, "rowWinnings:", rowWinnings, "totalWinnings:", totalWinnings);
+      console.log("[WalletContext] Awarded payout for ticket:", updatedTicket, "rowWinnings:", rowWinnings, "totalWinnings:", totalWinnings, "Updated history:", updatedHistory);
       return updatedHistory;
     });
   }
@@ -134,10 +129,12 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
     setBalance(STARTING_BALANCE);
     setHistory([]);
     localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify({ balance: STARTING_BALANCE, history: [] }));
+    console.log("[WalletContext] resetWallet called, set balance/history to starting values.");
   }
 
   return (
     <WalletContext.Provider value={{ balance, history, addConfirmedTicket, awardTicketWinnings, resetWallet }}>
+      {console.log("[WalletContext] Context.Provider render, balance:", balance, "history:", history)}
       {children}
     </WalletContext.Provider>
   );
@@ -148,5 +145,3 @@ export function useWallet() {
   if (!ctx) throw new Error("useWallet must be used within WalletProvider");
   return ctx;
 }
-
-// ... (no changes below)
