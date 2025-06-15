@@ -25,14 +25,7 @@ export default function TimerDisplay() {
         <JackpotSection />
         <TimerSection />
       </div>
-      {/* Small spacer */}
-      <div
-        className="w-full flex-shrink-0 flex-grow-0 bg-white"
-        style={{
-          height: "2%",
-          minHeight: Math.floor(LOGICAL_HEIGHT * 0.02),
-        }}
-      />
+      {/* Removed spacer here */}
       {/* Draw Numbers section */}
       <DrawNumbersSection />
       {/* Credits section */}
