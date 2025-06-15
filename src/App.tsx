@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -7,6 +8,10 @@ import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import Playground from "./pages/Playground";
 import AnalyticsPage from "./pages/Analytics";
+import { JackpotProvider } from "@/features/jackpot/JackpotContext";
+import { WalletProvider } from "@/features/wallet/WalletContext";
+import { TimerProvider } from "@/features/timer/timer-context";
+import { NumberSelectionProvider } from "@/features/number-select/NumberSelectionContext";
 
 const queryClient = new QueryClient();
 
@@ -15,15 +20,23 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/analytics" element={<AnalyticsPage />} />
-          <Route path="/playground" element={<Playground />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
+      <JackpotProvider>
+        <WalletProvider>
+          <TimerProvider>
+            <NumberSelectionProvider>
+              <BrowserRouter>
+                <Routes>
+                  <Route path="/" element={<Index />} />
+                  <Route path="/analytics" element={<AnalyticsPage />} />
+                  <Route path="/playground" element={<Playground />} />
+                  {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </BrowserRouter>
+            </NumberSelectionProvider>
+          </TimerProvider>
+        </WalletProvider>
+      </JackpotProvider>
     </TooltipProvider>
   </QueryClientProvider>
 );

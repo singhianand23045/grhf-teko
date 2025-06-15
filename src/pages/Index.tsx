@@ -1,24 +1,9 @@
-import { TimerProvider, useTimer } from "@/features/timer/timer-context";
-import TimerDisplay from "@/features/timer/TimerDisplay";
-import { NumberSelectionProvider } from "@/features/number-select/NumberSelectionContext";
-import { WalletProvider } from "@/features/wallet/WalletContext";
-import { JackpotProvider } from "@/features/jackpot/JackpotContext";
-const LOGICAL_WIDTH = 402;  // iPhone 16 Pro logical width
-const LOGICAL_HEIGHT = 874; // iPhone 16 Pro logical height
 
-function ConditionalWalletHistory() {
-  const { state } = useTimer();
-  if (state === "REVEAL" || state === "COMPLETE") {
-    return null;
-  }
-  return (
-    <div className="mt-2 mb-4 w-full max-w-[440px]">
-      {/* <WalletHistory /> */}
-    </div>
-  );
-}
 import MainTabs from "@/components/MainTabs";
 import FlexibleLayout from "@/layout/FlexibleLayout";
+
+const LOGICAL_WIDTH = 402;  // iPhone 16 Pro logical width
+const LOGICAL_HEIGHT = 874; // iPhone 16 Pro logical height
 
 const Index = () => {
   return (
@@ -32,19 +17,11 @@ const Index = () => {
           maxHeight: LOGICAL_HEIGHT,
         }}
       >
-        <JackpotProvider>
-          <WalletProvider>
-            <TimerProvider>
-              <NumberSelectionProvider>
-                <main className="flex flex-col w-full items-center px-4 py-8 h-full pb-24">
-                  <FlexibleLayout />
-                </main>
-                {/* Bottom Tabs */}
-                <MainTabs />
-              </NumberSelectionProvider>
-            </TimerProvider>
-          </WalletProvider>
-        </JackpotProvider>
+        <main className="flex flex-col w-full items-center px-4 py-8 h-full pb-24">
+          <FlexibleLayout />
+        </main>
+        {/* Bottom Tabs */}
+        <MainTabs />
       </div>
     </div>
   );
