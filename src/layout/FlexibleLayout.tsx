@@ -15,7 +15,7 @@ export default function FlexibleLayout() {
   const sectionMap: Record<string, React.ReactNode> = {
     header: (
       <h1 className="font-extrabold tracking-tight text-3xl text-[#1a1855] w-full flex items-center justify-center h-full m-0 p-0">
-        Lucky Dip
+        Get Rich having Fun
       </h1>
     ),
     jackpot: <JackpotSection />,
