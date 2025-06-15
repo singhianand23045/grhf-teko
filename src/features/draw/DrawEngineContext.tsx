@@ -35,7 +35,7 @@ export function DrawEngineProvider({ children }: { children: React.ReactNode }) 
   const sets = useDrawSets();
   const { lastPickedPerCycle, picked } = useTicketSelectionManager(cycleIndex);
 
-  const resultBarTimeoutMs = 5000;
+  const resultBarTimeoutMs = 10000;
   const {
     resultBar,
     showResultBar,
