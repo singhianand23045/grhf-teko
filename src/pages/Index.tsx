@@ -17,7 +17,8 @@ const Index = () => {
           maxHeight: LOGICAL_HEIGHT,
         }}
       >
-        <main className="flex flex-col w-full items-center px-4 py-8 h-full pb-24">
+        {/* MAIN CONTENT: removed pb-24 to avoid gap above tabs */}
+        <main className="flex flex-col w-full items-center px-4 py-8 h-full">
           <FlexibleLayout />
         </main>
         {/* Bottom Tabs */}
