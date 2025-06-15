@@ -3,13 +3,21 @@ import React from "react";
 import { useDrawEngine } from "./DrawEngineContext";
 import { useNumberSelection } from "../number-select/NumberSelectionContext";
 import { useTimer } from "../timer/timer-context";
-import ResultBar from "./ResultBar";
+import RevealRoulettePanel from "./RevealRoulettePanel";
+
+// Set this to false to roll back to previous static grid implementation
+const ENABLE_ROULETTE_ANIMATION = true;
 
 export default function RevealPanel() {
   const { drawnNumbers, revealResult } = useDrawEngine();
   const { picked: userNumbers } = useNumberSelection();
   const { state } = useTimer();
 
+  if (ENABLE_ROULETTE_ANIMATION) {
+    return <RevealRoulettePanel />;
+  }
+
+  // --- Legacy fallback, unreachable with ENABLE_ROULETTE_ANIMATION true ---
   // Always maintain 18 slots (3 rows × 6 columns)
   // PHASE LOGIC: only fill with numbers if state is "REVEAL", otherwise all slots undefined for black circles
   const slots: (number | undefined)[] =
@@ -34,8 +42,8 @@ export default function RevealPanel() {
   return (
     <div className="flex flex-col items-center w-full h-full overflow-y-hidden">
       {/* ResultBar: above numbers grid, only visible during 5s after reveal */}
-      <ResultBar visible={revealResult.show} creditsWon={revealResult.credits} />
-      {/* Drawn Numbers Grid */}
+      {/* Note: fallback ResultBar rendering is preserved in RevealRoulettePanel */}
+      {/* Drawn Numbers Grid - legacy */}
       <div className="w-full max-w-full flex flex-col justify-center items-center py-0">
         <div className="w-full space-y-1">
           {drawnSets.map((set, rowIdx) => (
@@ -88,7 +96,6 @@ export default function RevealPanel() {
           ))}
         </div>
       </div>
-      {/* Info below grid, NO ticket! */}
     </div>
   );
 }
