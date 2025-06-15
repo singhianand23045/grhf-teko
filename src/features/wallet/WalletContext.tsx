@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useEffect, useRef, useState } from "react";
+import { getCreditsForMatches } from "../draw/getCreditsForMatches";
 
 // Types
 export type WalletType = {
@@ -27,7 +28,7 @@ const LOCAL_STORAGE_KEY = "wallet";
 const STARTING_BALANCE = 100;
 
 // Payout map
-function getCreditsForMatches(matches: number) {
+function getCreditsForMatches_DEPRECATED(matches: number) {
   switch (matches) {
     case 6: return 1000;
     case 5: return 100;

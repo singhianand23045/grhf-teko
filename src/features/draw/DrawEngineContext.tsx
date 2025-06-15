@@ -4,22 +4,11 @@ import { generateDrawSets } from "./numberPool";
 import { useWallet } from "../wallet/WalletContext";
 import { useNumberSelection } from "../number-select/NumberSelectionContext";
 import { useJackpot } from "../jackpot/JackpotContext";
+import { getCreditsForMatches } from "./getCreditsForMatches";
 
 const SETS_COUNT = 6;
 const SET_SIZE = 6;
 const SETS_PER_CYCLE = 3; // 18 numbers (3x6) per cycle
-
-// Add payout rules (matches -> credits)
-const getCreditsForMatches = (matches: number): number => {
-  switch (matches) {
-    case 6: return 1000;
-    case 5: return 100;
-    case 4: return 40;
-    case 3: return 20;
-    case 2: return 10;
-    default: return 0;
-  }
-};
 
 interface DrawEngineContextType {
   drawnNumbers: number[];
