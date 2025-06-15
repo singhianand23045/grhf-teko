@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from "react";
 import Ball3D from "./Ball3D";
 import { useSpinSetting } from "./useSpinSetting";
@@ -47,6 +46,9 @@ export default function RouletteBallGrid({
   );
   const [revealedCount, setRevealedCount] = useState(0);
 
+  // New state: has the reveal animation finished this round?
+  const [animationComplete, setAnimationComplete] = useState(false);
+
   // -3: left fastest, -2: left fast, -1: left slow; 1: right slow, 2: right fast, 3: right fastest
   const [spinSetting, setSpinSetting] = useState(1); // Start with right slow
   const gridRef = useRef<HTMLDivElement | null>(null);
@@ -60,11 +62,17 @@ export default function RouletteBallGrid({
       setBalls(Array(ROWS * COLS).fill({ state: "spinning" }));
       setRevealedCount(0);
       setSpinSetting(1); // Reset to right slow
+      setAnimationComplete(false); // Reset animation completion flag
     }
   }, [reveal, numbersToReveal]);
 
   useEffect(() => {
-    if (reveal && numbersToReveal.length === ROWS * COLS) {
+    // Only reveal if not already complete
+    if (
+      reveal &&
+      numbersToReveal.length === ROWS * COLS &&
+      !animationComplete
+    ) {
       let cancelled = false;
       let idx = 0;
       function revealNext() {
@@ -84,6 +92,7 @@ export default function RouletteBallGrid({
         if (idx < ROWS * COLS && !cancelled) {
           setTimeout(revealNext, 320);
         } else if (!cancelled) {
+          setAnimationComplete(true); // Mark animation complete
           onDone?.();
         }
       }
@@ -92,8 +101,11 @@ export default function RouletteBallGrid({
         cancelled = true;
       };
     }
+    // Only run this if reveal/numbersToReveal/animationComplete changes. Remove userPicks/onDone from deps to avoid unwanted reruns.
     // eslint-disable-next-line
-  }, [reveal, numbersToReveal, userPicks, onDone]);
+  }, [reveal, numbersToReveal, animationComplete]);
+
+  const currentSpinConf = getSpinConfig(spinSetting);
 
   // Touch swipe handlers for the grid
   useEffect(() => {
@@ -102,9 +114,6 @@ export default function RouletteBallGrid({
     const detach = attachSwipeHandlers(grid);
     return detach;
   }, [reveal, attachSwipeHandlers]);
-
-  // For swipe demo: show current spin setting (optional visual debug)
-  const currentSpinConf = getSpinConfig(spinSetting);
 
   return (
     <div className="flex flex-col items-center w-full">
@@ -130,9 +139,8 @@ export default function RouletteBallGrid({
           )}
         </div>
       </div>
-      {/* Optional debug: show current setting (can delete) */}
+      {/* Optional debug */}
       {/* <div className="mt-2 text-xs text-slate-500">{spinSetting < 0 ? "⟲" : "⟳"} {currentSpinConf.label}</div> */}
     </div>
   );
 }
-
