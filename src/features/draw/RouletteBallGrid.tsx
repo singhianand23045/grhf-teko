@@ -100,7 +100,7 @@ export default function RouletteBallGrid({
 
   // Render balls based on revealedCount
   return (
-    <div className="flex flex-col items-center w-full bg-robinhood-green"> {/* GREEN background */}
+    <div className="flex flex-col items-center w-full">
       <div>
         <div
           className="grid grid-cols-6 grid-rows-3 gap-3 touch-pan-x"
