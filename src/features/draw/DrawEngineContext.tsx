@@ -58,6 +58,19 @@ export function DrawEngineProvider({ children }: { children: React.ReactNode }) 
     console.log("[DrawEngineContext] cycleTicketCountRef after reset:", { ...cycleTicketCountRef.current });
   }
 
+  // --- Ensure previous cycle ticket count is captured for jackpot increment logic ---
+  useEffect(() => {
+    if (cycleIndex > 0) {
+      const prevCycle = cycleIndex - 1;
+      // Forcibly ensure ticket count is captured for prevCycle IF the user picked numbers for that cycle
+      const userPicked = lastPickedPerCycle[prevCycle];
+      if (userPicked && userPicked.length === 6 && !cycleTicketCountRef.current[prevCycle]) {
+        incrementTicketCountForCycle(prevCycle, "catchup-on-cycle-advance");
+      }
+    }
+    // eslint-disable-next-line
+  }, [cycleIndex]);
+
   const {
     resultBar,
     showResultBar,
