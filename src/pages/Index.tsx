@@ -21,9 +21,12 @@ function ConditionalWalletHistory() {
   );
 }
 import { Link } from "react-router-dom";
+import MainTabs from "@/components/MainTabs";
+
 const Index = () => {
   return (
-    <div className="min-h-screen min-w-full flex items-center justify-center bg-gradient-to-tr from-blue-100 via-indigo-100 to-blue-50">
+    <div className="min-h-screen min-w-full flex flex-col items-center justify-center bg-gradient-to-tr from-blue-100 via-indigo-100 to-blue-50">
+      <MainTabs />
       <div
         className="relative flex flex-col items-center justify-center shadow-xl rounded-2xl border border-gray-200 bg-white overflow-hidden"
         style={{
@@ -33,14 +36,15 @@ const Index = () => {
           maxHeight: LOGICAL_HEIGHT,
         }}
       >
+        {/* Heading is now Home Tab */}
         <JackpotProvider>
           <WalletProvider>
             <TimerProvider>
               <NumberSelectionProvider>
                 <main className="flex flex-col w-full items-center px-4 py-8 h-full">
-                  <h1 className="font-extrabold tracking-tight text-3xl mb-12 mt-6 text-[#1a1855]">Lucky Dip Demo</h1>
-                  {/* "Go to Playground (Test Area)" link removed */}
-                  {/* WalletHistory removed */}
+                  <h1 className="font-extrabold tracking-tight text-3xl mb-12 mt-6 text-[#1a1855]">
+                    Home tab
+                  </h1>
                   <TimerDisplay />
                 </main>
               </NumberSelectionProvider>
