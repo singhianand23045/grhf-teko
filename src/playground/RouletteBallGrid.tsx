@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from "react";
 import Ball3D from "./Ball3D";
 import { useSpinSetting } from "./useSpinSetting";
@@ -41,12 +42,8 @@ export default function RouletteBallGrid({
   userPicks = [],
   onDone,
 }: Props) {
-  const [balls, setBalls] = useState<GridBall[]>(
-    Array(ROWS * COLS).fill({ state: "spinning" })
-  );
+  // Instead of storing spin config per ball, just track how many have been revealed
   const [revealedCount, setRevealedCount] = useState(0);
-
-  // New state: has the reveal animation finished this round?
   const [animationComplete, setAnimationComplete] = useState(false);
 
   // -3: left fastest, -2: left fast, -1: left slow; 1: right slow, 2: right fast, 3: right fastest
@@ -56,18 +53,17 @@ export default function RouletteBallGrid({
   // Attach swipe/touch handlers
   const { attachSwipeHandlers } = useSpinSetting(reveal, setSpinSetting);
 
+  // Reset for new round
   useEffect(() => {
-    // Reset for new round
     if (!reveal) {
-      setBalls(Array(ROWS * COLS).fill({ state: "spinning" }));
       setRevealedCount(0);
-      setSpinSetting(1); // Reset to right slow
-      setAnimationComplete(false); // Reset animation completion flag
+      setSpinSetting(1);
+      setAnimationComplete(false);
     }
   }, [reveal, numbersToReveal]);
 
+  // Reveal balls one by one (increment revealedCount)
   useEffect(() => {
-    // Only reveal if not already complete
     if (
       reveal &&
       numbersToReveal.length === ROWS * COLS &&
@@ -76,23 +72,12 @@ export default function RouletteBallGrid({
       let cancelled = false;
       let idx = 0;
       function revealNext() {
-        setBalls(prev =>
-          prev.map((ball, i) =>
-            i <= idx
-              ? {
-                  state: "stopped",
-                  number: numbersToReveal[i],
-                  isUserPick: userPicks.includes(numbersToReveal[i]),
-                }
-              : { state: "spinning" }
-          )
-        );
         setRevealedCount(idx + 1);
         idx++;
         if (idx < ROWS * COLS && !cancelled) {
           setTimeout(revealNext, 320);
         } else if (!cancelled) {
-          setAnimationComplete(true); // Mark animation complete
+          setAnimationComplete(true);
           onDone?.();
         }
       }
@@ -101,7 +86,6 @@ export default function RouletteBallGrid({
         cancelled = true;
       };
     }
-    // Only run this if reveal/numbersToReveal/animationComplete changes. Remove userPicks/onDone from deps to avoid unwanted reruns.
     // eslint-disable-next-line
   }, [reveal, numbersToReveal, animationComplete]);
 
@@ -115,6 +99,7 @@ export default function RouletteBallGrid({
     return detach;
   }, [reveal, attachSwipeHandlers]);
 
+  // Render balls based on revealedCount
   return (
     <div className="flex flex-col items-center w-full">
       <div className="inline-block p-2 bg-white rounded-xl shadow">
@@ -122,21 +107,29 @@ export default function RouletteBallGrid({
           className="grid grid-cols-6 grid-rows-3 gap-3 touch-pan-x"
           ref={gridRef}
         >
-          {balls.map((ball, i) =>
-            ball.state === "spinning" ? (
-              <Ball3D
-                key={"spin" + i}
-                spinning
-                spinConfig={!reveal ? getSpinConfig(spinSetting) : undefined}
-              />
-            ) : (
-              <Ball3D
-                key={"stop" + i}
-                number={ball.number}
-                highlight={ball.isUserPick}
-              />
-            )
-          )}
+          {Array.from({ length: ROWS * COLS }).map((_, i) => {
+            if (!reveal || i >= revealedCount) {
+              // Not yet revealed: always spinning, always current spin config
+              return (
+                <Ball3D
+                  key={"spin" + i}
+                  spinning
+                  spinConfig={currentSpinConf}
+                />
+              );
+            } else {
+              // Revealed: stopped, show number and highlight if user picked
+              const number = numbersToReveal[i];
+              const isUserPick = userPicks.includes(number);
+              return (
+                <Ball3D
+                  key={"stop" + i}
+                  number={number}
+                  highlight={isUserPick}
+                />
+              );
+            }
+          })}
         </div>
       </div>
       {/* Optional debug */}
@@ -144,3 +137,4 @@ export default function RouletteBallGrid({
     </div>
   );
 }
+
