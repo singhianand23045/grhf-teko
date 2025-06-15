@@ -232,14 +232,28 @@ export function DrawEngineProvider({ children }: { children: React.ReactNode }) 
     cleanupResultBarTimeout
   ]);
 
-  // === Hide ResultBar/reset when phase changes before reveal ===
+  // Hide ResultBar immediately when not in REVEAL state:
   React.useEffect(() => {
-    // Immediately hide result bar if entering a non-REVEAL state
     if (state !== "REVEAL" && resultBar.show) {
+      hideResultBar();
+    }
+    // Always clear result on entering OPEN or on reset:
+    if (state === "OPEN" && resultBar.show) {
+      hideResultBar();
+    }
+    // Optionally also clear when moving into CUT_OFF or COMPLETE to guarantee bar is not visible
+    if ((state === "CUT_OFF" || state === "COMPLETE") && resultBar.show) {
       hideResultBar();
     }
     // eslint-disable-next-line
   }, [state, cycleIndex]);
+
+  // On demo reset or app load, guarantee resultBar is cleared
+  useEffect(() => {
+    // On first mount or reset, always hide the bar
+    hideResultBar();
+    resultAwardedForCycle.current = null;
+  }, [cycleIndex]);
 
   return (
     <DrawEngineContext.Provider
