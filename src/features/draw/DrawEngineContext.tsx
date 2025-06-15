@@ -26,6 +26,47 @@ interface DrawEngineContextType {
   triggerResultBar: () => void;
 }
 
+// === Helper Functions for Effect Extraction ===
+
+// Ticket commit logic extracted from useEffect
+function commitTicketForCycle({
+  picked,
+  cycleIndex,
+  wallet,
+  incrementTicketCountForCycle,
+  ticketCommittedCycle,
+  lastPickedPerCycle,
+}: {
+  picked: number[],
+  cycleIndex: number,
+  wallet: ReturnType<typeof useWallet>,
+  incrementTicketCountForCycle: (cycle: number, debugSource?: string) => void,
+  ticketCommittedCycle: React.MutableRefObject<number | null>,
+  lastPickedPerCycle: { [cycle: number]: number[] },
+}) {
+  wallet.addConfirmedTicket({
+    date: new Date().toISOString(),
+    numbers: picked.slice(),
+  });
+  incrementTicketCountForCycle(cycleIndex, "picked-confirm");
+  ticketCommittedCycle.current = cycleIndex;
+  lastPickedPerCycle[cycleIndex] = picked.slice();
+  console.log("[DrawEngineContext] Committed ticket for cycle", cycleIndex, picked, ", ticketCommittedCycle now:", ticketCommittedCycle.current);
+}
+
+// Demo reset logic extracted from useEffect
+function resetDemoCycleStats({
+  ticketCommittedCycle,
+  cycleTicketCountRef,
+}: {
+  ticketCommittedCycle: React.MutableRefObject<number | null>,
+  cycleTicketCountRef: React.MutableRefObject<{ [cycle: number]: number }>,
+}) {
+  ticketCommittedCycle.current = null;
+  cycleTicketCountRef.current = {};
+  console.log("[DrawEngineContext] Demo RESET: ticketCommittedCycle and all ticket counts reset");
+}
+
 const DrawEngineContext = createContext<DrawEngineContextType | undefined>(undefined);
 
 export function DrawEngineProvider({ children }: { children: React.ReactNode }) {
@@ -92,9 +133,7 @@ export function DrawEngineProvider({ children }: { children: React.ReactNode }) 
   // On demo reset, also reset committed-cycle tracking so that tickets get allowed/incremented on new demo start
   useEffect(() => {
     if (cycleIndex === 0) {
-      ticketCommittedCycle.current = null;
-      cycleTicketCountRef.current = {};
-      console.log("[DrawEngineContext] Demo RESET: ticketCommittedCycle and all ticket counts reset");
+      resetDemoCycleStats({ ticketCommittedCycle, cycleTicketCountRef });
     }
   }, [cycleIndex]);
 
@@ -104,15 +143,14 @@ export function DrawEngineProvider({ children }: { children: React.ReactNode }) 
       picked.length === 6 &&
       ticketCommittedCycle.current !== cycleIndex
     ) {
-      console.log(`[DrawEngineContext] Committing ticket (picked/confirmed) for cycle ${cycleIndex}:`, picked);
-      wallet.addConfirmedTicket({
-        date: new Date().toISOString(),
-        numbers: picked.slice(),
+      commitTicketForCycle({
+        picked,
+        cycleIndex,
+        wallet,
+        incrementTicketCountForCycle,
+        ticketCommittedCycle,
+        lastPickedPerCycle,
       });
-      incrementTicketCountForCycle(cycleIndex, "picked-confirm");
-      ticketCommittedCycle.current = cycleIndex;
-      lastPickedPerCycle[cycleIndex] = picked.slice();
-      console.log("[DrawEngineContext] Committed ticket for cycle", cycleIndex, picked, ", ticketCommittedCycle now:", ticketCommittedCycle.current);
     } else {
       console.log(`[DrawEngineContext] Not committing ticket (picked.length: ${picked.length}, cycleIndex: ${cycleIndex}, ticketCommittedCycle: ${ticketCommittedCycle.current})`);
     }
