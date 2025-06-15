@@ -132,9 +132,12 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
     console.log("[WalletContext] resetWallet called, set balance/history to starting values.");
   }
 
+  // Move console.log OUT of JSX
+  // Before return, log context as needed:
+  // console.log("[WalletContext] Context.Provider render, balance:", balance, "history:", history);
+
   return (
     <WalletContext.Provider value={{ balance, history, addConfirmedTicket, awardTicketWinnings, resetWallet }}>
-      {console.log("[WalletContext] Context.Provider render, balance:", balance, "history:", history)}
       {children}
     </WalletContext.Provider>
   );
