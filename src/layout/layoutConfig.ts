@@ -1,48 +1,54 @@
 
 export type LayoutSectionKey =
+  | "header"
   | "jackpot"
   | "timer"
-  | "wallet"
   | "drawNumbers"
+  | "wallet"
   | "numberSelect";
 
 export type SectionLayoutConfig = {
   key: LayoutSectionKey;
   height: string; // e.g., "15%"
-  bg: string; // tailwind gradient classes
-  font: string; // font classes
+  bg?: string; // tailwind gradient classes, optional
+  font?: string; // font classes, optional
 };
 
 export const layoutConfig: SectionLayoutConfig[] = [
   {
+    key: "header",
+    height: "5%",
+    font: "font-extrabold tracking-tight text-3xl text-[#1a1855]",
+    bg: ""
+  },
+  {
     key: "jackpot",
     height: "15%",
-    bg: "from-yellow-50 to-yellow-100",
-    font: "font-bold text-yellow-700 text-6xl"
+    font: "font-bold text-yellow-700 text-6xl",
+    bg: "from-yellow-50 to-yellow-100"
   },
   {
     key: "timer",
     height: "15%",
-    bg: "from-blue-50 to-indigo-100",
-    font: "font-mono font-extrabold text-blue-900 text-3xl"
-  },
-  {
-    key: "wallet",
-    height: "5%",
-    bg: "from-green-50 to-green-100",
-    font: "font-semibold text-green-900"
+    font: "font-mono font-extrabold text-blue-900 text-3xl",
+    bg: "from-blue-50 to-indigo-100"
   },
   {
     key: "drawNumbers",
     height: "30%",
-    bg: "from-purple-50 to-indigo-50",
-    font: "font-normal text-indigo-900"
+    font: "font-normal text-indigo-900",
+    bg: "from-purple-50 to-indigo-50"
+  },
+  {
+    key: "wallet",
+    height: "5%",
+    font: "font-semibold text-green-900",
+    bg: "from-green-50 to-green-100"
   },
   {
     key: "numberSelect",
-    height: "35%",
-    bg: "from-white to-green-50",
-    font: "font-normal text-green-900"
+    height: "45%",
+    font: "font-normal text-green-900",
+    bg: "from-white to-green-50"
   }
 ];
-
