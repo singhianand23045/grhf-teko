@@ -5,7 +5,7 @@ import { Home, Activity } from "lucide-react";
 const TABS = [
   {
     value: "home",
-    label: "Lucky Dip",
+    label: "Home",
     path: "/",
     icon: Home,
   },
