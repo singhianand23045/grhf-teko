@@ -30,8 +30,8 @@ export default function Ball3D({
   const ballBoxShadow = highlight
     ? "0 3px 16px 2px rgba(34,197,94,0.28), 0 0.5px 2.8px 0px #eaf3fa"
     : isSpinning
-    ? "0 3px 14px 2px rgba(50,50,60,0.36), 0 0.5px 2.8px 0px #222a"
-    : "0 3px 8px 2px rgba(80,90,120,0.20), 0 0.5px 2.8px 0px #eaf3fa";
+    ? "0 3px 14px 2px rgba(50,50,60,0.18), 0 0.5px 2.8px 0px #cfd6ea44"
+    : "0 3px 8px 2px rgba(80,90,120,0.16), 0 0.5px 2.8px 0px #eaf3fa";
 
   // Dynamic animation config
   let glossAnimation = undefined;
@@ -74,61 +74,61 @@ export default function Ball3D({
         aria-hidden
         style={{ zIndex: 2 }}
       >
+        {/* Soft 3D gloss -- only a subtle arc in the upper left quadrant */}
         {spinning ? (
           <span
-            className="block absolute left-[-40%] top-1/4 w-2/3 h-1/2"
+            className="block absolute left-[-22%] top-[-10%] w-[75%] h-[60%]"
             style={{
               background:
-                "linear-gradient(100deg, rgba(255,255,255,0.23) 0%, rgba(255,255,255,0.6) 30%, rgba(255,255,255,0.08) 100%)",
-              filter: "blur(2.5px)",
-              borderRadius: "40%",
-              transform: "rotate(-14deg)",
+                "radial-gradient(ellipse 60% 90% at 40% 25%, rgba(255,255,255,0.48) 0%, rgba(255,255,255,0.18) 60%, rgba(255,255,255,0) 100%)",
+              filter: "blur(2px)",
+              borderRadius: "90%",
               animation: glossAnimation
                 ? `${glossAnimation} ${glossDuration} linear infinite`
                 : undefined,
             }}
           />
         ) : highlight ? (
-          // Subtle gloss over green if highlighted
+          // Subtle gloss over green if highlighted, bias to upper left
           <span
-            className="block absolute left-[18%] top-1/4 w-2/3 h-2/5"
+            className="block absolute left-[0%] top-[-8%] w-[70%] h-[48%]"
             style={{
               background:
-                "linear-gradient(96deg, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0.25) 45%, rgba(255,255,255,0.05) 100%)",
+                "radial-gradient(ellipse 70% 80% at 42% 15%, rgba(255,255,255,0.29) 0%, rgba(255,255,255,0.10) 70%, rgba(255,255,255,0) 100%)",
               filter: "blur(1.8px)",
-              borderRadius: "50%",
-              transform: "rotate(-15deg)",
-              opacity: 0.9,
+              borderRadius: "60%",
+              opacity: 0.7,
             }}
           />
         ) : (
           // Standard gloss for stopped white ball
           <span
-            className="block absolute left-[20%] top-1/4 w-2/3 h-1/2"
+            className="block absolute left-[-12%] top-[-12%] w-[75%] h-[54%]"
             style={{
               background:
-                "linear-gradient(100deg, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0.6) 35%, rgba(255,255,255,0.07) 98%)",
-              filter: "blur(2.1px)",
-              borderRadius: "40%",
-              transform: "rotate(-14deg)",
-              opacity: 0.85,
+                "radial-gradient(ellipse 60% 80% at 45% 20%, rgba(255,255,255,0.28) 0%, rgba(255,255,255,0.1) 64%, rgba(255,255,255,0) 100%)",
+              filter: "blur(1.45px)",
+              borderRadius: "70%",
+              opacity: 0.83,
             }}
           />
         )}
       </span>
+      {/* No lower or upper fake highlight below or right of the number anymore! */}
+
       {/* Center highlight - only show if not highlighted and not spinning */}
       {!highlight && !isSpinning && (
         <span
           className="absolute"
           style={{
-            top: "18%",
-            left: "38%",
+            top: "20%",
+            left: "41%",
             width: 8,
             height: 8,
             borderRadius: "50%",
             background: "radial-gradient(circle at 40% 40%, #fff 85%, #e0ebfc11 100%)",
-            opacity: 0.82,
-            filter: "blur(1px)",
+            opacity: 0.70,
+            filter: "blur(0.9px)",
           }}
           aria-hidden
         />
@@ -153,10 +153,10 @@ export default function Ball3D({
       )}
       <style>{`
         @keyframes roulette-ball-gloss-move-right {
-          0%   { left: -45%; opacity: 0.2;}
+          0%   { left: -25%; opacity: 0.2;}
           12%  { opacity: 0.5;}
           38%  { opacity: 0.98;}
-          50%  { left: 55%; opacity: 1;}
+          50%  { left: 45%; opacity: 1;}
           80%  { opacity: .5;}
           100% { left: 102%; opacity: 0.2;}
         }
@@ -164,12 +164,11 @@ export default function Ball3D({
           0%   { left: 102%; opacity: 0.2;}
           12%  { opacity: 0.5;}
           38%  { opacity: 0.98;}
-          50%  { left: -45%; opacity: 1;}
+          50%  { left: -25%; opacity: 1;}
           80%  { opacity: .5;}
-          100% { left: -80%; opacity: 0.2;}
+          100% { left: -60%; opacity: 0.2;}
         }
       `}</style>
     </div>
   );
 }
-
