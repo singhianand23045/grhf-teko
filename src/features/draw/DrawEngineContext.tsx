@@ -54,6 +54,7 @@ export function DrawEngineProvider({ children }: { children: React.ReactNode }) 
     triggerResultBar,
     cleanup: cleanupResultBarTimeout,
     setResultBar,
+    hideResultBar, // <-- add this
   } = useResultBar({ show: false, credits: null }, 5000);
 
   // Reveal animation logic: always use last picked per cycle if available
@@ -196,6 +197,15 @@ export function DrawEngineProvider({ children }: { children: React.ReactNode }) 
     showResultBar,
     cleanupResultBarTimeout
   ]);
+
+  // === Hide ResultBar/reset when phase changes before reveal ===
+  React.useEffect(() => {
+    // Immediately hide result bar if entering a non-REVEAL state
+    if (state !== "REVEAL" && resultBar.show) {
+      hideResultBar();
+    }
+    // eslint-disable-next-line
+  }, [state, cycleIndex]);
 
   return (
     <DrawEngineContext.Provider
