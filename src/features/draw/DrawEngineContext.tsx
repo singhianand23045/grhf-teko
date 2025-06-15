@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect } from "react";
+import React, { createContext, useContext, useEffect, useRef } from "react";
 import { useTimer } from "../timer/timer-context";
 import { useWallet } from "../wallet/WalletContext";
 import { useJackpot } from "../jackpot/JackpotContext";
@@ -40,6 +40,9 @@ export function DrawEngineProvider({ children }: { children: React.ReactNode }) 
   const { state, cycleIndex } = useTimer();
   const wallet = useWallet();
   const jackpotContext = useJackpot();
+
+  // Add a ref to keep track of last processed cycleIndex for result logic
+  const resultAwardedForCycle = useRef<number | null>(null);
 
   // Modular constants and hooks
   const sets = useDrawSets();
@@ -110,11 +113,20 @@ export function DrawEngineProvider({ children }: { children: React.ReactNode }) 
     if (cycleIndex === 0) {
       console.log("[DrawEngineContext] Demo RESET: all ticket counts reset");
     }
+    // Reset awarded flag on game reset:
+    resultAwardedForCycle.current = null;
   }, [cycleIndex]);
 
-  // On REVEAL DONE (drawn numbers settled, after animation), process credits logic
+  // On REVEAL DONE, process credits logic -- but only once per cycle!
   useEffect(() => {
-    if (isRevealDone) {
+    if (
+      isRevealDone &&
+      cycleIndex !== null &&
+      resultAwardedForCycle.current !== cycleIndex
+    ) {
+      // Only process once for this cycle
+      resultAwardedForCycle.current = cycleIndex;
+
       const startSet = cycleIndex * SETS_PER_CYCLE;
       const activeSets = sets.slice(startSet, startSet + SETS_PER_CYCLE);
 
@@ -171,7 +183,19 @@ export function DrawEngineProvider({ children }: { children: React.ReactNode }) 
       cleanupResultBarTimeout();
     };
     // eslint-disable-next-line
-  }, [isRevealDone, cycleIndex, sets, wallet, jackpotContext]);
+  }, [
+    isRevealDone,
+    cycleIndex,
+    sets,
+    wallet,
+    jackpotContext,
+    lastPickedPerCycle,
+    pendingTicketRef,
+    SETS_PER_CYCLE,
+    SET_SIZE,
+    showResultBar,
+    cleanupResultBarTimeout
+  ]);
 
   return (
     <DrawEngineContext.Provider
