@@ -1,5 +1,5 @@
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useJackpot } from "../jackpot/JackpotContext";
 
 /**
@@ -11,23 +11,27 @@ export function useJackpotHandlers(
   lastPickedPerCycle: { [cycle: number]: number[] }
 ) {
   const jackpotContext = useJackpot();
+  // Track which cycles have already had their jackpot incremented
+  const incrementedCycles = useRef<Set<number>>(new Set());
 
   useEffect(() => {
-    if (cycleIndex > 0) {
-      const prevCycle = cycleIndex - 1;
-      const userNumbers = lastPickedPerCycle[prevCycle] || [];
-      const hadValidTicket = userNumbers.length === 6;
-      console.log(
-        `[useJackpotHandlers] cycle=${cycleIndex}, prevCycle=${prevCycle}, userNumbers: ${JSON.stringify(userNumbers)}, hadValidTicket: ${hadValidTicket}`
-      );
-      if (hadValidTicket) {
-        console.log(`[useJackpotHandlers] Adding $1 to jackpot for previous cycle ${prevCycle}`);
-        jackpotContext.addToJackpot(1);
-      }
-    }
+    // On new demo/game, clear tracking
     if (cycleIndex === 0) {
+      incrementedCycles.current.clear();
       console.log("[useJackpotHandlers] cycleIndex 0, resetting for new demo/game.");
+      return;
+    }
+
+    const prevCycle = cycleIndex - 1;
+    const userNumbers = lastPickedPerCycle[prevCycle] || [];
+    const hadValidTicket = userNumbers.length === 6;
+
+    // Only increment jackpot ONCE per prevCycle
+    if (hadValidTicket && !incrementedCycles.current.has(prevCycle)) {
+      console.log(`[useJackpotHandlers] Adding $1 to jackpot for previous cycle ${prevCycle}`);
+      jackpotContext.addToJackpot(1);
+      incrementedCycles.current.add(prevCycle);
     }
     // eslint-disable-next-line
-  }, [cycleIndex, jackpotContext, lastPickedPerCycle]);
+  }, [cycleIndex, jackpotContext]);
 }
