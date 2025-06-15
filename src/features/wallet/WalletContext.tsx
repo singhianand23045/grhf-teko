@@ -93,15 +93,15 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
     saveWalletToStorage({ balance, history });
   }, [balance, history]);
 
-  // STEP 1: CONFIRM ticket — deduct 10 credits immediately, store ticket with matches: 0, creditChange: -10
+  // STEP 1: CONFIRM ticket — deduct 30 credits immediately, store ticket with matches: 0, creditChange: -30
   function addConfirmedTicket(ticketCore: Omit<TicketType, "id" | "creditChange" | "matches">) {
     const newTicket: TicketType = {
       ...ticketCore,
       id: Math.random().toString(36).slice(2) + Date.now(),
       matches: 0,
-      creditChange: -10,
+      creditChange: -30,
     };
-    setBalance((prev) => prev - 10);
+    setBalance((prev) => prev - 30);
     setHistory(prev => [newTicket, ...prev]);
     console.log("[WalletContext] Confirmed ticket & deducted: ", newTicket);
   }
@@ -111,7 +111,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
     setHistory(prevHistory => {
       if (!prevHistory.length) return prevHistory;
       const [latest, ...rest] = prevHistory;
-      if (latest.matches !== 0 || latest.creditChange !== -10) return prevHistory; // Only award once
+      if (latest.matches !== 0 || latest.creditChange !== -30) return prevHistory; // Only award once
 
       // For display/history: count TOTAL matched numbers (any row, overlapping possible), 
       // but for actual winnings, use per-row sum
@@ -122,7 +122,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
         }
       }
 
-      // Award credits (already deducted -10 on confirm, only add winnings)
+      // Award credits (already deducted -30 on confirm, only add winnings)
       if (totalWinnings > 0) {
         setBalance(prev => prev + totalWinnings);
       }
@@ -130,7 +130,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
       const updatedTicket: TicketType = {
         ...latest,
         matches: totalMatches, // for .history/support info
-        creditChange: -10 + totalWinnings,
+        creditChange: -30 + totalWinnings,
       };
       console.log("[WalletContext] Awarded payout for all 3 rows: ", {rowWinnings, totalWinnings, updatedTicket});
       return [updatedTicket, ...rest];
