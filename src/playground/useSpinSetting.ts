@@ -12,7 +12,9 @@ export function useSpinSetting(
   const touchStartX = useRef<number | null>(null);
   const SWIPE_THRESHOLD = 30;
 
-  // The consuming component should use this ref for the grid
+  // Valid spin settings in order: left fastest, left fast, left slow, right slow, right fast, right fastest
+  const SPIN_LEVELS = [-3, -2, -1, 1, 2, 3];
+
   function attachSwipeHandlers(grid: HTMLDivElement | null) {
     if (!grid) return;
 
@@ -26,42 +28,16 @@ export function useSpinSetting(
       const dx = touchEndX - touchStartX.current;
       if (Math.abs(dx) > SWIPE_THRESHOLD) {
         setSpinSetting((prev) => {
-          let next = prev;
+          const idx = SPIN_LEVELS.indexOf(prev);
           if (dx < 0) {
-            // swipe left
-            if (prev > -3) {
-              // special case: going from right slow (1) to left slow (-1)
-              if (prev === 1) {
-                next = -1;
-              } else if (prev === 2) {
-                next = 1;
-              } else if (prev === 3) {
-                next = 2;
-              } else {
-                next = prev - 1;
-                if (next === 0) next = -1;
-              }
-            }
+            // swipe left → go one step to the left (lower index)
+            if (idx > 0) return SPIN_LEVELS[idx - 1];
+            return prev; // At leftmost, do nothing
           } else {
-            // swipe right
-            if (prev < 3) {
-              // special case: going from left slow (-1) to right slow (1)
-              if (prev === -1) {
-                next = 1;
-              } else if (prev === -2) {
-                next = -1;
-              } else if (prev === -3) {
-                next = -2;
-              } else {
-                next = prev + 1;
-                if (next === 0) next = 1;
-              }
-            }
+            // swipe right → go one step to the right (higher index)
+            if (idx < SPIN_LEVELS.length - 1) return SPIN_LEVELS[idx + 1];
+            return prev; // At rightmost, do nothing
           }
-          if (next < -3) next = -3;
-          if (next > 3) next = 3;
-          if (next === 0) next = prev < 0 ? -1 : 1; // just safety
-          return next;
         });
       }
       touchStartX.current = null;
@@ -81,3 +57,4 @@ export function useSpinSetting(
 
   return { attachSwipeHandlers };
 }
+
