@@ -303,6 +303,8 @@ export function DrawEngineProvider({ children }: { children: React.ReactNode }) 
       console.log("[DrawEngineContext] Resetting ALL ticket counts (demo reset)");
       cycleTicketCountRef.current = {};
     }
+    // FIX: Reset ticketCommittedCycle between draws so it allows confirming a ticket for the current cycle
+    ticketCommittedCycle.current = null;
   // Only depend on cycleIndex and jackpotContext
   }, [cycleIndex, jackpotContext]);
 
