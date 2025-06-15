@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import RouletteBallGrid from "@/playground/RouletteBallGrid";
 import { useDrawEngine } from "./DrawEngineContext";
@@ -14,27 +15,32 @@ export default function RevealRoulettePanel() {
   const { picked: userNumbers } = useNumberSelection();
   const { state } = useTimer();
 
-  // State for controlling the reveal, numbersToReveal, user picks.
-  // Only REVEAL phase triggers the full number sequence reveal.
+  // Reveal is true during REVEAL phase, false otherwise
   const [reveal, setReveal] = useState(false);
 
-  // Local numbers to reveal to pass to RouletteBallGrid
-  // These match "drawnNumbers" (always 18 in REVEAL phase)
   useEffect(() => {
-    if (state === "REVEAL") setReveal(true);
-    else setReveal(false);
+    setReveal(state === "REVEAL");
   }, [state]);
 
-  // This disables the grid entirely unless state === REVEAL
-  // We keep drawnNumbers always at length 18 for consistency
+  // Always pass an array of 18 elements to RouletteBallGrid:
+  // - During REVEAL: drawnNumbers is at most 18, rest undefined.
+  // - Before REVEAL: pass 18 undefineds (so balls spin)
+  // - After REVEAL: drawnNumbers is fully 18, all balls stopped
   const numbersToReveal =
-    state === "REVEAL" && drawnNumbers.length === 18 ? drawnNumbers : [];
+    state === "REVEAL"
+      ? // During reveal phase, already revealed numbers + unrevealed as undefined
+        Array.from({ length: 18 }, (_, i) =>
+          drawnNumbers[i] !== undefined ? drawnNumbers[i] : undefined
+        )
+      : // Before reveal, all undefined (spinning)
+        Array(18).fill(undefined);
+
+  // This allows RouletteBallGrid to display correct grid, and only use "stopped" for slots with a number, "spinning" otherwise.
+  // No legacy grid anymore.
 
   return (
     <div className="flex flex-col items-center w-full h-full overflow-y-hidden">
-      {/* Result bar is unchanged */}
       <ResultBar visible={revealResult.show} creditsWon={revealResult.credits} />
-      {/* Animated Roulette Ball Grid */}
       <div className="w-full flex flex-col items-center justify-center py-0">
         <RouletteBallGrid
           numbersToReveal={numbersToReveal}
