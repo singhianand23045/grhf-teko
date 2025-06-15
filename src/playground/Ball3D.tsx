@@ -1,3 +1,4 @@
+
 import React from "react";
 
 type Ball3DProps = {
@@ -16,16 +17,15 @@ export default function Ball3D({
   // Determine color based on user pick (highlight)
   const isSpinning = !!spinning;
 
-  // REVISED: All balls (spinning or stopped) use the white/silver gradient unless highlighted
+  // All balls (spinning or stopped) use the white/silver gradient unless highlighted
   const ballBackground = highlight
     ? "bg-green-500"
     : "bg-gradient-to-b from-white via-slate-100 to-slate-300";
 
+  // Only show border if highlighted, transparent otherwise
   const borderColor = highlight
     ? "border-green-600/60"
-    : isSpinning
-    ? "border-black"
-    : "border-slate-500/40";
+    : "border-transparent";
 
   const ballBoxShadow = highlight
     ? "0 3px 16px 2px rgba(34,197,94,0.28), 0 0.5px 2.8px 0px #eaf3fa"
@@ -172,3 +172,4 @@ export default function Ball3D({
     </div>
   );
 }
+
