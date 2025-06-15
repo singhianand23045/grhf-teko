@@ -1,4 +1,3 @@
-
 ## Phase 4 Spec: Result & Wallet
 
 ### 1. User Stories
@@ -51,7 +50,7 @@
   - This Credits section must show an "Add credits" label aligned to the extreme left, and the credits/balance remaining (e.g., "1750 credits") aligned to the extreme right.
   - The visual layout should resemble the "add to balance" bar in the Robinhood app.
   - The Credits section must always be visible except during demo restart.
-  - After each draw, a feedback message appears above drawn numbers for 5 seconds summarizing the result:
+  - After each draw, a feedback message appears above drawn numbers for **10 seconds starting at 0:30 on the timer and ending at 0:20**, summarizing the result:
     - If credits are won: "Congrats! You won [sum of winnings] credits!"
     - If not: "Try again. Win next time!" (if lost).
   - Winnings are computed per row and then summed.
@@ -69,7 +68,7 @@
 - [ ] The wallet balance is restored correctly on app reload.
 - [ ] Ticket selection resets automatically at the start of each new draw cycle; previous balance remains unchanged.
 - [ ] The Credits section always appears, takes up 5% of the total logical height, and "Add credits", the balance are properly positioned.
-- [ ] The correct feedback message is displayed at the right time, with correct text and duration, and does not interfere with grid layout.
+- [ ] The correct feedback message is displayed for **10 seconds, from timer 0:30 to 0:20**, with correct text and duration, and does not interfere with grid layout.
 - [ ] Feedback message and credited amount are correct for the sum of row winnings as appropriate.
 
 ---
@@ -91,6 +90,5 @@
 
 - [ ] On app launch or reload, wallet is consistent with prior play.
 - [ ] The credits section always appears, takes up 5% of the total logical height, and "Add credits", the balance are properly positioned.
-- [ ] The correct feedback message is displayed at the right time, with the correct text and duration, and does not interfere with grid layout.
+- [ ] The correct feedback message is displayed at the right time, with the correct text and duration (**10 seconds from timer 0:30 to 0:20**), and does not interfere with grid layout.
 - [ ] Feedback message and credited amount are correct for the sum of row winnings, as appropriate.
-

@@ -1,4 +1,3 @@
-
 # Phase 5 Spec: Rolling Jackpot (Simplified)
 
 ---
@@ -45,6 +44,7 @@
   - **Right side:** Shows the draw timer as before.
 - This section should be visually balanced, sitting above the main game interface.
 - All other sections (draw numbers, credits bar, confirmed numbers, etc.) remain in their existing locations.
+- **The result feedback message (jackpot/credits/try again) must display for 10 seconds, from timer 0:30 to 0:20.**
 
 ---
 
@@ -57,7 +57,7 @@
 - [ ] A draw result never grants both the jackpot and additional credit prizes for the same ticket.
 - [ ] Wallet and jackpot pool values persist on reload.
 - [ ] Credit bar and jackpot display always visible except on demo restart.
-- [ ] Result feedback appears at draw’s end for 5 seconds, always showing only the highest applicable win.
+- [ ] Result feedback appears at draw’s end for **10 seconds, always showing only the highest applicable win, and exactly during timer 0:30–0:20**.
 - [ ] Ticket selection resets after each draw.
 
 ---
@@ -75,6 +75,5 @@
 ### UI/UX Tests
 - [ ] Credit and jackpot bar always visible (except on demo reset), correctly positioned.
 - [ ] Jackpot value increases correctly between draws with new entries, resets on jackpot win.
-- [ ] Correct result feedback banner displays for jackpot win, credit win, or loss, with correct values and only one type of win per ticket.
+- [ ] Correct result feedback banner displays for jackpot win, credit win, or loss, with correct values and only one type of win per ticket, and is visible for **10 seconds during timer 0:30–0:20**.
 - [ ] Selection panel resets after each draw.
-
