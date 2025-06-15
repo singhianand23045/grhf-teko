@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useEffect } from "react";
 import { useTimer } from "../timer/timer-context";
 import { useWallet } from "../wallet/WalletContext";
@@ -93,6 +92,18 @@ export function DrawEngineProvider({ children }: { children: React.ReactNode }) 
   const instantlyFinishReveal = () => {
     hookInstantlyFinishReveal(cycleIndex);
   };
+
+  // === FIX: Trigger reveal when entering REVEAL state ===
+  React.useEffect(() => {
+    if (state === "REVEAL") {
+      startReveal(cycleIndex);
+    }
+    // Optionally, cleanup reveal timeouts when leaving REVEAL state:
+    if (state !== "REVEAL") {
+      cleanupRevealTimeouts();
+    }
+    // eslint-disable-next-line
+  }, [state, cycleIndex]);
 
   // On demo reset, also reset committed-cycle tracking so tickets get allowed/incremented on new demo start
   useEffect(() => {
