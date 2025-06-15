@@ -71,7 +71,6 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
       matches: 0,
       creditChange: -30,
     };
-    // Deduct credits immediately
     setBalance(prev => {
       const newBal = prev - 30;
       console.log("[WalletContext] Deducting 30 credits. Old:", prev, "New:", newBal);
@@ -84,21 +83,22 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
     });
   }
 
-  // Step 2: Award winnings by updating the most recent pending ticket, if eligible
+  /**
+   * Step 2: Award winnings by updating most recent pending ticket, if eligible.
+   * This function synchronizes updates to history and balance, ensuring both are in sync WITHOUT relying on setTimeout or batching.
+   */
   function awardTicketWinnings(cycleRows: number[][], rowWinnings: number[], totalWinnings: number) {
-    let ticketToAward: TicketType | null = null;
-    let idx = -1;
-    // We'll modify both history and balance in sync to avoid batch/closure issues!
     setHistory(prevHistory => {
       if (!prevHistory.length) return prevHistory;
-      idx = prevHistory.findIndex(
+      const idx = prevHistory.findIndex(
         (t) => t.matches === 0 && t.creditChange === -30
       );
       if (idx === -1) {
         console.log("[WalletContext] No pending ticket found for awarding, skipping.");
         return prevHistory;
       }
-      ticketToAward = prevHistory[idx];
+      const ticketToAward = prevHistory[idx];
+
       // For display/history: count total matched numbers (across all rows)
       let totalMatches = 0;
       if (cycleRows.length === 3) {
@@ -106,26 +106,26 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
           totalMatches += cycleRows[i].filter((n) => ticketToAward.numbers.includes(n)).length;
         }
       }
+
       const updatedTicket: TicketType = {
         ...ticketToAward,
         matches: totalMatches,
         creditChange: -30 + totalWinnings,
       };
-      // Update the specific ticket
+
       const updatedHistory = [...prevHistory];
       updatedHistory[idx] = updatedTicket;
-      console.log("[WalletContext] Awarded payout for ticket:", updatedTicket, "rowWinnings:", rowWinnings, "totalWinnings:", totalWinnings);
 
-      // Update balance after updating history (using setTimeout to avoid React batching pitfall)
-      if (totalWinnings > 0) {
-        setTimeout(() => {
-          setBalance(prev => {
-            const newBal = prev + totalWinnings;
-            console.log("[WalletContext] Awarding winnings:", totalWinnings, "Old balance:", prev, "New balance:", newBal);
-            return newBal;
-          });
-        }, 0);
-      }
+      // --- Synchronize balance ---
+      setBalance((prevBal) => {
+        // Previous deduction already applied at confirmation.
+        // Here we only add winnings (if any) to current balance.
+        const newBal = prevBal + totalWinnings;
+        console.log("[WalletContext] Awarding winnings:", totalWinnings, "Old balance:", prevBal, "New balance:", newBal);
+        return newBal;
+      });
+
+      console.log("[WalletContext] Awarded payout for ticket:", updatedTicket, "rowWinnings:", rowWinnings, "totalWinnings:", totalWinnings);
       return updatedHistory;
     });
   }
