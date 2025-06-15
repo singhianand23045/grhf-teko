@@ -55,6 +55,9 @@ export default function RevealPanel() {
   // Define the ResultBar's height (adjust as needed for nice appearance)
   const RESULT_BAR_HEIGHT = 44; // px, fits 1-line ResultBar text + spacing
 
+  // Spacing between message and ball grid: only 0.5% of screen height
+  const DRAWN_GRID_MARGIN_TOP = "0.5vh";
+
   return (
     <div className="flex flex-col items-center w-full h-full overflow-y-hidden">
       {/* Reserve vertical space for ResultBar always, to anchor the ball grid */}
@@ -73,7 +76,12 @@ export default function RevealPanel() {
         />
       </div>
       {/* Grid wrapper -- ensure full height & center grid, now grid never jumps */}
-      <div className="flex-1 w-full flex items-center justify-center py-0">
+      <div
+        className="flex-1 w-full flex items-center justify-center py-0"
+        style={{
+          marginTop: DRAWN_GRID_MARGIN_TOP
+        }}
+      >
         <div className="w-full space-y-1 flex flex-col items-center justify-center">
           {drawnSets.map((set, rowIdx) => (
             <div
