@@ -60,8 +60,9 @@ export default function RevealPanel() {
         creditsWon={revealResult.credits}
         jackpot={Boolean(revealResult.credits && revealResult.credits > 0 && revealResult.credits >= 1000)}
       />
-      <div className="w-full max-w-full flex flex-col justify-center items-center py-0">
-        <div className="w-full space-y-1">
+      {/* Grid wrapper -- ensure full height & center grid */}
+      <div className="flex-1 w-full flex items-center justify-center py-0">
+        <div className="w-full space-y-1 flex flex-col items-center justify-center">
           {drawnSets.map((set, rowIdx) => (
             <div
               key={rowIdx}
