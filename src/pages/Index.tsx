@@ -38,7 +38,7 @@ const Index = () => {
               <NumberSelectionProvider>
                 <main className="flex flex-col w-full items-center px-4 py-8 h-full pb-24">
                   <h1 className="font-extrabold tracking-tight text-3xl mb-12 mt-6 text-[#1a1855]">
-                    Home tab
+                    Lucky Dip
                   </h1>
                   <TimerDisplay />
                 </main>
@@ -54,3 +54,4 @@ const Index = () => {
 };
 
 export default Index;
+
