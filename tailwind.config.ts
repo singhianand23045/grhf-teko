@@ -1,4 +1,3 @@
-
 import type { Config } from "tailwindcss";
 
 // Robinhood color palette (2024 main branding)
@@ -27,6 +26,21 @@ export default {
 			}
 		},
 		extend: {
+			fontFamily: {
+				sans: [
+					'"Inter"',
+					'"IBM Plex Sans"',
+					'system-ui',
+					'Arial',
+					'sans-serif'
+				],
+				mono: [
+					'"Roboto Mono"',
+					'Menlo',
+					'Monaco',
+					'monospace'
+				],
+			},
 			colors: {
 				border: 'hsl(var(--border))',
 				input: 'hsl(var(--input))',
@@ -115,4 +129,3 @@ export default {
 	},
 	plugins: [require("tailwindcss-animate")],
 } satisfies Config;
-

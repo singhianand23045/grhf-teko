@@ -1,4 +1,3 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -85,13 +84,16 @@
   }
 }
 
+/* DEFAULT FONT FAMILY OVERRIDE */
 @layer base {
   * {
     @apply border-border;
   }
-
+  html {
+    font-family: 'Inter', 'IBM Plex Sans', system-ui, Arial, sans-serif;
+  }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-sans;
   }
 }
 
@@ -106,4 +108,3 @@
   30%, 50%, 70% { transform: translateX(-4px); }
   40%, 60% { transform: translateX(4px); }
 }
-
