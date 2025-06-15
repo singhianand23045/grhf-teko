@@ -76,11 +76,20 @@ export default function RouletteBallGrid({
     number?: number;
     highlight?: boolean;
   }) {
+    // Determine color based on user pick (highlight)
+    const ballBackground = highlight
+      ? "bg-green-500"
+      : "bg-gradient-to-b from-white via-slate-100 to-slate-300";
+    const borderColor = highlight
+      ? "border-green-600/60"
+      : "border-slate-500/40";
+    const ballBoxShadow = highlight
+      ? "0 3px 16px 2px rgba(34,197,94,0.28), 0 0.5px 2.8px 0px #eaf3fa"
+      : "0 3px 8px 2px rgba(80,90,120,0.20), 0 0.5px 2.8px 0px #eaf3fa";
+
     return (
       <div
-        className={`relative flex items-center justify-center aspect-square
-          ${highlight ? "border-2 border-green-700 shadow-green-300 shadow-lg" : ""}
-        `}
+        className={`relative flex items-center justify-center aspect-square`}
         style={{
           width: 38,
           height: 38,
@@ -88,28 +97,24 @@ export default function RouletteBallGrid({
           minHeight: 28,
         }}
       >
-        {/* Base 3D white ball with gradient and shadow */}
+        {/* Ball surface */}
         <span
           className={`
             absolute inset-0 rounded-full
-            bg-gradient-to-b from-white via-slate-100 to-slate-300
-            shadow-lg border-[2.5px] ${highlight ? "border-green-500/50" : "border-slate-500/40"}
+            ${ballBackground}
+            shadow-lg border-[2.5px] ${borderColor}
           `}
           style={{
-            boxShadow:
-              highlight
-                ? "0 3px 16px 2px rgba(34,197,94,0.17), 0 0.5px 2.8px 0px #eaf3fa"
-                : "0 3px 8px 2px rgba(80,90,120,0.20), 0 0.5px 2.8px 0px #eaf3fa",
+            boxShadow: ballBoxShadow,
+            transition: "background 0.3s",
           }}
           aria-hidden
         />
-        {/* Animated left-to-right gloss for spinning, static gloss for stopped */}
+        {/* Gloss for spinning, static gloss for stopped */}
         <span
           className="absolute left-0 top-0 w-full h-full rounded-full pointer-events-none overflow-hidden"
           aria-hidden
-          style={{
-            zIndex: 2,
-          }}
+          style={{ zIndex: 2 }}
         >
           {spinning ? (
             <span
@@ -123,7 +128,21 @@ export default function RouletteBallGrid({
                 animation: "roulette-ball-gloss-move 0.85s linear infinite",
               }}
             />
+          ) : highlight ? (
+            // Subtle gloss over green if highlighted
+            <span
+              className="block absolute left-[18%] top-1/4 w-2/3 h-2/5"
+              style={{
+                background:
+                  "linear-gradient(96deg, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0.25) 45%, rgba(255,255,255,0.05) 100%)",
+                filter: "blur(1.8px)",
+                borderRadius: "50%",
+                transform: "rotate(-15deg)",
+                opacity: 0.9,
+              }}
+            />
           ) : (
+            // Standard gloss for stopped white ball
             <span
               className="block absolute left-[20%] top-1/4 w-2/3 h-1/2"
               style={{
@@ -137,17 +156,18 @@ export default function RouletteBallGrid({
             />
           )}
         </span>
-        {/* Center specular highlight */}
+        {/* Center highlight */}
         <span
           className="absolute"
           style={{
-            top: "18%",
-            left: "38%",
-            width: 8,
-            height: 8,
+            top: highlight ? "16%" : "18%",
+            left: highlight ? "38%" : "38%",
+            width: highlight ? 8 : 8,
+            height: highlight ? 8 : 8,
             borderRadius: "50%",
-            background:
-              "radial-gradient(circle at 40% 40%, #fff 85%, #e0ebfc11 100%)",
+            background: highlight
+              ? "radial-gradient(circle at 40% 40%, #fff 80%, #bbf7d022 100%)"
+              : "radial-gradient(circle at 40% 40%, #fff 85%, #e0ebfc11 100%)",
             opacity: 0.82,
             filter: "blur(1px)",
           }}
@@ -159,9 +179,9 @@ export default function RouletteBallGrid({
             className={`relative font-extrabold text-base select-none`}
             style={{
               zIndex: 10,
-              color: highlight ? "#22c55e" : "#222", // green-500/black
+              color: highlight ? "#1a1a1a" : "#222",
               textShadow: highlight
-                ? "0 2px 7px #98ecb3ee"
+                ? "0 2px 7px #99f6e0ee"
                 : "0 1px 6px #d4dfff88",
               fontFamily: "Poppins, Inter, sans-serif",
               letterSpacing: "-0.02em",
