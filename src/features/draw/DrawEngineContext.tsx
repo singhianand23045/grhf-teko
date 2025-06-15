@@ -58,7 +58,11 @@ export function DrawEngineProvider({ children }: { children: React.ReactNode }) 
     console.log("[DrawEngineContext] cycleTicketCountRef after reset:", { ...cycleTicketCountRef.current });
   }
 
-  // --- Replace resultBar state and timeout logic with custom hook ---
+  // --- Remove the old, now redundant resultBar state and resultTimeout ref ---
+  // const [resultBar, setResultBar] = useState<{ show: boolean; credits: number | null }>({ show: false, credits: null });
+  // const resultTimeout = useRef<NodeJS.Timeout | null>(null);
+
+  // --- Use result bar custom hook instead ---
   const {
     resultBar,
     showResultBar,
@@ -312,12 +316,21 @@ export function DrawEngineProvider({ children }: { children: React.ReactNode }) 
       // Show correct banner for 5s using useResultBar
       showResultBar(resultType === "jackpot" ? jackpotContext.jackpot : totalWinnings);
     }
-    // Clean up timeout if component unmounts
+    // Use the new cleanup function from the result bar hook:
     return () => {
       cleanupResultBarTimeout();
     };
     // eslint-disable-next-line
   }, [isRevealDone, cycleIndex, sets, wallet, jackpotContext]);
+
+  // --- Remove now-redundant manual triggerResultBar function ---
+  // function triggerResultBar() {
+  //   setResultBar((curr) => ({ show: true, credits: curr.credits }));
+  //   if (resultTimeout.current) clearTimeout(resultTimeout.current);
+  //   resultTimeout.current = setTimeout(() => {
+  //     setResultBar({ show: false, credits: null });
+  //   }, 5000);
+  // }
 
   return (
     <DrawEngineContext.Provider
