@@ -13,7 +13,7 @@ In each cycle, a set of 18 numbers (3 sets of 6) is revealed on screen in a time
 - The drawn numbers area is a fixed grid of 3 rows and 6 columns (18 slots in total).
 - When the timer is not ready to draw (before 0:45), all slots show filled black circles, and maintain their layout even when not filled.
 - At 0:45, the reveal phase begins.
-- During reveal, one number appears (“pops in”) every 0.5 seconds, in left-to-right, top-to-bottom order.
+- During reveal, one number appears (“pops in”) every **1 second** (was 0.5s), in left-to-right, top-to-bottom order.
 - All revealed numbers remain visible and persist on the screen until the timer reaches 0:00.
 - After the draw, the screen stays on the revealed numbers until the timer restarts or the demo completes.
 
@@ -44,8 +44,8 @@ In each cycle, a set of 18 numbers (3 sets of 6) is revealed on screen in a time
 ## Demo Flow
 
 **Cycle 1:**
-- Open (number selection) → Cut Off → Reveal phase (0:45–0:36, numbers revealed)
-- From 0:36 to 0:00, all numbers remain visible.
+- Open (number selection) → Cut Off → Reveal phase (0:45–0:36, numbers revealed at 1s intervals)
+- From 0:27 to 0:00, all numbers remain visible.
 
 **Cycle 2:**
 - Same flow as above.
@@ -68,4 +68,4 @@ In each cycle, a set of 18 numbers (3 sets of 6) is revealed on screen in a time
 - [ ] After each draw, correct result message (win/loss) appears for exactly 5 seconds, is visually distinct and correctly placed.
 - [ ] The sum of winnings from all three rows is shown if the user wins, not just the total matches across all 18 numbers.
 - [ ] The per-row calculation is used: for each of the 3 rows (draws), award is determined and the total is the sum of all row results.
-
+- [ ] Each number is revealed at exactly **1 second intervals** (updated from 0.5s).

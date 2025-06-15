@@ -16,6 +16,7 @@
     - When drawing starts, roulette balls stop spinning one at a time, left-to-right and top-to-bottom, at the exact reveal sequence.
     - When a ball stops spinning, the corresponding number appears in its place.
     - The stopped ball visually transitions from the spinning style to a static style.
+    - **Each ball now stops at an exact 1 second interval** (updated from 0.5s), to match current app timing.
 3. **Number Highlight**
     - Numbers that match the user’s picks are highlighted (e.g., green color/border as currently done).
 4. **Grid Consistency**
@@ -23,7 +24,7 @@
 
 ### User Acceptance Criteria
 - [ ] Before the reveal, all 18 balls spin; no numbers are shown.
-- [ ] During the reveal, each ball stops spinning and reveals its number one after the other (following the actual draw order).
+- [ ] During the reveal, each ball stops spinning and reveals its number one after the other at **1 second intervals**.
 - [ ] Numbers that match the user's selection are highlighted visually.
 - [ ] The display is visually stable throughout all phases; no layout issues occur.
 - [ ] All revealed numbers remain visible until the next game round.
@@ -31,10 +32,11 @@
 ### Tests
 - **Visual / Unit**
   - [ ] 18 balls render and spin prior to the reveal.
-  - [ ] Balls stop spinning in correct order, one at a time, with the drawn number displayed.
+  - [ ] Balls stop spinning in correct order, one at a time, at **1s per ball** (updated; was 0.5s), with the drawn number displayed.
   - [ ] User-picked numbers are highlighted as described.
 - **Integration**
   - [ ] Switching between game phases correctly swaps between spinning balls and revealed numbers.
   - [ ] Grid layout remains correct and unchanged throughout.
 - **Regression**
   - [ ] Removing or editing this feature doesn’t break existing reveal/grid drawing features.
+
