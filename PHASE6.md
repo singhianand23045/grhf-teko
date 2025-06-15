@@ -28,6 +28,7 @@
 - [ ] Numbers that match the user's selection are highlighted visually.
 - [ ] The display is visually stable throughout all phases; no layout issues occur.
 - [ ] All revealed numbers remain visible until the next game round.
+- [ ] After all numbers are revealed, the result message ("Congrats! You won..." or "Try again...") is displayed for exactly **10 seconds** (from timer 0:25 to 0:15), then disappears.
 
 ### Tests
 - **Visual / Unit**
@@ -37,6 +38,7 @@
 - **Integration**
   - [ ] Switching between game phases correctly swaps between spinning balls and revealed numbers.
   - [ ] Grid layout remains correct and unchanged throughout.
+  - [ ] Result message appears for **10 seconds** (from 0:25 to 0:15), then disappears.
 - **Regression**
   - [ ] Removing or editing this feature doesn’t break existing reveal/grid drawing features.
 
