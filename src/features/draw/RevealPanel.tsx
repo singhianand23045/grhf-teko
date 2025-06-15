@@ -6,7 +6,7 @@ import { useTimer } from "../timer/timer-context";
 import RevealRoulettePanel from "./RevealRoulettePanel";
 
 // Set this to false to roll back to previous static grid implementation
-const ENABLE_ROULETTE_ANIMATION = true;
+const ENABLE_ROULETTE_ANIMATION = false;
 
 export default function RevealPanel() {
   const { drawnNumbers, revealResult } = useDrawEngine();
