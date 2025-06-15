@@ -133,58 +133,12 @@ export function DrawEngineProvider({ children }: { children: React.ReactNode }) 
   // REVEAL: When actual numbers are known, update last ticket record with matches/winnings (wallet history/winning payout can be calculated by wallet/history)
   useEffect(() => {
     if (state === "REVEAL") {
-      const pickedNumbers =
-        lastPickedPerCycle[cycleIndex] && lastPickedPerCycle[cycleIndex].length === 6
-          ? lastPickedPerCycle[cycleIndex]
-          : picked;
-      if (pickedNumbers.length === 6) {
-        const startSet = cycleIndex * SETS_PER_CYCLE;
-        const activeSets = sets.slice(startSet, startSet + SETS_PER_CYCLE);
-        const allDrawn = activeSets.flat();
-        const matches = pickedNumbers.filter((n) => allDrawn.includes(n)).length;
-        // NO wallet.addTicket here -- it's already deducted.
-      }
+      // No-op: wallet actions deferred until after REVEAL is done
     }
     // eslint-disable-next-line
   }, [state, cycleIndex, picked, sets, wallet]);
 
-  // UseEffect for handling "REVEAL" phase: ensure startReveal is called ONLY ONCE per cycle
-  useEffect(() => {
-    if (
-      state === "REVEAL" &&
-      revealStartedForCycle.current !== cycleIndex
-    ) {
-      startReveal(cycleIndex);
-
-      const handleVisibility = () => {
-        if (
-          document.visibilityState === "visible" &&
-          state === "REVEAL" &&
-          drawnNumbers.length < SETS_PER_CYCLE * SET_SIZE
-        ) {
-          instantlyFinishReveal();
-        }
-      };
-      document.addEventListener("visibilitychange", handleVisibility);
-
-      // Pending ticket logic moved to useTicketCommitManager
-
-      return () => {
-        document.removeEventListener("visibilitychange", handleVisibility);
-        cleanupRevealTimeouts();
-      };
-    }
-    // Rest of old pending ticket management logic moved to useTicketCommitManager
-    // eslint-disable-next-line
-  }, [state, cycleIndex /*, wallet intentionally removed!*/]);
-
-  // New: Commit ticket to wallet/credit only AFTER REVEAL phase ends (when timer ticks to next cycle)
-  // Moved to useTicketCommitManager
-
-  // Enhanced logging for jackpot handlers effect
-  useJackpotHandlers(cycleIndex, lastPickedPerCycle);
-
-  // PHASE 5 Payoff Handling: 
+  // On REVEAL DONE (drawn numbers settled, after animation), process credits logic
   useEffect(() => {
     if (isRevealDone) {
       const startSet = cycleIndex * SETS_PER_CYCLE;
@@ -193,15 +147,39 @@ export function DrawEngineProvider({ children }: { children: React.ReactNode }) 
       let userNumbers: number[] = [];
       if (lastPickedPerCycle[cycleIndex] && lastPickedPerCycle[cycleIndex].length === 6) {
         userNumbers = lastPickedPerCycle[cycleIndex];
+      } else if (
+        pendingTicketRef.current &&
+        pendingTicketRef.current.cycle === cycleIndex &&
+        pendingTicketRef.current.ticket.numbers.length === 6
+      ) {
+        userNumbers = pendingTicketRef.current.ticket.numbers;
       }
 
+      // 1. ONCE PER CYCLE, only now DEDUCT CREDITS and add ticket
+      let ticketWasEntered = false;
+      if (
+        pendingTicketRef.current &&
+        pendingTicketRef.current.cycle === cycleIndex &&
+        !pendingTicketRef.current.entered &&
+        userNumbers.length === 6
+      ) {
+        wallet.addConfirmedTicket({
+          date: pendingTicketRef.current.ticket.date,
+          numbers: pendingTicketRef.current.ticket.numbers,
+        });
+        pendingTicketRef.current.entered = true;
+        ticketWasEntered = true;
+        // If needed, increment ticket count for jackpot logic (not used, can implement here if relevant)
+      }
+
+      // 2. Calculate and award winnings as before
       const { jackpotWon, rowWinnings, totalWinnings, resultType } = calculateWinnings(
         userNumbers,
         activeSets,
         jackpotContext.jackpot
       );
 
-      if (userNumbers.length === 6) {
+      if (userNumbers.length === 6 && ticketWasEntered) {
         if (jackpotWon) {
           wallet.awardTicketWinnings(activeSets, [0,0,0], totalWinnings);
           jackpotContext.resetJackpot();

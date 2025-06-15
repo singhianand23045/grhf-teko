@@ -18,7 +18,7 @@ export function useTicketCommitManager(
   // pendingTicketRef: helper to track ticket to be entered post-reveal
   const pendingTicketRef = useRef<{
     cycle: number;
-    ticket: { date: string; numbers: number[]; matches: number };
+    ticket: { date: string; numbers: number[] };
     entered: boolean;
   } | null>(null);
 
@@ -30,83 +30,34 @@ export function useTicketCommitManager(
     }
   }, [cycleIndex]);
 
-  // Commit ticket on confirmation, only once per cycle
+  // Track "pending confirmed ticket" per cycle (WAIT to actually store/deduct until draw is finished)
   useEffect(() => {
-    if (picked.length === 6 && ticketCommittedCycle.current !== cycleIndex) {
-      wallet.addConfirmedTicket({
-        date: new Date().toISOString(),
-        numbers: picked.slice(),
-      });
-      incrementTicketCountForCycle(cycleIndex, "picked-confirm");
-      ticketCommittedCycle.current = cycleIndex;
-    }
-    // eslint-disable-next-line
-  }, [picked, cycleIndex, wallet]);
-
-  // Handle pending ticket bookkeeping (commit to wallet after REVEAL phase, etc.)
-  useEffect(() => {
-    if (state === "REVEAL") {
-      const ticketNumbers =
-        lastPickedPerCycle[cycleIndex] && lastPickedPerCycle[cycleIndex].length === 6
-          ? lastPickedPerCycle[cycleIndex]
-          : picked;
-
-      if (
-        ticketNumbers.length === 6 &&
-        (!pendingTicketRef.current ||
-          pendingTicketRef.current.cycle !== cycleIndex)
-      ) {
-        const startSet = cycleIndex * SETS_PER_CYCLE;
-        const activeSets = sets.slice(startSet, startSet + SETS_PER_CYCLE);
-        const allDrawn = activeSets.flat();
-        const matches = ticketNumbers.filter((n) => allDrawn.includes(n)).length;
-
-        pendingTicketRef.current = {
-          cycle: cycleIndex,
-          ticket: {
-            date: new Date().toISOString(),
-            numbers: ticketNumbers,
-            matches: 0,
-          },
-          entered: false,
-        };
-      }
-    } else if (
-      pendingTicketRef.current &&
-      !pendingTicketRef.current.entered
+    // Only save pending if user confirmed 6 numbers for this cycle and not already saved
+    if (
+      picked.length === 6 && 
+      (!pendingTicketRef.current || pendingTicketRef.current.cycle !== cycleIndex)
     ) {
-      wallet.addConfirmedTicket(pendingTicketRef.current.ticket);
-      pendingTicketRef.current.entered = true;
-    } else if (
-      state === "OPEN" &&
+      pendingTicketRef.current = {
+        cycle: cycleIndex,
+        ticket: {
+          date: new Date().toISOString(),
+          numbers: picked.slice(),
+        },
+        entered: false,
+      };
+    }
+    // If on new cycle, clear pending ref unless it's for THIS cycle
+    if (
       pendingTicketRef.current &&
-      pendingTicketRef.current.entered
+      pendingTicketRef.current.cycle !== cycleIndex
     ) {
       pendingTicketRef.current = null;
     }
-    // eslint-disable-next-line
-  }, [state, cycleIndex]);
+  }, [picked, cycleIndex]);
 
-  // On non-REVEAL, commit any pending ticket if not entered yet
-  useEffect(() => {
-    if (
-      state !== "REVEAL" &&
-      pendingTicketRef.current &&
-      !pendingTicketRef.current.entered
-    ) {
-      wallet.addConfirmedTicket(pendingTicketRef.current.ticket);
-      pendingTicketRef.current.entered = true;
-    }
+  // REMOVE: immediate deduction logic everywhere, let DrawEngineContext deduct after REVEAL/draw instead
 
-    if (
-      state === "OPEN" &&
-      pendingTicketRef.current &&
-      pendingTicketRef.current.entered
-    ) {
-      pendingTicketRef.current = null;
-    }
-    // eslint-disable-next-line
-  }, [state, cycleIndex, wallet]);
+  // No-op on state change (all handling done in DrawEngineContext now)
 
   return {
     ticketCommittedCycle,
