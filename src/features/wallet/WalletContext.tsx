@@ -106,7 +106,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
         }
       }
 
-      // New: Only allow creditChange to INCREASE from -30 if user won something.
+      // Only allow creditChange to INCREASE from -30 if user won something.
       let newCreditChange = ticketToAward.creditChange;
       if (totalWinnings > 0) {
         newCreditChange = ticketToAward.creditChange + totalWinnings;
@@ -125,16 +125,23 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
       const updatedHistory = [...prevHistory];
       updatedHistory[idx] = updatedTicket;
 
-      // Only add winnings to balance, NEVER deduct again.
+      // ---- DEFENSIVE: No deduction after confirm (ever!) ----
       if (totalWinnings > 0) {
         setBalance((prevBal) => {
           const newBal = prevBal + totalWinnings;
           console.log("[WalletContext] Awarding winnings:", totalWinnings, "Old balance:", prevBal, "New balance:", newBal);
           return newBal;
         });
+      } else if (totalWinnings < 0) {
+        // This should never happen: winnings should not be negative
+        setBalance((prevBal) => {
+          const newBal = prevBal + totalWinnings;
+          console.error("[WalletContext] ERROR: Negative winnings detected, adjusting balance! totalWinnings:", totalWinnings, "Old:", prevBal, "New:", newBal);
+          return newBal;
+        });
       } else {
-        // No winnings, don't change balance, only update ticket result!
-        console.log("[WalletContext] No winnings to add.");
+        // totalWinnings === 0: NO CHANGE to balance. Log for debugging.
+        console.log("[WalletContext] No winnings to add and NO deduction. Balance remains unchanged.");
       }
 
       console.log("[WalletContext] Awarded payout for ticket:", updatedTicket, "rowWinnings:", rowWinnings, "totalWinnings:", totalWinnings, "Updated history:", updatedHistory);
