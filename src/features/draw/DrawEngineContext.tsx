@@ -15,6 +15,7 @@ import { useResultBar } from "./useResultBar";
 import { SETS_COUNT, SET_SIZE, SETS_PER_CYCLE, REVEAL_TOTAL_NUMBERS, REVEAL_DURATION_SEC, REVEAL_PER_NUMBER_SEC } from "./drawConstants";
 import { useDrawSets } from "./useDrawSets";
 import { useTicketSelectionManager } from "./useTicketSelectionManager";
+import { useTicketCommitManager } from "./useTicketCommitManager";
 
 interface DrawEngineContextType {
   drawnNumbers: number[];
@@ -74,12 +75,17 @@ export function DrawEngineProvider({ children }: { children: React.ReactNode }) 
     revealStartedForCycle,
   } = useRevealAnimation(sets, SETS_PER_CYCLE, SET_SIZE);
 
-  // Helper: track pending wallet action per cycle for ticket entry
-  const pendingTicketRef = useRef<{
-    cycle: number;
-    ticket: { date: string; numbers: number[]; matches: number };
-    entered: boolean;
-  } | null>(null);
+  // Use new hook for ticket commit/confirmation and pending tracking
+  const { ticketCommittedCycle, pendingTicketRef } = useTicketCommitManager(
+    cycleIndex,
+    sets,
+    SETS_PER_CYCLE,
+    SET_SIZE,
+    state,
+    lastPickedPerCycle,
+    picked,
+    incrementTicketCountForCycle
+  );
 
   const startReveal = (cycle: number) => {
     hookStartReveal(cycle);
@@ -89,35 +95,18 @@ export function DrawEngineProvider({ children }: { children: React.ReactNode }) 
     hookInstantlyFinishReveal(cycleIndex);
   };
 
+  // Remove all direct ticket commit/pendingTicket logic/coordinating useEffects—now handled in useTicketCommitManager
+
   // On demo reset, also reset committed-cycle tracking so that tickets get allowed/incremented on new demo start
   useEffect(() => {
     if (cycleIndex === 0) {
-      ticketCommittedCycle.current = null;
       cycleTicketCountRef.current = {};
-      console.log("[DrawEngineContext] Demo RESET: ticketCommittedCycle and all ticket counts reset");
+      console.log("[DrawEngineContext] Demo RESET: all ticket counts reset");
     }
   }, [cycleIndex]);
 
   // PHASE 1: On ticket confirmation, deduct credits but don't increment jackpot yet
-  useEffect(() => {
-    if (
-      picked.length === 6 &&
-      ticketCommittedCycle.current !== cycleIndex
-    ) {
-      console.log(`[DrawEngineContext] Committing ticket (picked/confirmed) for cycle ${cycleIndex}:`, picked);
-      wallet.addConfirmedTicket({
-        date: new Date().toISOString(),
-        numbers: picked.slice(),
-      });
-      incrementTicketCountForCycle(cycleIndex, "picked-confirm");
-      ticketCommittedCycle.current = cycleIndex;
-      lastPickedPerCycle[cycleIndex] = picked.slice();
-      console.log("[DrawEngineContext] Committed ticket for cycle", cycleIndex, picked, ", ticketCommittedCycle now:", ticketCommittedCycle.current);
-    } else {
-      console.log(`[DrawEngineContext] Not committing ticket (picked.length: ${picked.length}, cycleIndex: ${cycleIndex}, ticketCommittedCycle: ${ticketCommittedCycle.current})`);
-    }
-    // eslint-disable-next-line
-  }, [picked, cycleIndex, wallet, jackpotContext]);
+  // Moved to useTicketCommitManager
 
   // REVEAL: When actual numbers are known, update last ticket record with matches/winnings (wallet history/winning payout can be calculated by wallet/history)
   useEffect(() => {
@@ -156,82 +145,19 @@ export function DrawEngineProvider({ children }: { children: React.ReactNode }) 
       };
       document.addEventListener("visibilitychange", handleVisibility);
 
-      const ticketNumbers =
-        lastPickedPerCycle[cycleIndex] && lastPickedPerCycle[cycleIndex].length === 6
-          ? lastPickedPerCycle[cycleIndex]
-          : picked;
-
-      if (
-        ticketNumbers.length === 6 &&
-        (!pendingTicketRef.current ||
-          pendingTicketRef.current.cycle !== cycleIndex)
-      ) {
-        const startSet = cycleIndex * SETS_PER_CYCLE;
-        const activeSets = sets.slice(startSet, startSet + SETS_PER_CYCLE);
-        const allDrawn = activeSets.flat();
-        const matches = ticketNumbers.filter((n) => allDrawn.includes(n)).length;
-
-        pendingTicketRef.current = {
-          cycle: cycleIndex,
-          ticket: {
-            date: new Date().toISOString(),
-            numbers: ticketNumbers,
-            matches: 0,
-          },
-          entered: false,
-        };
-        console.log(
-          "[DrawEngineContext] Created pending ticket for cycle",
-          cycleIndex,
-          "numbers:",
-          ticketNumbers,
-          "matches:",
-          matches
-        );
-      }
+      // Pending ticket logic moved to useTicketCommitManager
 
       return () => {
         document.removeEventListener("visibilitychange", handleVisibility);
         cleanupRevealTimeouts();
       };
-    } else if (
-      pendingTicketRef.current &&
-      !pendingTicketRef.current.entered
-    ) {
-      console.log("[DrawEngineContext] Adding ticket to wallet:", pendingTicketRef.current.ticket);
-      wallet.addConfirmedTicket(pendingTicketRef.current.ticket);
-      pendingTicketRef.current.entered = true;
-    } else if (
-      state === "OPEN" &&
-      pendingTicketRef.current &&
-      pendingTicketRef.current.entered
-    ) {
-      console.log("[DrawEngineContext] Clearing pending ticket ref");
-      pendingTicketRef.current = null;
     }
+    // Rest of old pending ticket management logic moved to useTicketCommitManager
     // eslint-disable-next-line
   }, [state, cycleIndex /*, wallet intentionally removed!*/]);
 
   // New: Commit ticket to wallet/credit only AFTER REVEAL phase ends (when timer ticks to next cycle)
-  useEffect(() => {
-    if (
-      state !== "REVEAL" &&
-      pendingTicketRef.current &&
-      !pendingTicketRef.current.entered
-    ) {
-      wallet.addConfirmedTicket(pendingTicketRef.current.ticket);
-      pendingTicketRef.current.entered = true;
-    }
-
-    if (
-      state === "OPEN" &&
-      pendingTicketRef.current &&
-      pendingTicketRef.current.entered
-    ) {
-      pendingTicketRef.current = null;
-    }
-    // eslint-disable-next-line
-  }, [state, cycleIndex, wallet]);
+  // Moved to useTicketCommitManager
 
   useJackpotHandlers(cycleIndex, cycleTicketCountRef, resetTicketCountForCycle);
 
