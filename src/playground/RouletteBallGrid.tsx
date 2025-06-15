@@ -156,23 +156,23 @@ export default function RouletteBallGrid({
             />
           )}
         </span>
-        {/* Center highlight */}
-        <span
-          className="absolute"
-          style={{
-            top: highlight ? "16%" : "18%",
-            left: highlight ? "38%" : "38%",
-            width: highlight ? 8 : 8,
-            height: highlight ? 8 : 8,
-            borderRadius: "50%",
-            background: highlight
-              ? "radial-gradient(circle at 40% 40%, #fff 80%, #bbf7d022 100%)"
-              : "radial-gradient(circle at 40% 40%, #fff 85%, #e0ebfc11 100%)",
-            opacity: 0.82,
-            filter: "blur(1px)",
-          }}
-          aria-hidden
-        />
+        {/* Center highlight - only show if not highlighted */}
+        {!highlight && (
+          <span
+            className="absolute"
+            style={{
+              top: "18%",
+              left: "38%",
+              width: 8,
+              height: 8,
+              borderRadius: "50%",
+              background: "radial-gradient(circle at 40% 40%, #fff 85%, #e0ebfc11 100%)",
+              opacity: 0.82,
+              filter: "blur(1px)",
+            }}
+            aria-hidden
+          />
+        )}
         {/* Number overlay */}
         {typeof number === "number" && (
           <span
