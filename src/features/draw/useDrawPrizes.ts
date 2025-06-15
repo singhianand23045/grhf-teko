@@ -2,6 +2,11 @@
 import { useEffect, useRef } from "react";
 import { calculateWinnings } from "./calculateWinnings";
 
+/*
+ * Handles awarding prizes and triggering result bar after reveal.
+ * Does NOT show warnings—silently skips if userNumbers isn't exactly 6.
+ * PHASE 5: User either wins jackpot OR regular credits (not both).
+ */
 type UseDrawPrizesArgs = {
   isRevealDone: boolean;
   cycleIndex: number;
@@ -21,10 +26,6 @@ type UseDrawPrizesArgs = {
   } | null>;
 };
 
-/**
- * Handles prize calculation and awarding after reveal phase for one ticket per cycle.
- * Does not show warnings—silently skips if userNumbers isn't exactly 6.
- */
 export function useDrawPrizes({
   isRevealDone,
   cycleIndex,
@@ -51,7 +52,7 @@ export function useDrawPrizes({
       const startSet = cycleIndex * SETS_PER_CYCLE;
       const activeSets = sets.slice(startSet, startSet + SETS_PER_CYCLE);
 
-      // Always strictly require 6 numbers, otherwise do nothing
+      // Always strictly require 6 numbers - skip if not valid
       let userNumbers: number[] = [];
       if (
         lastPickedPerCycle[cycleIndex] &&
@@ -66,7 +67,6 @@ export function useDrawPrizes({
         userNumbers = pendingTicketRef.current.ticket.numbers;
       }
 
-      // If not valid, skip everything (no warnings)
       if (userNumbers.length !== 6) {
         showResultBar(0);
         cleanupResultBarTimeout();
@@ -89,24 +89,35 @@ export function useDrawPrizes({
         ticketWasEntered = true;
       }
 
+      // Calculate winnings; never grant both types for same ticket
       const { jackpotWon, rowWinnings, totalWinnings, resultType } =
         calculateWinnings(userNumbers, activeSets, jackpotContext.jackpot);
 
+      // PHASE 5 handle: only award EITHER jackpot OR credits
       if (userNumbers.length === 6 && ticketWasEntered) {
         if (jackpotWon) {
-          wallet.awardTicketWinnings(activeSets, [0, 0, 0], totalWinnings);
+          // Award jackpot ONLY, then reset pool - NO regular credits
+          wallet.awardTicketWinnings(activeSets, [0, 0, 0], jackpotContext.jackpot);
+          // Don't forget to reset jackpot
           jackpotContext.resetJackpot();
-        } else {
+          showResultBar(jackpotContext.jackpot);
+          console.log("[Prize] JACKPOT WIN, awarded", jackpotContext.jackpot);
+        } else if (totalWinnings > 0) {
           wallet.awardTicketWinnings(activeSets, rowWinnings, totalWinnings);
+          showResultBar(totalWinnings);
+          console.log("[Prize] CREDIT WIN, awarded", totalWinnings, rowWinnings);
+        } else {
+          wallet.awardTicketWinnings(activeSets, [0,0,0], 0);
+          showResultBar(0);
+          console.log("[Prize] NO WIN, awarded nothing.");
         }
+      } else {
+        // Not a valid or entered ticket: always show "try again"
+        showResultBar(0);
+        console.log("[Prize] Not a valid or entered ticket for prize awarding.");
       }
-      showResultBar(
-        resultType === "jackpot"
-          ? jackpotContext.jackpot
-          : totalWinnings
-      );
+      cleanupResultBarTimeout();
     }
-    // No-op cleanup
     // eslint-disable-next-line
   }, [
     isRevealDone,
