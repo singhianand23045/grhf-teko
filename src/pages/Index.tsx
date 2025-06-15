@@ -39,12 +39,7 @@ const Index = () => {
               <NumberSelectionProvider>
                 <main className="flex flex-col w-full items-center px-4 py-8 h-full">
                   <h1 className="font-extrabold tracking-tight text-3xl mb-12 mt-6 text-[#1a1855]">Lucky Dip Demo</h1>
-                  <Link
-                    to="/playground"
-                    className="mb-6 px-4 py-2 bg-indigo-500 text-white rounded hover:bg-indigo-600 transition-colors font-semibold shadow"
-                  >
-                    Go to Playground (Test Area)
-                  </Link>
+                  {/* "Go to Playground (Test Area)" link removed */}
                   {/* WalletHistory removed */}
                   <TimerDisplay />
                 </main>
