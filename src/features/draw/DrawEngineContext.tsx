@@ -12,7 +12,7 @@ import { useJackpotHandlers } from "./useJackpotHandlers";
 import { useResultBar } from "./useResultBar";
 
 // === new hooks and constants extracted ===
-import { SETS_COUNT, SET_SIZE, SETS_PER_CYCLE } from "./drawConstants";
+import { SETS_COUNT, SET_SIZE, SETS_PER_CYCLE, REVEAL_TOTAL_NUMBERS, REVEAL_DURATION_SEC, REVEAL_PER_NUMBER_SEC } from "./drawConstants";
 import { useDrawSets } from "./useDrawSets";
 import { useTicketSelectionManager } from "./useTicketSelectionManager";
 
