@@ -132,6 +132,7 @@ export function DrawEngineProvider({ children }: { children: React.ReactNode }) 
       const activeSets = sets.slice(startSet, startSet + SETS_PER_CYCLE);
 
       let userNumbers: number[] = [];
+      // Strictly only use picks/committed tickets with exactly 6 numbers
       if (
         lastPickedPerCycle[cycleIndex] &&
         lastPickedPerCycle[cycleIndex].length === 6
@@ -143,6 +144,39 @@ export function DrawEngineProvider({ children }: { children: React.ReactNode }) 
         pendingTicketRef.current.ticket.numbers.length === 6
       ) {
         userNumbers = pendingTicketRef.current.ticket.numbers;
+      } else {
+        // EXTRA: warn if any partial pick is being considered
+        if (
+          lastPickedPerCycle[cycleIndex] &&
+          lastPickedPerCycle[cycleIndex].length !== 6
+        ) {
+          console.warn(
+            `[DrawEngineContext] WARNING: lastPickedPerCycle[${cycleIndex}] used in draw with incorrect length:`,
+            lastPickedPerCycle[cycleIndex]
+          );
+        }
+        if (
+          pendingTicketRef.current &&
+          pendingTicketRef.current.cycle === cycleIndex &&
+          pendingTicketRef.current.ticket.numbers.length !== 6
+        ) {
+          console.warn(
+            `[DrawEngineContext] WARNING: pendingTicketRef.current.ticket.numbers used in draw with incorrect length:`,
+            pendingTicketRef.current.ticket.numbers
+          );
+        }
+      }
+
+      // ADDITIONAL GUARD: Prevent awarding for <6 or >6 numbers
+      if (userNumbers.length !== 6) {
+        console.warn(
+          `[DrawEngineContext] Aborting prize/ticket logic: userNumbers is not length 6:`,
+          userNumbers
+        );
+        // Show result bar as "try again" or nothing, but do NOT award
+        showResultBar(0);
+        cleanupResultBarTimeout();
+        return;
       }
 
       // ONCE PER CYCLE, only now DEDUCT CREDITS and add ticket
