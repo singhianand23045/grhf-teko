@@ -40,38 +40,38 @@ export function DrawEngineProvider({ children }: { children: React.ReactNode }) 
   const { lastPickedPerCycle, picked } = useTicketSelectionManager(cycleIndex);
 
   // Count of tickets per cycle (for jackpot add/reset logic)
-  const cycleTicketCountRef = useRef<{ [cycle: number]: number }>({});
+  // const cycleTicketCountRef = useRef<{ [cycle: number]: number }>({});
 
-  function incrementTicketCountForCycle(cycle: number, debugSource = "unknown") {
-    if (!cycleTicketCountRef.current[cycle]) {
-      cycleTicketCountRef.current[cycle] = 1;
-      console.log(`[DrawEngineContext] First ticket for cycle ${cycle} from ${debugSource} - count=1`);
-    } else {
-      console.log(`[DrawEngineContext] Already have a ticket for cycle ${cycle} from ${debugSource} — no increment`);
-    }
-    // Debug print state
-    console.log("[DrawEngineContext] cycleTicketCountRef after increment:", { ...cycleTicketCountRef.current });
-  }
+  // function incrementTicketCountForCycle(cycle: number, debugSource = "unknown") {
+  //   if (!cycleTicketCountRef.current[cycle]) {
+  //     cycleTicketCountRef.current[cycle] = 1;
+  //     console.log(`[DrawEngineContext] First ticket for cycle ${cycle} from ${debugSource} - count=1`);
+  //   } else {
+  //     console.log(`[DrawEngineContext] Already have a ticket for cycle ${cycle} from ${debugSource} — no increment`);
+  //   }
+  //   // Debug print state
+  //   console.log("[DrawEngineContext] cycleTicketCountRef after increment:", { ...cycleTicketCountRef.current });
+  // }
 
-  function resetTicketCountForCycle(cycle: number) {
-    console.log(`[DrawEngineContext] Resetting ticket count for cycle ${cycle}`);
-    delete cycleTicketCountRef.current[cycle];
-    console.log("[DrawEngineContext] cycleTicketCountRef after reset:", { ...cycleTicketCountRef.current });
-  }
+  // function resetTicketCountForCycle(cycle: number) {
+  //   console.log(`[DrawEngineContext] Resetting ticket count for cycle ${cycle}`);
+  //   delete cycleTicketCountRef.current[cycle];
+  //   console.log("[DrawEngineContext] cycleTicketCountRef after reset:", { ...cycleTicketCountRef.current });
+  // }
 
   // --- Ensure previous cycle ticket count is captured for jackpot increment logic ---
-  useEffect(() => {
-    if (cycleIndex > 0) {
-      const prevCycle = cycleIndex - 1;
-      // Forcibly ensure ticket count is captured for prevCycle IF the user picked numbers for that cycle
-      const userPicked = lastPickedPerCycle[prevCycle];
-      if (userPicked && userPicked.length === 6 && !cycleTicketCountRef.current[prevCycle]) {
-        console.log(`[DrawEngineContext] (cycle advance) Trying to increment ticket for previous cycle=${prevCycle}`);
-        incrementTicketCountForCycle(prevCycle, "catchup-on-cycle-advance");
-      }
-    }
-    // eslint-disable-next-line
-  }, [cycleIndex]);
+  // useEffect(() => {
+  //   if (cycleIndex > 0) {
+  //     const prevCycle = cycleIndex - 1;
+  //     // Forcibly ensure ticket count is captured for prevCycle IF the user picked numbers for that cycle
+  //     const userPicked = lastPickedPerCycle[prevCycle];
+  //     if (userPicked && userPicked.length === 6 && !cycleTicketCountRef.current[prevCycle]) {
+  //       console.log(`[DrawEngineContext] (cycle advance) Trying to increment ticket for previous cycle=${prevCycle}`);
+  //       incrementTicketCountForCycle(prevCycle, "catchup-on-cycle-advance");
+  //     }
+  //   }
+  //   // eslint-disable-next-line
+  // }, [cycleIndex]);
 
   const {
     resultBar,
@@ -100,7 +100,7 @@ export function DrawEngineProvider({ children }: { children: React.ReactNode }) 
     state,
     lastPickedPerCycle,
     picked,
-    incrementTicketCountForCycle
+    () => {}
   );
 
   const startReveal = (cycle: number) => {
@@ -116,7 +116,7 @@ export function DrawEngineProvider({ children }: { children: React.ReactNode }) 
   // On demo reset, also reset committed-cycle tracking so that tickets get allowed/incremented on new demo start
   useEffect(() => {
     if (cycleIndex === 0) {
-      cycleTicketCountRef.current = {};
+      // cycleTicketCountRef.current = {};
       console.log("[DrawEngineContext] Demo RESET: all ticket counts reset");
     }
   }, [cycleIndex]);
@@ -176,10 +176,7 @@ export function DrawEngineProvider({ children }: { children: React.ReactNode }) 
   // Moved to useTicketCommitManager
 
   // Enhanced logging for jackpot handlers effect
-  useJackpotHandlers(cycleIndex, cycleTicketCountRef, (cycle) => {
-    console.log(`[DrawEngineContext -> JackpotHandlers] Reset ticket count for cycle=${cycle}`);
-    resetTicketCountForCycle(cycle);
-  });
+  useJackpotHandlers(cycleIndex, lastPickedPerCycle);
 
   // PHASE 5 Payoff Handling: 
   useEffect(() => {

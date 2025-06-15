@@ -1,33 +1,33 @@
+
 import { useEffect } from "react";
 import { useJackpot } from "../jackpot/JackpotContext";
-import { WalletType } from "../wallet/WalletContext";
 
-// Encapsulates jackpot increment/reset logic for cycle changes
+/**
+ * Handles increment/reset of jackpot based on confirmed ticket per cycle entry.
+ * Relies on accurate lastPickedPerCycle data, which is robust to race conditions.
+ */
 export function useJackpotHandlers(
   cycleIndex: number,
-  cycleTicketCountRef: React.MutableRefObject<{ [cycle: number]: number }>,
-  resetTicketCountForCycle: (cycle: number) => void
+  lastPickedPerCycle: { [cycle: number]: number[] }
 ) {
   const jackpotContext = useJackpot();
 
   useEffect(() => {
-    // On cycle change, possibly increase jackpot and clean up ticket states
     if (cycleIndex > 0) {
       const prevCycle = cycleIndex - 1;
-      const tickets = cycleTicketCountRef.current[prevCycle] ? 1 : 0;
-      console.log(`[useJackpotHandlers] On cycle change to ${cycleIndex}, checking previous cycle ${prevCycle}: ticket count = ${cycleTicketCountRef.current[prevCycle]}`);
-      if (tickets > 0) {
+      const userNumbers = lastPickedPerCycle[prevCycle] || [];
+      const hadValidTicket = userNumbers.length === 6;
+      console.log(
+        `[useJackpotHandlers] cycle=${cycleIndex}, prevCycle=${prevCycle}, userNumbers: ${JSON.stringify(userNumbers)}, hadValidTicket: ${hadValidTicket}`
+      );
+      if (hadValidTicket) {
         console.log(`[useJackpotHandlers] Adding $1 to jackpot for previous cycle ${prevCycle}`);
-        jackpotContext.addToJackpot(1); // Add $1 for this user/cycle
-        resetTicketCountForCycle(prevCycle);
+        jackpotContext.addToJackpot(1);
       }
     }
     if (cycleIndex === 0) {
-      cycleTicketCountRef.current = {};
-      console.log("[useJackpotHandlers] cycleIndex 0, ticket count ref reset to empty.");
+      console.log("[useJackpotHandlers] cycleIndex 0, resetting for new demo/game.");
     }
     // eslint-disable-next-line
-  }, [cycleIndex, jackpotContext]);
+  }, [cycleIndex, jackpotContext, lastPickedPerCycle]);
 }
-
-// Add more jackpot utilities if needed.
