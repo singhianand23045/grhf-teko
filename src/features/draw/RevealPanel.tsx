@@ -13,7 +13,17 @@ const BASE_DIAM = "2.2rem"; // same as used elsewhere (LotteryTicket)
 const ENABLE_ROULETTE_ANIMATION = false;
 
 export default function RevealPanel() {
-  const { drawnNumbers, revealResult } = useDrawEngine();
+  // DEBUG: Give a visible runtime warning
+  let ctx;
+  try {
+    ctx = useDrawEngine();
+  } catch (e) {
+    // Console error and throw
+    console.error("[RevealPanel] useDrawEngine context error! Is RevealPanel rendered outside DrawEngineProvider?");
+    throw e;
+  }
+
+  const { drawnNumbers, revealResult } = ctx;
   const { picked: userNumbers } = useNumberSelection();
   const { state } = useTimer();
 
@@ -109,4 +119,3 @@ export default function RevealPanel() {
     </div>
   );
 }
-
