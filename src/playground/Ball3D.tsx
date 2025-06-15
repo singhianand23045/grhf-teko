@@ -15,14 +15,25 @@ export default function Ball3D({
   spinConfig,
 }: Ball3DProps) {
   // Determine color based on user pick (highlight)
+  const isSpinning = !!spinning;
+
+  // CHANGED: For spinning balls, always use the roulette gradient with more visual depth
   const ballBackground = highlight
     ? "bg-green-500"
+    : isSpinning
+    ? "bg-gradient-to-br from-slate-900 via-slate-700 to-neutral-500"
     : "bg-gradient-to-b from-white via-slate-100 to-slate-300";
+
   const borderColor = highlight
     ? "border-green-600/60"
+    : isSpinning
+    ? "border-black"
     : "border-slate-500/40";
+
   const ballBoxShadow = highlight
     ? "0 3px 16px 2px rgba(34,197,94,0.28), 0 0.5px 2.8px 0px #eaf3fa"
+    : isSpinning
+    ? "0 3px 14px 2px rgba(50,50,60,0.36), 0 0.5px 2.8px 0px #222a"
     : "0 3px 8px 2px rgba(80,90,120,0.20), 0 0.5px 2.8px 0px #eaf3fa";
 
   // Dynamic animation config
@@ -59,6 +70,7 @@ export default function Ball3D({
         }}
         aria-hidden
       />
+
       {/* Gloss for spinning, static gloss for stopped */}
       <span
         className="absolute left-0 top-0 w-full h-full rounded-full pointer-events-none overflow-hidden"
@@ -70,7 +82,7 @@ export default function Ball3D({
             className="block absolute left-[-40%] top-1/4 w-2/3 h-1/2"
             style={{
               background:
-                "linear-gradient(100deg, rgba(255,255,255,0.33) 0%, rgba(255,255,255,0.9) 30%, rgba(255,255,255,0.09) 100%)",
+                "linear-gradient(100deg, rgba(255,255,255,0.23) 0%, rgba(255,255,255,0.6) 30%, rgba(255,255,255,0.08) 100%)",
               filter: "blur(2.5px)",
               borderRadius: "40%",
               transform: "rotate(-14deg)",
@@ -107,8 +119,8 @@ export default function Ball3D({
           />
         )}
       </span>
-      {/* Center highlight - only show if not highlighted */}
-      {!highlight && (
+      {/* Center highlight - only show if not highlighted and not spinning */}
+      {!highlight && !isSpinning && (
         <span
           className="absolute"
           style={{
