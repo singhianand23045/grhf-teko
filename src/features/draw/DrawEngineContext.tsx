@@ -1,5 +1,4 @@
-
-import React, { createContext, useContext } from "react";
+import React, { createContext, useContext, useEffect } from "react";
 import { useTimer } from "../timer/timer-context";
 import { useWallet } from "../wallet/WalletContext";
 import { useJackpot } from "../jackpot/JackpotContext";
@@ -58,6 +57,7 @@ export function DrawEngineProvider({ children }: { children: React.ReactNode }) 
     startReveal: _startReveal,
     instantlyFinishReveal: _instantlyFinishReveal,
     cleanupRevealTimeouts,
+    revealStartedForCycle // <- needed to avoid retrigger
   } = useRevealAnimation(
     sets,
     SETS_PER_CYCLE,
@@ -99,6 +99,15 @@ export function DrawEngineProvider({ children }: { children: React.ReactNode }) 
     resultBar,
     hideResultBar
   });
+
+  // ---- FIX: Trigger startReveal when state transitions to "REVEAL" ----
+  useEffect(() => {
+    if (state === "REVEAL" && revealStartedForCycle.current !== cycleIndex) {
+      _startReveal(cycleIndex);
+    }
+    // eslint-disable-next-line
+  }, [state, cycleIndex]);
+  // ----
 
   const startReveal = (cycleIdx: number) => {
     _startReveal(cycleIdx);
