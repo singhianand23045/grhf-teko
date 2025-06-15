@@ -12,12 +12,13 @@ export type TicketType = {
   numbers: number[];
   matches: number;
   creditChange: number;
+  winnings?: number; // <-- for display only
 };
 
 type WalletContextType = {
   balance: number;
   history: TicketType[];
-  addConfirmedTicket: (ticket: Omit<TicketType, "id" | "creditChange" | "matches">) => void;
+  addConfirmedTicket: (ticket: Omit<TicketType, "id" | "creditChange" | "matches" | "winnings">) => void;
   awardTicketWinnings: (cycleRows: number[][], rowWinnings: number[], totalWinnings: number) => void;
   resetWallet: () => void;
 };
@@ -67,12 +68,13 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
     console.log("[WalletContext] Provider rendered with balance:", balance, "history:", history);
   });
 
-  function addConfirmedTicket(ticketCore: Omit<TicketType, "id" | "creditChange" | "matches">) {
+  function addConfirmedTicket(ticketCore: Omit<TicketType, "id" | "creditChange" | "matches" | "winnings">) {
     const newTicket: TicketType = {
       ...ticketCore,
       id: Math.random().toString(36).slice(2) + Date.now(),
       matches: 0,
       creditChange: -30,
+      winnings: 0,
     };
     setBalance(prev => {
       const newBal = prev - 30;
@@ -86,6 +88,9 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
     });
   }
 
+  /**
+   * Only awards winnings for the FIRST pending ticket (with matches === 0), and NEVER mutates creditChange field.
+   */
   function awardTicketWinnings(cycleRows: number[][], rowWinnings: number[], totalWinnings: number) {
     setHistory(prevHistory => {
       if (!prevHistory.length) return prevHistory;
@@ -106,26 +111,18 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
         }
       }
 
-      // Only allow creditChange to INCREASE from -30 if user won something.
-      let newCreditChange = ticketToAward.creditChange;
-      if (totalWinnings > 0) {
-        newCreditChange = ticketToAward.creditChange + totalWinnings;
-      } else if (ticketToAward.creditChange < -30) {
-        // Defensive: Never let it deduct again
-        console.warn("[WalletContext] Defensive: ticket's creditChange is less than -30, this should not happen!", ticketToAward);
-        newCreditChange = -30;
-      } // else: leave at whatever it was (-30, i.e. only initial deduction)
-
+      // Always: winnings are added to balance; ticket's creditChange is never mutated.
       const updatedTicket: TicketType = {
         ...ticketToAward,
         matches: totalMatches,
-        creditChange: newCreditChange,
+        // creditChange: ticketToAward.creditChange, // never change after confirmation
+        winnings: totalWinnings, // for display ONLY
       };
 
       const updatedHistory = [...prevHistory];
       updatedHistory[idx] = updatedTicket;
 
-      // ---- DEFENSIVE: No deduction after confirm (ever!) ----
+      // Award winnings to balance (NEVER mutate creditChange)
       if (totalWinnings > 0) {
         setBalance((prevBal) => {
           const newBal = prevBal + totalWinnings;
@@ -133,7 +130,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
           return newBal;
         });
       } else if (totalWinnings < 0) {
-        // This should never happen: winnings should not be negative
+        // Defensive: This should never happen: winnings should not be negative
         setBalance((prevBal) => {
           const newBal = prevBal + totalWinnings;
           console.error("[WalletContext] ERROR: Negative winnings detected, adjusting balance! totalWinnings:", totalWinnings, "Old:", prevBal, "New:", newBal);
@@ -155,10 +152,6 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify({ balance: STARTING_BALANCE, history: [] }));
     console.log("[WalletContext] resetWallet called, set balance/history to starting values.");
   }
-
-  // Move console.log OUT of JSX
-  // Before return, log context as needed:
-  // console.log("[WalletContext] Context.Provider render, balance:", balance, "history:", history);
 
   return (
     <WalletContext.Provider value={{ balance, history, addConfirmedTicket, awardTicketWinnings, resetWallet }}>
