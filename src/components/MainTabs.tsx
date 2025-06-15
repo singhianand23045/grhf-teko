@@ -28,8 +28,14 @@ export default function MainTabs() {
 
   return (
     <nav
-      className="fixed bottom-0 left-1/2 -translate-x-1/2 w-[402px] max-w-full z-30 bg-white border-t border-gray-200 rounded-b-2xl h-16 flex items-center"
-      style={{}}
+      className="fixed bottom-0 left-1/2 -translate-x-1/2 w-[402px] max-w-full z-30 bg-white h-16 flex items-center border-t border-gray-200"
+      // removed rounded-b-2xl and ensured border for visual separation, but flush with edge
+      style={{
+        borderBottomLeftRadius: 0,
+        borderBottomRightRadius: 0,
+        marginBottom: 0,
+        paddingBottom: 0,
+      }}
     >
       <ul className="flex w-full justify-around items-center">
         {TABS.map((tab) => {
@@ -64,3 +70,4 @@ export default function MainTabs() {
     </nav>
   );
 }
+
