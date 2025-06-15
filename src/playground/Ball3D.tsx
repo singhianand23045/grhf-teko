@@ -1,6 +1,10 @@
 
 import React from "react";
 
+// Use a single global font/circle size in this file
+const CIRCLE_DIAM = 35; // px
+const NUMBER_FONT_SIZE = "1.05rem";
+
 type Ball3DProps = {
   spinning?: boolean;
   number?: number;
@@ -14,10 +18,8 @@ export default function Ball3D({
   highlight,
   spinConfig,
 }: Ball3DProps) {
-  // Determine color based on user pick (highlight)
   const isSpinning = !!spinning;
 
-  // CHANGED: For spinning balls, always use the roulette gradient with more visual depth
   const ballBackground = highlight
     ? "bg-green-500"
     : isSpinning
@@ -36,7 +38,6 @@ export default function Ball3D({
     ? "0 3px 14px 2px rgba(50,50,60,0.36), 0 0.5px 2.8px 0px #222a"
     : "0 3px 8px 2px rgba(80,90,120,0.20), 0 0.5px 2.8px 0px #eaf3fa";
 
-  // Dynamic animation config
   let glossAnimation = undefined;
   let glossDuration = undefined;
   if (spinning && spinConfig) {
@@ -51,13 +52,12 @@ export default function Ball3D({
     <div
       className={`relative flex items-center justify-center aspect-square`}
       style={{
-        width: 38,
-        height: 38,
+        width: CIRCLE_DIAM,
+        height: CIRCLE_DIAM,
         minWidth: 28,
         minHeight: 28,
       }}
     >
-      {/* Ball surface */}
       <span
         className={`
           absolute inset-0 rounded-full
@@ -71,7 +71,6 @@ export default function Ball3D({
         aria-hidden
       />
 
-      {/* Gloss for spinning, static gloss for stopped */}
       <span
         className="absolute left-0 top-0 w-full h-full rounded-full pointer-events-none overflow-hidden"
         aria-hidden
@@ -92,7 +91,6 @@ export default function Ball3D({
             }}
           />
         ) : highlight ? (
-          // Subtle gloss over green if highlighted
           <span
             className="block absolute left-[18%] top-1/4 w-2/3 h-2/5"
             style={{
@@ -105,7 +103,6 @@ export default function Ball3D({
             }}
           />
         ) : (
-          // Standard gloss for stopped white ball
           <span
             className="block absolute left-[20%] top-1/4 w-2/3 h-1/2"
             style={{
@@ -119,7 +116,6 @@ export default function Ball3D({
           />
         )}
       </span>
-      {/* Center highlight - only show if not highlighted and not spinning */}
       {!highlight && !isSpinning && (
         <span
           className="absolute"
@@ -136,10 +132,9 @@ export default function Ball3D({
           aria-hidden
         />
       )}
-      {/* Number overlay */}
       {typeof number === "number" && (
         <span
-          className={`relative font-extrabold text-base select-none`}
+          className={`relative font-extrabold select-none`}
           style={{
             zIndex: 10,
             color: highlight ? "#111" : "#222",
@@ -149,6 +144,8 @@ export default function Ball3D({
             fontFamily: "Poppins, Inter, sans-serif",
             letterSpacing: "-0.02em",
             userSelect: "none",
+            fontSize: NUMBER_FONT_SIZE,
+            lineHeight: 1.13,
           }}
         >
           {number}
@@ -175,3 +172,4 @@ export default function Ball3D({
     </div>
   );
 }
+

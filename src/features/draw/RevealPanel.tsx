@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useDrawEngine } from "./DrawEngineContext";
 import { useNumberSelection } from "../number-select/NumberSelectionContext";
@@ -6,7 +5,10 @@ import { useTimer } from "../timer/timer-context";
 import RevealRoulettePanel from "./RevealRoulettePanel";
 import ResultBar from "./ResultBar";
 
-// Set this to false to roll back to previous static grid implementation
+// Use a single global font/circle size in this file
+const BASE_FONT_SIZE = "1rem";
+const BASE_DIAM = "2.2rem"; // same as used elsewhere (LotteryTicket)
+
 const ENABLE_ROULETTE_ANIMATION = false;
 
 export default function RevealPanel() {
@@ -40,17 +42,13 @@ export default function RevealPanel() {
   // Used to highlight slots matching user ticket
   const userSet = new Set(userNumbers);
 
-  // Show ResultBar during 5s after revealResult.show becomes true (see context for timing)
-  // Note: The logic for when to show credits / jackpot is in useDrawEngine (returns revealResult object)
   return (
     <div className="flex flex-col items-center w-full h-full overflow-y-hidden">
-      {/* ResultBar: above numbers grid, only visible during 5s after reveal */}
       <ResultBar
         visible={!!revealResult.show}
         creditsWon={revealResult.credits}
         jackpot={Boolean(revealResult.credits && revealResult.credits > 0 && revealResult.credits >= 1000)}
       />
-      {/* Drawn Numbers Grid - legacy */}
       <div className="w-full max-w-full flex flex-col justify-center items-center py-0">
         <div className="w-full space-y-1">
           {drawnSets.map((set, rowIdx) => (
@@ -60,13 +58,17 @@ export default function RevealPanel() {
             >
               {set.map((n, colIdx) => {
                 const baseCircleStyle = {
-                  width: "clamp(1.1rem, 4vw, 2rem)",
+                  width: BASE_DIAM,
                   minWidth: 28,
-                  height: "clamp(1.1rem, 4vw, 2rem)",
+                  height: BASE_DIAM,
                   minHeight: 28,
-                  fontSize: "clamp(0.7rem, 2.5vw, 1.05rem)",
+                  fontSize: BASE_FONT_SIZE,
                   lineHeight: 1.05,
                   padding: 0,
+                  boxSizing: "border-box",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
                 };
                 if (n === undefined) {
                   return (
@@ -106,4 +108,3 @@ export default function RevealPanel() {
     </div>
   );
 }
-

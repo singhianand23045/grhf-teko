@@ -21,18 +21,22 @@ const LOGICAL_HEIGHT = 874; // Should match page layout
  * - Confirmed/user numbers: 40%
  */
 
+const JACKPOT_TIMER_HEIGHT = 0.15;
+const SPACER_HEIGHT = 0.02; // reduce a bit for extra space
+const DRAW_SECTION_HEIGHT = 0.35;
+
 export default function TimerDisplay() {
   const { countdown, state, resetDemo } = useTimer();
-
-  const TIMER_HEIGHT = 0.10;
-  const SPACER_HEIGHT = 0.03;
-  const DRAW_SECTION_HEIGHT = 0.20;
 
   // JACKPOT + TIMER HEADER -- Phase 5 top row
   const JackpotTimerHeader = (
     <div
       className="w-full flex flex-row items-center justify-between px-0 pt-4 pb-0"
-      style={{ minHeight: 52, maxHeight: 90, height: 64 }}
+      style={{
+        minHeight: Math.floor(LOGICAL_HEIGHT * JACKPOT_TIMER_HEIGHT),
+        maxHeight: Math.ceil(LOGICAL_HEIGHT * JACKPOT_TIMER_HEIGHT),
+        height: `${JACKPOT_TIMER_HEIGHT * 100}%`
+      }}
       data-testid="jackpot-timer-header"
     >
       <div className="flex-1 flex justify-start">
@@ -72,23 +76,22 @@ export default function TimerDisplay() {
     ></div>
   );
 
-  // Drawn+Ticket: Only during REVEAL, keep both in shared contexts vertically stacked
+  // NOTE: set both sections to 35% height, both before and after reveal
   const RevealSectionWithTicket = (
     <DrawEngineProvider>
       <div className="flex flex-col w-full h-full">
-        {/* Drawn numbers grid */}
         <div
           className="flex flex-col items-center justify-center w-full flex-shrink-0 flex-grow-0 overflow-y-hidden"
           style={{
-            height: "20%",              // force 20% of parent at all times
-            minHeight: 85,              
-            maxHeight: "20%",
-            flexBasis: "20%",
+            height: `${DRAW_SECTION_HEIGHT * 100}%`,
+            minHeight: Math.floor(LOGICAL_HEIGHT * DRAW_SECTION_HEIGHT),
+            maxHeight: `${DRAW_SECTION_HEIGHT * 100}%`,
+            flexBasis: `${DRAW_SECTION_HEIGHT * 100}%`,
           }}
         >
           <RevealPanel />
         </div>
-        {/* Confirmed numbers section: always 40% height, sits just below credits */}
+        {/* Confirmed numbers section: always 40% height */}
         <div
           className="flex-shrink-0 flex-grow-0 flex flex-col items-center justify-center overflow-y-hidden"
           style={{
@@ -186,12 +189,8 @@ export default function TimerDisplay() {
     >
       {JackpotTimerHeader}
       {Spacer}
-      {/* Drawn numbers or reveal+ticket */}
       {state === "REVEAL" ? RevealSectionWithTicket : DrawSection}
-      {/* CreditsBar is always visible at all times in prototype */}
       <CreditsBar />
-      {/* No spacer below credits bar */}
-      {/* Confirmed or selection (always 40% height, directly below credits) */}
       {state !== "REVEAL" && ConfirmedSection}
     </div>
   );
