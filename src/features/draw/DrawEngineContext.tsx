@@ -5,6 +5,7 @@ import { useWallet } from "../wallet/WalletContext";
 import { useNumberSelection } from "../number-select/NumberSelectionContext";
 import { useJackpot } from "../jackpot/JackpotContext";
 import { getCreditsForMatches } from "./getCreditsForMatches";
+import { calculateWinnings } from "./calculateWinnings";
 
 const SETS_COUNT = 6;
 const SET_SIZE = 6;
@@ -330,33 +331,19 @@ export function DrawEngineProvider({ children }: { children: React.ReactNode }) 
         userNumbers = lastPickedPerCycle.current[cycleIndex];
       }
 
-      // PHASE 5 LOGIC — Check if any row is jackpot match
-      let rowWinnings = [0, 0, 0];
-      let jackpotWon = false;
-      if (userNumbers.length === 6) {
-        for (let i = 0; i < SETS_PER_CYCLE; i++) {
-          const drawnRow = activeSets[i];
-          const matches = drawnRow.filter((n) => userNumbers.includes(n)).length;
-          if (matches === 6) {
-            jackpotWon = true;
-          }
-          rowWinnings[i] = getCreditsForMatches(matches);
-        }
-      }
-
-      let totalWinnings = 0;
-      let resultType: "jackpot" | "credits" | "none" = "none";
+      // --- Use the pure utility for result logic ---
+      const { jackpotWon, rowWinnings, totalWinnings, resultType } = calculateWinnings(
+        userNumbers,
+        activeSets,
+        jackpotContext.jackpot
+      );
 
       if (userNumbers.length === 6) {
         if (jackpotWon) {
           // Award jackpot only, NO regular credit payout
-          totalWinnings = jackpotContext.jackpot;
-          resultType = "jackpot";
           wallet.awardTicketWinnings(activeSets, [0,0,0], totalWinnings);
           jackpotContext.resetJackpot();
         } else {
-          totalWinnings = rowWinnings.reduce((sum, w) => sum + w, 0);
-          resultType = totalWinnings > 0 ? "credits" : "none";
           wallet.awardTicketWinnings(activeSets, rowWinnings, totalWinnings);
         }
       }
