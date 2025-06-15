@@ -1,4 +1,3 @@
-
 import { useRef, useState } from "react";
 
 /**
@@ -8,8 +7,7 @@ import { useRef, useState } from "react";
  */
 export function useResultBar(
   initial: { show: boolean; credits: number | null } = { show: false, credits: null },
--  timeoutMs: number = 5000
-+  timeoutMs: number = 10000 // Updated: result message persists for 10 seconds (0:30–0:20)
+  timeoutMs: number = 10000 // Updated: result message persists for 10 seconds (0:30–0:20)
 ) {
   const [resultBar, setResultBar] = useState<{ show: boolean; credits: number | null }>(initial);
   const resultTimeout = useRef<NodeJS.Timeout | null>(null);
