@@ -30,6 +30,19 @@ export default function FlexibleLayout() {
   const timerCfg = layoutConfig.find((s) => s.key === "timer");
   const headerCfg = layoutConfig.find((s) => s.key === "header");
 
+  // Spacer utility for 0.5% height
+  const SectionGap = () => (
+    <div
+      className="flex-shrink-0"
+      style={{
+        height: "0.5%",
+        minHeight: 0,
+        width: "100%",
+      }}
+      aria-hidden="true"
+    />
+  );
+
   return (
     <div className="w-full h-full flex flex-col">
       {/* Header (Lucky Dip, 5%) */}
@@ -42,6 +55,8 @@ export default function FlexibleLayout() {
       >
         {sectionMap["header"]}
       </div>
+      {/* Gap */}
+      <SectionGap />
       {/* Jackpot and Timer side by side (15% total height) */}
       <div
         className="w-full flex flex-row flex-shrink-0 flex-grow-0"
@@ -65,6 +80,8 @@ export default function FlexibleLayout() {
           {sectionMap["timer"]}
         </div>
       </div>
+      {/* Gap */}
+      <SectionGap />
       {/* Draw Numbers (30%) */}
       <div
         className={`w-full flex-shrink-0 flex-grow-0 flex items-center justify-center bg-gradient-to-r ${layoutConfig[3].bg} ${layoutConfig[3].font}`}
@@ -75,6 +92,8 @@ export default function FlexibleLayout() {
       >
         {sectionMap["drawNumbers"]}
       </div>
+      {/* Gap */}
+      <SectionGap />
       {/* Wallet / Credits (5%) */}
       <div
         className={`w-full flex-shrink-0 flex-grow-0 flex items-center justify-center bg-gradient-to-r ${layoutConfig[4].bg} ${layoutConfig[4].font}`}
@@ -85,6 +104,8 @@ export default function FlexibleLayout() {
       >
         {sectionMap["wallet"]}
       </div>
+      {/* Gap */}
+      <SectionGap />
       {/* Number Select (45%) */}
       <div
         className={`w-full flex-shrink-0 flex-grow-0 flex items-center justify-center bg-gradient-to-r ${layoutConfig[5].bg} ${layoutConfig[5].font}`}
