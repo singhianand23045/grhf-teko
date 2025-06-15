@@ -7,6 +7,11 @@ import { useJackpot } from "../jackpot/JackpotContext";
 import { getCreditsForMatches } from "./getCreditsForMatches";
 import { calculateWinnings } from "./calculateWinnings";
 
+// --- new imports from refactor ---
+import { useRevealAnimation } from "./useRevealAnimation";
+import { shouldAwardTicket } from "./walletAwardUtils";
+import { useJackpotHandlers } from "./useJackpotHandlers";
+
 const SETS_COUNT = 6;
 const SET_SIZE = 6;
 const SETS_PER_CYCLE = 3; // 18 numbers (3x6) per cycle
@@ -52,9 +57,7 @@ export function DrawEngineProvider({ children }: { children: React.ReactNode }) 
     console.log("[DrawEngineContext] cycleTicketCountRef after reset:", { ...cycleTicketCountRef.current });
   }
 
-  const [drawnNumbers, setDrawnNumbers] = useState<number[]>([]);
-  const [isRevealDone, setIsRevealDone] = useState(false);
-   const [resultBar, setResultBar] = useState<{ show: boolean; credits: number | null }>({ show: false, credits: null });
+  const [resultBar, setResultBar] = useState<{ show: boolean; credits: number | null }>({ show: false, credits: null });
   const resultTimeout = useRef<NodeJS.Timeout | null>(null);
 
   // Generate 6 sets of 6 numbers, once per session
@@ -64,8 +67,15 @@ export function DrawEngineProvider({ children }: { children: React.ReactNode }) 
   }
   const sets = setsRef.current;
 
-  const revealTimeouts = useRef<NodeJS.Timeout[]>([]);
-  const revealStartedForCycle = useRef<number | null>(null);
+  // Use refactored custom hook for reveal
+  const {
+    drawnNumbers,
+    isRevealDone,
+    startReveal: hookStartReveal,
+    instantlyFinishReveal: hookInstantlyFinishReveal,
+    cleanupRevealTimeouts,
+    revealStartedForCycle,
+  } = useRevealAnimation(sets, SETS_PER_CYCLE, SET_SIZE);
 
   // --- NEW: Keep last picked numbers per cycle regardless of provider reset ---
   const lastPickedPerCycle = useRef<{ [cycle: number]: number[] }>({});
@@ -78,44 +88,12 @@ export function DrawEngineProvider({ children }: { children: React.ReactNode }) 
     entered: boolean;
   } | null>(null);
 
-  // Helper: count ticket per cycle, initialize if missing
-  
-
-  // Reveal logic: reveal all numbers in 9 seconds, one every 0.5s (18 numbers)
-  const REVEAL_TOTAL_NUMBERS = SETS_PER_CYCLE * SET_SIZE; // 18
-  const REVEAL_DURATION_SEC = 9; // 0:45 to 0:36 = 9 seconds
-  const REVEAL_PER_NUMBER_SEC = REVEAL_DURATION_SEC / REVEAL_TOTAL_NUMBERS; // 0.5s per number
-
   const startReveal = (cycle: number) => {
-    revealTimeouts.current.forEach(clearTimeout);
-    revealTimeouts.current = [];
-    // cycle 0: sets 0‒2, cycle 1: sets 3‒5
-    const startSet = cycle * SETS_PER_CYCLE;
-    const activeSets = sets.slice(startSet, startSet + SETS_PER_CYCLE);
-    // Flatten the active sets
-    const poolSlice = activeSets.flat();
-    setDrawnNumbers([]);
-    setIsRevealDone(false);
-
-    for (let i = 0; i < poolSlice.length; i++) {
-      revealTimeouts.current.push(
-        setTimeout(() => {
-          setDrawnNumbers((prev) => [...prev, poolSlice[i]]);
-          if (i === poolSlice.length - 1) setIsRevealDone(true);
-        }, REVEAL_PER_NUMBER_SEC * 1000 * i)
-      );
-    }
-    revealStartedForCycle.current = cycle;
+    hookStartReveal(cycle);
   };
 
   const instantlyFinishReveal = () => {
-    revealTimeouts.current.forEach(clearTimeout);
-    revealTimeouts.current = [];
-    const cycle = revealStartedForCycle.current ?? cycleIndex;
-    const startSet = cycle * SETS_PER_CYCLE;
-    const activeSets = sets.slice(startSet, startSet + SETS_PER_CYCLE);
-    setDrawnNumbers(activeSets.flat());
-    setIsRevealDone(true);
+    hookInstantlyFinishReveal(cycleIndex);
   };
 
   // Save picked numbers in lastPickedPerCycle whenever they update, for current cycle
@@ -201,7 +179,7 @@ export function DrawEngineProvider({ children }: { children: React.ReactNode }) 
         if (
           document.visibilityState === "visible" &&
           state === "REVEAL" &&
-          drawnNumbers.length < REVEAL_TOTAL_NUMBERS
+          drawnNumbers.length < SETS_PER_CYCLE * SET_SIZE
         ) {
           instantlyFinishReveal();
         }
@@ -245,8 +223,7 @@ export function DrawEngineProvider({ children }: { children: React.ReactNode }) 
 
       return () => {
         document.removeEventListener("visibilitychange", handleVisibility);
-        revealTimeouts.current.forEach(clearTimeout);
-        revealTimeouts.current = [];
+        cleanupRevealTimeouts();
       };
     } else if (
       // When leaving REVEAL or no valid entry
@@ -291,31 +268,8 @@ export function DrawEngineProvider({ children }: { children: React.ReactNode }) 
     // eslint-disable-next-line
   }, [state, cycleIndex, wallet]);
 
-  // When a new cycle begins, increase jackpot by 1 ONLY if user had a valid ticket last cycle.
-  useEffect(() => {
-    console.log(`[DrawEngineContext] useEffect: cycleIndex changed to ${cycleIndex}`);
-    if (cycleIndex > 0) {
-      const prevCycle = cycleIndex - 1;
-      // Only ever +$1 for user's ticket last cycle (single-user demo); future: would sum for multiplayer
-      const tickets = cycleTicketCountRef.current[prevCycle] ? 1 : 0;
-      console.log(`[DrawEngineContext] Previous cycle ${prevCycle} had ${tickets} ticket(s)`);
-      if (tickets > 0) {
-        console.log(`[DrawEngineContext] Adding $${tickets} to jackpot for cycle ${prevCycle}! Jackpot before: ${jackpotContext.jackpot}`);
-        jackpotContext.addToJackpot(1); // only ever +$1 for this user/cycle
-        console.log(`[DrawEngineContext] Jackpot should now be: ${jackpotContext.jackpot + 1} (pending re-render)`);
-        resetTicketCountForCycle(prevCycle);
-      }
-    }
-    // Clean everything on reset
-    if (cycleIndex === 0) {
-      cycleTicketCountRef.current = {};
-      ticketCommittedCycle.current = null;
-      console.log("[DrawEngineContext] Resetting ALL ticket counts and ticketCommittedCycle (demo reset)");
-    }
-    // Always allow ticket to be committed in new cycle
-    ticketCommittedCycle.current = null;
-    // Only depend on cycleIndex and jackpotContext
-  }, [cycleIndex, jackpotContext]);
+  // Apply jackpot handler effect (ticket/jackpot increment)
+  useJackpotHandlers(cycleIndex, cycleTicketCountRef, resetTicketCountForCycle);
 
   // PHASE 5 Payoff Handling: 
   // When all numbers are revealed, check for jackpot win and handle result/awards.
