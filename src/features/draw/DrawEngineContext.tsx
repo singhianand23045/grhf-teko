@@ -1,21 +1,20 @@
-import React, { createContext, useContext, useEffect, useRef, useState } from "react";
+import React, { createContext, useContext, useEffect, useRef } from "react";
 import { useTimer } from "../timer/timer-context";
-import { generateDrawSets } from "./numberPool";
 import { useWallet } from "../wallet/WalletContext";
 import { useNumberSelection } from "../number-select/NumberSelectionContext";
 import { useJackpot } from "../jackpot/JackpotContext";
 import { getCreditsForMatches } from "./getCreditsForMatches";
 import { calculateWinnings } from "./calculateWinnings";
 
-// --- new imports from refactor ---
 import { useRevealAnimation } from "./useRevealAnimation";
 import { shouldAwardTicket } from "./walletAwardUtils";
 import { useJackpotHandlers } from "./useJackpotHandlers";
 import { useResultBar } from "./useResultBar";
 
-const SETS_COUNT = 6;
-const SET_SIZE = 6;
-const SETS_PER_CYCLE = 3; // 18 numbers (3x6) per cycle
+// === new hooks and constants extracted ===
+import { SETS_COUNT, SET_SIZE, SETS_PER_CYCLE } from "./drawConstants";
+import { useDrawSets } from "./useDrawSets";
+import { useTicketSelectionManager } from "./useTicketSelectionManager";
 
 interface DrawEngineContextType {
   drawnNumbers: number[];
@@ -31,15 +30,16 @@ const DrawEngineContext = createContext<DrawEngineContextType | undefined>(undef
 
 export function DrawEngineProvider({ children }: { children: React.ReactNode }) {
   const { state, cycleIndex } = useTimer();
-  // Wallet & Confirmed numbers
   const wallet = useWallet();
-  const { picked } = useNumberSelection();
   const jackpotContext = useJackpot();
 
-  // Count of tickets per cycle — for future multi-player
+  // --- Modular constants and hooks ---
+  const sets = useDrawSets(); // replaces setsRef logic
+  const { lastPickedPerCycle, ticketCommittedCycle, picked } = useTicketSelectionManager(cycleIndex);
+
+  // Count of tickets per cycle (for jackpot add/reset logic)
   const cycleTicketCountRef = useRef<{ [cycle: number]: number }>({});
 
-  // Helpers for ticket count
   function incrementTicketCountForCycle(cycle: number, debugSource = "unknown") {
     if (!cycleTicketCountRef.current[cycle]) {
       cycleTicketCountRef.current[cycle] = 1;
@@ -56,7 +56,6 @@ export function DrawEngineProvider({ children }: { children: React.ReactNode }) 
     console.log("[DrawEngineContext] cycleTicketCountRef after reset:", { ...cycleTicketCountRef.current });
   }
 
-  // Use the custom result bar hook instead of legacy state/timeout logic
   const {
     resultBar,
     showResultBar,
@@ -65,14 +64,7 @@ export function DrawEngineProvider({ children }: { children: React.ReactNode }) 
     setResultBar,
   } = useResultBar({ show: false, credits: null }, 5000);
 
-  // Generate 6 sets of 6 numbers, once per session
-  const setsRef = useRef<number[][] | null>(null);
-  if (!setsRef.current) {
-    setsRef.current = generateDrawSets();
-  }
-  const sets = setsRef.current;
-
-  // Use refactored custom hook for reveal
+  // Reveal animation logic
   const {
     drawnNumbers,
     isRevealDone,
@@ -81,9 +73,6 @@ export function DrawEngineProvider({ children }: { children: React.ReactNode }) 
     cleanupRevealTimeouts,
     revealStartedForCycle,
   } = useRevealAnimation(sets, SETS_PER_CYCLE, SET_SIZE);
-
-  // Keep last picked numbers per cycle regardless of provider reset
-  const lastPickedPerCycle = useRef<{ [cycle: number]: number[] }>({});
 
   // Helper: track pending wallet action per cycle for ticket entry
   const pendingTicketRef = useRef<{
@@ -99,17 +88,6 @@ export function DrawEngineProvider({ children }: { children: React.ReactNode }) 
   const instantlyFinishReveal = () => {
     hookInstantlyFinishReveal(cycleIndex);
   };
-
-  // Save picked numbers in lastPickedPerCycle whenever they update, for current cycle
-  useEffect(() => {
-    if (picked && picked.length === 6) {
-      lastPickedPerCycle.current[cycleIndex] = picked.slice();
-      console.log("[DrawEngineContext] Caching picked numbers for cycle", cycleIndex, "->", picked.slice());
-    }
-  }, [picked, cycleIndex]);
-
-  // We'll track if a ticket for the current cycle was already committed
-  const ticketCommittedCycle = useRef<number | null>(null);
 
   // On demo reset, also reset committed-cycle tracking so that tickets get allowed/incremented on new demo start
   useEffect(() => {
@@ -133,7 +111,7 @@ export function DrawEngineProvider({ children }: { children: React.ReactNode }) 
       });
       incrementTicketCountForCycle(cycleIndex, "picked-confirm");
       ticketCommittedCycle.current = cycleIndex;
-      lastPickedPerCycle.current[cycleIndex] = picked.slice();
+      lastPickedPerCycle[cycleIndex] = picked.slice();
       console.log("[DrawEngineContext] Committed ticket for cycle", cycleIndex, picked, ", ticketCommittedCycle now:", ticketCommittedCycle.current);
     } else {
       console.log(`[DrawEngineContext] Not committing ticket (picked.length: ${picked.length}, cycleIndex: ${cycleIndex}, ticketCommittedCycle: ${ticketCommittedCycle.current})`);
@@ -145,8 +123,8 @@ export function DrawEngineProvider({ children }: { children: React.ReactNode }) 
   useEffect(() => {
     if (state === "REVEAL") {
       const pickedNumbers =
-        lastPickedPerCycle.current[cycleIndex] && lastPickedPerCycle.current[cycleIndex].length === 6
-          ? lastPickedPerCycle.current[cycleIndex]
+        lastPickedPerCycle[cycleIndex] && lastPickedPerCycle[cycleIndex].length === 6
+          ? lastPickedPerCycle[cycleIndex]
           : picked;
       if (pickedNumbers.length === 6) {
         const startSet = cycleIndex * SETS_PER_CYCLE;
@@ -179,8 +157,8 @@ export function DrawEngineProvider({ children }: { children: React.ReactNode }) 
       document.addEventListener("visibilitychange", handleVisibility);
 
       const ticketNumbers =
-        lastPickedPerCycle.current[cycleIndex] && lastPickedPerCycle.current[cycleIndex].length === 6
-          ? lastPickedPerCycle.current[cycleIndex]
+        lastPickedPerCycle[cycleIndex] && lastPickedPerCycle[cycleIndex].length === 6
+          ? lastPickedPerCycle[cycleIndex]
           : picked;
 
       if (
@@ -264,8 +242,8 @@ export function DrawEngineProvider({ children }: { children: React.ReactNode }) 
       const activeSets = sets.slice(startSet, startSet + SETS_PER_CYCLE);
 
       let userNumbers: number[] = [];
-      if (lastPickedPerCycle.current[cycleIndex] && lastPickedPerCycle.current[cycleIndex].length === 6) {
-        userNumbers = lastPickedPerCycle.current[cycleIndex];
+      if (lastPickedPerCycle[cycleIndex] && lastPickedPerCycle[cycleIndex].length === 6) {
+        userNumbers = lastPickedPerCycle[cycleIndex];
       }
 
       const { jackpotWon, rowWinnings, totalWinnings, resultType } = calculateWinnings(
