@@ -1,4 +1,3 @@
-
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -119,17 +118,27 @@ function AnalyticChat() {
   );
 }
 
+import MainTabs from "@/components/MainTabs";
+
 export default function AnalyticsPage() {
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-tr from-blue-100 via-indigo-100 to-blue-50">
-      <MainTabs />
-      <main className="flex flex-col flex-1 items-center">
-        <h1 className="text-3xl font-bold mt-4 mb-1 text-slate-700">Analytics Agent Chat</h1>
-        <span className="text-gray-500 mb-3 text-sm">Ask about draw stats, frequency, streaks, and more.</span>
-        <AnalyticChat />
-      </main>
+    <div className="min-h-screen flex flex-col bg-gradient-to-tr from-blue-100 via-indigo-100 to-blue-50 items-center justify-center">
+      <div
+        className="relative flex flex-col items-center justify-center shadow-xl rounded-2xl border border-gray-200 bg-white overflow-hidden"
+        style={{
+          width: 402,
+          height: 874,
+          maxWidth: 402,
+          maxHeight: 874,
+        }}
+      >
+        <main className="flex flex-col flex-1 items-center w-full px-2 py-8 h-full pb-24">
+          <h1 className="text-3xl font-bold mt-4 mb-1 text-slate-700">Analytics Agent Chat</h1>
+          <span className="text-gray-500 mb-3 text-sm">Ask about draw stats, frequency, streaks, and more.</span>
+          <AnalyticChat />
+        </main>
+        <MainTabs />
+      </div>
     </div>
   );
 }
-
-import MainTabs from "@/components/MainTabs";
