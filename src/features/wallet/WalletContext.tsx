@@ -89,6 +89,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
   function awardTicketWinnings(cycleRows: number[][], rowWinnings: number[], totalWinnings: number) {
     setHistory(prevHistory => {
       if (!prevHistory.length) return prevHistory;
+      // Only update the FIRST pending ticket (matches === 0 && creditChange === -30)
       const idx = prevHistory.findIndex(
         (t) => t.matches === 0 && t.creditChange === -30
       );
@@ -105,20 +106,28 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
         }
       }
 
+      // We ONLY update matches and creditChange, never deduct again!
       const updatedTicket: TicketType = {
         ...ticketToAward,
         matches: totalMatches,
-        creditChange: -30 + totalWinnings,
+        // Keep initial deduction, just add winnings if any:
+        creditChange: ticketToAward.creditChange + totalWinnings,
       };
 
       const updatedHistory = [...prevHistory];
       updatedHistory[idx] = updatedTicket;
 
-      setBalance((prevBal) => {
-        const newBal = prevBal + totalWinnings;
-        console.log("[WalletContext] Awarding winnings:", totalWinnings, "Old balance:", prevBal, "New balance:", newBal);
-        return newBal;
-      });
+      // Only add winnings to balance, NEVER deduct again.
+      if (totalWinnings > 0) {
+        setBalance((prevBal) => {
+          const newBal = prevBal + totalWinnings;
+          console.log("[WalletContext] Awarding winnings:", totalWinnings, "Old balance:", prevBal, "New balance:", newBal);
+          return newBal;
+        });
+      } else {
+        // No winnings, don't change balance, only update ticket result!
+        console.log("[WalletContext] No winnings to add.");
+      }
 
       console.log("[WalletContext] Awarded payout for ticket:", updatedTicket, "rowWinnings:", rowWinnings, "totalWinnings:", totalWinnings, "Updated history:", updatedHistory);
       return updatedHistory;
