@@ -36,7 +36,8 @@ export function DrawEngineProvider({ children }: { children: React.ReactNode }) 
 
   // --- Modular constants and hooks ---
   const sets = useDrawSets(); // replaces setsRef logic
-  const { lastPickedPerCycle, ticketCommittedCycle, picked } = useTicketSelectionManager(cycleIndex);
+  // FIX: Only extract lastPickedPerCycle and picked (NOT ticketCommittedCycle)
+  const { lastPickedPerCycle, picked } = useTicketSelectionManager(cycleIndex);
 
   // Count of tickets per cycle (for jackpot add/reset logic)
   const cycleTicketCountRef = useRef<{ [cycle: number]: number }>({});
