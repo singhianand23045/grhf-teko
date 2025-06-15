@@ -13,7 +13,7 @@ export default function JackpotBar() {
       }}
       data-testid="jackpot-bar"
     >
-      <span className="font-bold text-4xl text-yellow-700">
+      <span className="font-bold text-8xl text-yellow-700">
         ${jackpot}
       </span>
     </div>
