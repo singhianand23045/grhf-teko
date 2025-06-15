@@ -13,26 +13,24 @@ export function useJackpotHandlers(
 ) {
   const jackpotContext = useJackpot();
   const incrementedCycles = useRef<Set<number>>(new Set());
-  const prevCycleIndex = useRef<number | null>(null);
+  const prevCycleIndex = useRef<number>(cycleIndex); // INIT to current
 
+  // On new demo/game OR mount, clear tracking and reset prevCycleIndex to cycleIndex
   useEffect(() => {
-    console.log("[useJackpotHandlers] --- DEBUG CYCLE ---");
-    console.log(`[useJackpotHandlers] cycleIndex now: ${cycleIndex}, prevCycleIndex: ${prevCycleIndex.current}`);
-    console.log("[useJackpotHandlers] lastPickedPerCycle snapshot:", JSON.stringify(lastPickedPerCycle));
-
-    // On new demo/game, clear tracking and reset prevCycleIndex
     if (cycleIndex === 0) {
       incrementedCycles.current.clear();
       prevCycleIndex.current = 0;
       console.log("[useJackpotHandlers] cycleIndex 0, resetting for new demo/game.");
+      // No need to continue; don't run increment logic on reset
       return;
     }
 
-    // Only run logic when the cycleIndex transitions (not just from a re-render)
-    if (
-      prevCycleIndex.current !== null &&
-      cycleIndex === prevCycleIndex.current + 1
-    ) {
+    console.log("[useJackpotHandlers] --- DEBUG CYCLE ---");
+    console.log(`[useJackpotHandlers] cycleIndex now: ${cycleIndex}, prevCycleIndex: ${prevCycleIndex.current}`);
+    console.log("[useJackpotHandlers] lastPickedPerCycle snapshot:", JSON.stringify(lastPickedPerCycle));
+
+    // Detect AND handle real cycle transitions (from N to N+1)
+    if (cycleIndex === prevCycleIndex.current + 1) {
       const prevCycle = cycleIndex - 1;
       const userNumbers = lastPickedPerCycle[prevCycle] || [];
       const hadValidTicket = userNumbers.length === 6;
@@ -60,4 +58,3 @@ export function useJackpotHandlers(
     // eslint-disable-next-line
   }, [cycleIndex, jackpotContext, lastPickedPerCycle]);
 }
-
