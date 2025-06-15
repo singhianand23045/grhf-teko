@@ -5,12 +5,14 @@ import { useNumberSelection } from "../number-select/NumberSelectionContext";
 import { useTimer } from "../timer/timer-context";
 import RevealRoulettePanel from "./RevealRoulettePanel";
 import ResultBar from "./ResultBar";
+import RouletteBallGrid from "./RouletteBallGrid"; // <-- moved component
 
 // Use a single global font/circle size in this file
 const BASE_FONT_SIZE = "1rem";
 const BASE_DIAM = "2.2rem"; // same as used elsewhere (LotteryTicket)
 
-const ENABLE_ROULETTE_ANIMATION = false;
+// FEATURE FLAG: Set to true to activate roulette animation, false for legacy grid
+const ENABLE_ROULETTE_ANIMATION = true;
 
 export default function RevealPanel() {
   // DEBUG: Give a visible runtime warning
@@ -26,10 +28,6 @@ export default function RevealPanel() {
   const { drawnNumbers, revealResult } = ctx;
   const { picked: userNumbers } = useNumberSelection();
   const { state } = useTimer();
-
-  if (ENABLE_ROULETTE_ANIMATION) {
-    return <RevealRoulettePanel />;
-  }
 
   // Always maintain 18 slots (3 rows × 6 columns)
   // PHASE LOGIC: only fill with numbers if state is "REVEAL", otherwise all slots undefined for black circles
@@ -58,6 +56,53 @@ export default function RevealPanel() {
   // Spacing between message and ball grid: only 0.5% of screen height
   const DRAWN_GRID_MARGIN_TOP = "0.5vh";
 
+  // --- FEATURE FLAG CONDITIONAL ---
+  if (ENABLE_ROULETTE_ANIMATION) {
+    // Always pass an array of 18 elements to RouletteBallGrid:
+    // - During REVEAL: drawnNumbers is at most 18, rest undefined.
+    // - Before REVEAL: pass 18 undefineds (so balls spin)
+    // - After REVEAL: drawnNumbers is fully 18, all balls stopped
+    const numbersToReveal =
+      state === "REVEAL"
+        ? Array.from({ length: 18 }, (_, i) =>
+            drawnNumbers[i] !== undefined ? drawnNumbers[i] : undefined
+          )
+        : Array(18).fill(undefined);
+    return (
+      <div className="flex flex-col items-center w-full h-full overflow-y-hidden">
+        <div
+          className="w-full flex justify-center items-center"
+          style={{
+            height: RESULT_BAR_HEIGHT,
+            minHeight: RESULT_BAR_HEIGHT,
+            maxHeight: RESULT_BAR_HEIGHT
+          }}
+        >
+          <ResultBar
+            visible={!!revealResult.show}
+            creditsWon={revealResult.credits}
+            jackpot={Boolean(revealResult.credits && revealResult.credits > 0 && revealResult.credits >= 1000)}
+          />
+        </div>
+        <div
+          className="flex-1 w-full flex items-center justify-center py-0"
+          style={{
+            marginTop: DRAWN_GRID_MARGIN_TOP
+          }}
+        >
+          <div className="w-full space-y-1 flex flex-col items-center justify-center">
+            <RouletteBallGrid
+              numbersToReveal={numbersToReveal}
+              reveal={state === "REVEAL"}
+              userPicks={userNumbers}
+            />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ---- Legacy (non-roulette) display remains below ----
   return (
     <div className="flex flex-col items-center w-full h-full overflow-y-hidden">
       {/* Reserve vertical space for ResultBar always, to anchor the ball grid */}
