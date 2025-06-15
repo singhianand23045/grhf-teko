@@ -1,3 +1,4 @@
+
 import { useRef, useEffect } from "react";
 import { useWallet } from "../wallet/WalletContext";
 import { useNumberSelection } from "../number-select/NumberSelectionContext";
@@ -13,6 +14,7 @@ export function useTicketCommitManager(
   incrementTicketCountForCycle: (cycle: number, debugSource?: string) => void
 ) {
   const wallet = useWallet();
+  const { isConfirmed } = useNumberSelection();
   const ticketCommittedCycle = useRef<number | null>(null);
 
   // pendingTicketRef: helper to track ticket to be entered post-reveal
@@ -34,7 +36,8 @@ export function useTicketCommitManager(
   useEffect(() => {
     // Only save pending if user confirmed 6 numbers for this cycle and not already saved
     if (
-      picked.length === 6 && 
+      picked.length === 6 &&
+      isConfirmed &&
       (!pendingTicketRef.current || pendingTicketRef.current.cycle !== cycleIndex)
     ) {
       pendingTicketRef.current = {
@@ -46,16 +49,14 @@ export function useTicketCommitManager(
         entered: false,
       };
     }
-    // If on new cycle, clear pending ref unless it's for THIS cycle
+    // If user unconfirms, or unselects numbers, or on new cycle, clear pending ref unless it's for THIS cycle and still confirmed
     if (
-      pendingTicketRef.current &&
-      pendingTicketRef.current.cycle !== cycleIndex
+      (!isConfirmed || picked.length !== 6) ||
+      (pendingTicketRef.current && pendingTicketRef.current.cycle !== cycleIndex)
     ) {
       pendingTicketRef.current = null;
     }
-  }, [picked, cycleIndex]);
-
-  // REMOVE: immediate deduction logic everywhere, let DrawEngineContext deduct after REVEAL/draw instead
+  }, [picked, isConfirmed, cycleIndex]);
 
   // No-op on state change (all handling done in DrawEngineContext now)
 
