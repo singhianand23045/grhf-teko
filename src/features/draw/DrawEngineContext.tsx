@@ -3,6 +3,7 @@ import { useTimer } from "../timer/timer-context";
 import { generateDrawSets } from "./numberPool";
 import { useWallet } from "../wallet/WalletContext";
 import { useNumberSelection } from "../number-select/NumberSelectionContext";
+import { useJackpot } from "../jackpot/JackpotContext";
 
 const SETS_COUNT = 6;
 const SET_SIZE = 6;
@@ -37,6 +38,7 @@ export function DrawEngineProvider({ children }: { children: React.ReactNode }) 
   // Wallet & Confirmed numbers
   const wallet = useWallet();
   const { picked } = useNumberSelection();
+  const jackpotContext = useJackpot();
   const [drawnNumbers, setDrawnNumbers] = useState<number[]>([]);
   const [isRevealDone, setIsRevealDone] = useState(false);
    const [resultBar, setResultBar] = useState<{ show: boolean; credits: number | null }>({ show: false, credits: null });
@@ -112,10 +114,9 @@ export function DrawEngineProvider({ children }: { children: React.ReactNode }) 
   // We'll track if a ticket for the current cycle was already committed
   const ticketCommittedCycle = useRef<number | null>(null);
 
-  // Updated: As soon as picked.length === 6 (just after confirm), commit ticket and deduct credits
+  // STEP 1: When user confirms a valid ticket, deduct 10 credits and add $1 to jackpot
   useEffect(() => {
-    // Only act if we're NOT waiting for reveal and the user just locked in 6 picks for this cycle
-    if (picked && picked.length === 6 && cycleIndex !== ticketCommittedCycle.current) {
+    if (picked.length === 6 && cycleIndex !== ticketCommittedCycle.current) {
       // Only commit once per cycle!
       // The 18 drawn numbers for this cycle:
       const startSet = cycleIndex * SETS_PER_CYCLE;
@@ -129,12 +130,13 @@ export function DrawEngineProvider({ children }: { children: React.ReactNode }) 
       };
       // Immediate -10 credit, will update with matches (if needed) in REVEAL
       wallet.addConfirmedTicket(ticket);
+      jackpotContext.addToJackpot(1); // New: add $1 per valid ticket
       ticketCommittedCycle.current = cycleIndex;
       lastPickedPerCycle.current[cycleIndex] = picked.slice();
-      console.log("[DrawEngineContext] Committed ticket for cycle", cycleIndex, ticket);
+      console.log("[DrawEngineContext] Committed ticket for cycle", cycleIndex, picked);
     }
     // eslint-disable-next-line
-  }, [picked, cycleIndex, wallet]);
+  }, [picked, cycleIndex, wallet, jackpotContext]);
 
   // REVEAL: When actual numbers are known, update last ticket record with matches/winnings (wallet history/winning payout can be calculated by wallet/history)
   useEffect(() => {
@@ -264,47 +266,56 @@ export function DrawEngineProvider({ children }: { children: React.ReactNode }) 
     // eslint-disable-next-line
   }, [state, cycleIndex, wallet]);
 
-  // When all drawn numbers revealed, at timer = 0:25, show result message for 5s
+  // PHASE 5 Payoff Handling: 
+  // When all numbers are revealed, check for jackpot win and handle result/awards.
   useEffect(() => {
     // Only show after all numbers revealed during REVEAL phase
     if (isRevealDone) {
       // Which sets for this cycle?
       const startSet = cycleIndex * SETS_PER_CYCLE;
-      const activeSets = sets.slice(startSet, startSet + SETS_PER_CYCLE); // 3×6 = 18
+      const activeSets = sets.slice(startSet, startSet + SETS_PER_CYCLE);
 
-      // User's confirmed ticket (if any):
       let userNumbers: number[] = [];
-      if (
-        lastPickedPerCycle.current[cycleIndex] &&
-        lastPickedPerCycle.current[cycleIndex].length === 6
-      ) {
+      if (lastPickedPerCycle.current[cycleIndex] && lastPickedPerCycle.current[cycleIndex].length === 6) {
         userNumbers = lastPickedPerCycle.current[cycleIndex];
       }
 
-      // --- PHASE 3+4: Calculate winnings independently for each row ---
+      // PHASE 5 LOGIC — Check if any row is jackpot match
       let rowWinnings = [0, 0, 0];
+      let jackpotWon = false;
       if (userNumbers.length === 6) {
         for (let i = 0; i < SETS_PER_CYCLE; i++) {
-          // Each row is a 6-number set
           const drawnRow = activeSets[i];
           const matches = drawnRow.filter((n) => userNumbers.includes(n)).length;
+          if (matches === 6) {
+            jackpotWon = true;
+          }
           rowWinnings[i] = getCreditsForMatches(matches);
         }
       }
-      const totalWinnings = rowWinnings.reduce((sum, w) => sum + w, 0);
 
-      // Award wallet only if ticket exists (confirmed 6 numbers last this cycle)
+      let totalWinnings = 0;
+      let resultType: "jackpot" | "credits" | "none" = "none";
+
       if (userNumbers.length === 6) {
-        wallet.awardTicketWinnings(
-          activeSets, // pass all three rows as an array of arrays (for multi-row)
-          rowWinnings, // pass detailed row winnings
-          totalWinnings // the sum
-        );
+        if (jackpotWon) {
+          // Award jackpot only, NO regular credit payout
+          totalWinnings = jackpotContext.jackpot;
+          resultType = "jackpot";
+          wallet.awardTicketWinnings(activeSets, [0,0,0], totalWinnings);
+          jackpotContext.resetJackpot();
+        } else {
+          totalWinnings = rowWinnings.reduce((sum, w) => sum + w, 0);
+          resultType = totalWinnings > 0 ? "credits" : "none";
+          wallet.awardTicketWinnings(activeSets, rowWinnings, totalWinnings);
+        }
       }
 
-      // Show bar with summed winnings for 5s
-      setResultBar({ show: true, credits: totalWinnings });
-
+      // Show correct banner for 5s
+      setResultBar(({ show }) => ({
+        show: true,
+        credits: resultType === "jackpot" ? jackpotContext.jackpot : totalWinnings
+      }));
       if (resultTimeout.current) clearTimeout(resultTimeout.current);
       resultTimeout.current = setTimeout(() => {
         setResultBar({ show: false, credits: null });
@@ -315,7 +326,7 @@ export function DrawEngineProvider({ children }: { children: React.ReactNode }) 
       if (resultTimeout.current) clearTimeout(resultTimeout.current);
     };
 // eslint-disable-next-line
-  }, [isRevealDone, cycleIndex, sets, wallet]);
+  }, [isRevealDone, cycleIndex, sets, wallet, jackpotContext]);
 
   // Helper for explicit triggering (could be used for test)
   function triggerResultBar() {

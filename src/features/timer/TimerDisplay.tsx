@@ -7,6 +7,7 @@ import RevealPanel from "../draw/RevealPanel";
 import LotteryTicket from "../number-select/LotteryTicket";
 import NumberSelectionPanel from "../number-select/NumberSelectionPanel";
 import CreditsBar from "../wallet/CreditsBar";
+import JackpotBar from "../jackpot/JackpotBar";
 
 // For screen proportions
 const LOGICAL_HEIGHT = 874; // Should match page layout
@@ -25,40 +26,38 @@ export default function TimerDisplay() {
 
   const TIMER_HEIGHT = 0.10;
   const SPACER_HEIGHT = 0.03;
-  const DRAW_SECTION_HEIGHT = 0.20; // 20%, but visually still looks like the main draw area
+  const DRAW_SECTION_HEIGHT = 0.20;
 
-  // Timer Section (top)
-  const TimerSection = (
+  // JACKPOT + TIMER HEADER -- Phase 5 top row
+  const JackpotTimerHeader = (
     <div
-      className="flex items-center justify-center w-full flex-shrink-0 flex-grow-0"
-      style={{
-        height: `${TIMER_HEIGHT * 100}%`,
-        minHeight: 40,
-        maxHeight: 120,
-      }}
+      className="w-full flex flex-row items-center justify-between px-0 pt-4 pb-0"
+      style={{ minHeight: 52, maxHeight: 90, height: 64 }}
+      data-testid="jackpot-timer-header"
     >
-      <Card
-        className="flex items-center justify-center bg-gradient-to-b from-[#f4f4fa] to-[#e3e7fb] border-2 border-white shadow-xl rounded-xl w-1/2"
-        style={{
-          width: `50%`,
-          minWidth: 116,
-          maxWidth: 210,
-          height: "100%",
-          minHeight: 40,
-          padding: 0,
-        }}
-      >
-        <span
-          className="font-mono font-extrabold tracking-widest text-[#24266e] select-none animate-fade-in"
+      <div className="flex-1 flex justify-start">
+        <JackpotBar />
+      </div>
+      <div className="flex-1 flex justify-end pr-4">
+        <Card
+          className="flex items-center justify-center bg-gradient-to-b from-[#f4f4fa] to-[#e3e7fb] border-2 border-white shadow-xl rounded-xl"
           style={{
-            fontSize: "clamp(1.3rem, 4vw, 2rem)",
-            lineHeight: 1.1,
+            minWidth: 116,
+            maxWidth: 210,
+            height: 48,
+            minHeight: 40,
+            padding: 0,
           }}
-          data-testid="timer"
         >
-          {countdown}
-        </span>
-      </Card>
+          <span
+            className="font-mono font-extrabold tracking-widest text-[#24266e] select-none animate-fade-in"
+            style={{ fontSize: "clamp(1.3rem, 4vw, 2rem)", lineHeight: 1.1 }}
+            data-testid="timer"
+          >
+            {countdown}
+          </span>
+        </Card>
+      </div>
     </div>
   );
 
@@ -185,7 +184,7 @@ export default function TimerDisplay() {
         minHeight: LOGICAL_HEIGHT,
       }}
     >
-      {TimerSection}
+      {JackpotTimerHeader}
       {Spacer}
       {/* Drawn numbers or reveal+ticket */}
       {state === "REVEAL" ? RevealSectionWithTicket : DrawSection}
