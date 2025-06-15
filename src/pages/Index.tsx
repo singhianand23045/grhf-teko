@@ -1,4 +1,3 @@
-
 import { TimerProvider, useTimer } from "@/features/timer/timer-context";
 import TimerDisplay from "@/features/timer/TimerDisplay";
 import { NumberSelectionProvider } from "@/features/number-select/NumberSelectionContext";
@@ -19,6 +18,7 @@ function ConditionalWalletHistory() {
   );
 }
 import MainTabs from "@/components/MainTabs";
+import FlexibleLayout from "@/layout/FlexibleLayout";
 
 const Index = () => {
   return (
@@ -40,7 +40,8 @@ const Index = () => {
                   <h1 className="font-extrabold tracking-tight text-3xl mb-12 mt-6 text-[#1a1855]">
                     Lucky Dip
                   </h1>
-                  <TimerDisplay />
+                  {/* Replace TimerDisplay with FlexibleLayout */}
+                  <FlexibleLayout />
                 </main>
                 {/* Bottom Tabs */}
                 <MainTabs />
@@ -54,4 +55,3 @@ const Index = () => {
 };
 
 export default Index;
-
