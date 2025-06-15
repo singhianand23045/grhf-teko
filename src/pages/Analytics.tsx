@@ -1,3 +1,4 @@
+
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -133,8 +134,8 @@ export default function AnalyticsPage() {
         }}
       >
         <main className="flex flex-col flex-1 items-center w-full px-2 py-8 h-full pb-24">
-          <h1 className="text-3xl font-bold mt-4 mb-1 text-slate-700">Analytics Agent Chat</h1>
-          <span className="text-gray-500 mb-3 text-sm">Ask about draw stats, frequency, streaks, and more.</span>
+          <h1 className="text-3xl font-bold mt-4 mb-1 text-slate-700">Ask Agent</h1>
+          <span className="text-gray-500 mb-3 text-sm">Ask Agent about draw stats, frequency, streaks, and more.</span>
           <AnalyticChat />
         </main>
         <MainTabs />
