@@ -3,18 +3,37 @@ import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 
-// Demo draw history (would connect to real draws in an actual app)
-const DEMO_DRAWS: number[][] = Array.from({ length: 100 }, () =>
-  Array.from({ length: 18 }, () => Math.floor(Math.random() * 99) + 1)
-);
+// Util for localStorage interactions
+const LOCAL_STORAGE_KEY = "draw_history";
 
-// Very simplified "agent" responds to a few analytic queries based on demo draw data.
-function analyticAgent(userMsg: string): string {
+// Get draws from localStorage, return as number[][]
+function getDrawsFromLocalStorage(): number[][] {
+  try {
+    const data = localStorage.getItem(LOCAL_STORAGE_KEY);
+    if (!data) return [];
+    const parsed = JSON.parse(data);
+    if (!Array.isArray(parsed)) return [];
+    // Each should be an array of numbers
+    return parsed.every(
+      (draw) => Array.isArray(draw) && draw.every((n) => typeof n === "number")
+    )
+      ? parsed
+      : [];
+  } catch {
+    return [];
+  }
+}
+
+// Analytics "agent" that uses only actual draws, or returns default message if none
+function analyticAgent(userMsg: string, draws: number[][]): string {
+  if (!draws || draws.length === 0) {
+    return "Please play some games and we will start generating insights.";
+  }
   const normalized = userMsg.toLowerCase();
+  // "most frequent" or "most common"
   if (/most[\s\-]?frequent|most[ -]?common/.test(normalized)) {
-    // Compute number frequency in last 50 draws:
     const freq: Record<number, number> = {};
-    DEMO_DRAWS.slice(-50).flat().forEach((n) => (freq[n] = (freq[n] || 0) + 1));
+    draws.flat().forEach((n) => (freq[n] = (freq[n] || 0) + 1));
     let max = 0, maxNum = null;
     for (const n in freq) {
       if (freq[n]! > max) {
@@ -22,17 +41,41 @@ function analyticAgent(userMsg: string): string {
         maxNum = n;
       }
     }
-    return `The most frequently drawn number in the last 50 games is **${maxNum}** (drawn ${max} times).`;
+    return `The most frequently drawn number in your games is <b>${maxNum}</b> (drawn ${max} times).`;
   }
+  // "summary" or "overview"
   if (/summary|overview/.test(normalized)) {
-    return `There have been ${DEMO_DRAWS.length} draws. Each draw selects 18 numbers between 1 and 99.`;
+    return `You've played ${draws.length} games. Each draw selected ${draws[0]?.length ?? 0} numbers between 1 and 99.`;
   }
+  // "longest streak"
   if (/longest streak|streak/.test(normalized)) {
-    // Fake a streak
-    return "No numbers have repeated more than 5 times in a row in the last 100 draws.";
+    // Find the longest consecutive appearance streak for any number
+    let streaks: Record<number, number> = {};
+    let maxStreakNum = null;
+    let maxStreakLen = 0;
+
+    for (let num = 1; num <= 99; num++) {
+      let currStreak = 0;
+      let best = 0;
+      for (let d = 0; d < draws.length; d++) {
+        if (draws[d].includes(num)) {
+          currStreak++;
+          if (currStreak > best) best = currStreak;
+        } else {
+          currStreak = 0;
+        }
+      }
+      if (best > maxStreakLen) {
+        maxStreakLen = best;
+        maxStreakNum = num;
+      }
+    }
+    return maxStreakLen > 1
+      ? `Number <b>${maxStreakNum}</b> had the longest streak: drawn in ${maxStreakLen} consecutive games.`
+      : "No number has appeared in consecutive draws.";
   }
-  // Default
-  return `Sorry, I can only answer basic analytic queries (“most frequent”, “summary”, “streak”, etc.) in this prototype.`;
+  // Default response
+  return "Sorry, I can only answer basic analytic queries (“most frequent”, “summary”, “streak”, etc.) in this prototype.";
 }
 
 // Simple chat message model
@@ -45,6 +88,17 @@ function AnalyticChat() {
   const [msgs, setMsgs] = useState<Msg[]>([]);
   const [value, setValue] = useState("");
   const chatRef = useRef<HTMLDivElement>(null);
+  const [draws, setDraws] = useState<number[][]>(getDrawsFromLocalStorage);
+
+  // Pull latest draw data on load (and if storage changes)
+  useEffect(() => {
+    function update() {
+      setDraws(getDrawsFromLocalStorage());
+    }
+    window.addEventListener("storage", update);
+    update();
+    return () => window.removeEventListener("storage", update);
+  }, []);
 
   useEffect(() => {
     chatRef.current?.scrollTo({ top: chatRef.current.scrollHeight });
@@ -56,9 +110,9 @@ function AnalyticChat() {
     setMsgs((m) => [...m, { sender: "user", content: userMsg }]);
     setValue("");
     setTimeout(() => {
-      const ans = analyticAgent(userMsg);
+      const ans = analyticAgent(userMsg, draws);
       setMsgs((m) => [...m, { sender: "agent", content: ans }]);
-    }, 500); // simulate slight delay
+    }, 400); // Slight delay for UX
   }
 
   return (
@@ -69,10 +123,10 @@ function AnalyticChat() {
       >
         {msgs.length === 0 && (
           <div className="text-center text-gray-400 py-20">
-            Ask analytics questions about recent draws.<br />
+            Ask analytics questions about your session draws.<br />
             Try:<br />
             <span className="text-[13px] text-sky-900">
-              "Which number was drawn most often in last 50 games?"<br />
+              "Which number was drawn most often?"<br />
               "Can I get a summary?"<br />
               "Show the longest streak of any number"
             </span>
@@ -94,7 +148,7 @@ function AnalyticChat() {
                   : "inline-block bg-white border px-3 py-1 rounded-xl"
               }
             >
-              <span dangerouslySetInnerHTML={{ __html: msg.content.replace(/\*\*(.+?)\*\*/g, '<b>$1</b>') }} />
+              <span dangerouslySetInnerHTML={{ __html: msg.content }} />
             </div>
           </div>
         ))}
@@ -135,7 +189,7 @@ export default function AnalyticsPage() {
       >
         <main className="flex flex-col flex-1 items-center w-full px-2 py-8 h-full pb-24">
           <h1 className="text-3xl font-bold mt-4 mb-1 text-slate-700">Ask Agent</h1>
-          <span className="text-gray-500 mb-3 text-sm">Ask Agent about draw stats, frequency, streaks, and more.</span>
+          <span className="text-gray-500 mb-3 text-sm">Ask Agent about your draw stats, frequency, streaks, and more.</span>
           <AnalyticChat />
         </main>
         <MainTabs />
