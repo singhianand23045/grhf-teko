@@ -1,3 +1,4 @@
+
 import React from "react";
 import { useDrawEngine } from "./DrawEngineContext";
 import { useNumberSelection } from "../number-select/NumberSelectionContext";
@@ -65,10 +66,10 @@ export default function RevealPanel() {
                   fontSize: BASE_FONT_SIZE,
                   lineHeight: 1.05,
                   padding: 0,
-                  boxSizing: "border-box",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
+                  // boxSizing removed to fix TS error
                 };
                 if (n === undefined) {
                   return (
@@ -108,3 +109,4 @@ export default function RevealPanel() {
     </div>
   );
 }
+
