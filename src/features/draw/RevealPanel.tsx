@@ -31,7 +31,6 @@ export default function RevealPanel() {
     return <RevealRoulettePanel />;
   }
 
-  // --- Legacy fallback, unreachable with ENABLE_ROULETTE_ANIMATION true ---
   // Always maintain 18 slots (3 rows × 6 columns)
   // PHASE LOGIC: only fill with numbers if state is "REVEAL", otherwise all slots undefined for black circles
   const slots: (number | undefined)[] =
@@ -53,14 +52,27 @@ export default function RevealPanel() {
   // Used to highlight slots matching user ticket
   const userSet = new Set(userNumbers);
 
+  // Define the ResultBar's height (adjust as needed for nice appearance)
+  const RESULT_BAR_HEIGHT = 44; // px, fits 1-line ResultBar text + spacing
+
   return (
     <div className="flex flex-col items-center w-full h-full overflow-y-hidden">
-      <ResultBar
-        visible={!!revealResult.show}
-        creditsWon={revealResult.credits}
-        jackpot={Boolean(revealResult.credits && revealResult.credits > 0 && revealResult.credits >= 1000)}
-      />
-      {/* Grid wrapper -- ensure full height & center grid */}
+      {/* Reserve vertical space for ResultBar always, to anchor the ball grid */}
+      <div
+        className="w-full flex justify-center items-center"
+        style={{
+          height: RESULT_BAR_HEIGHT,
+          minHeight: RESULT_BAR_HEIGHT,
+          maxHeight: RESULT_BAR_HEIGHT
+        }}
+      >
+        <ResultBar
+          visible={!!revealResult.show}
+          creditsWon={revealResult.credits}
+          jackpot={Boolean(revealResult.credits && revealResult.credits > 0 && revealResult.credits >= 1000)}
+        />
+      </div>
+      {/* Grid wrapper -- ensure full height & center grid, now grid never jumps */}
       <div className="flex-1 w-full flex items-center justify-center py-0">
         <div className="w-full space-y-1 flex flex-col items-center justify-center">
           {drawnSets.map((set, rowIdx) => (
