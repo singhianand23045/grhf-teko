@@ -32,33 +32,44 @@ export function useTicketCommitManager(
     }
   }, [cycleIndex]);
 
-  // Track "pending confirmed ticket" per cycle (WAIT to actually store/deduct until draw is finished)
+  // When user confirms a valid ticket (6 numbers), immediately deduct credits & commit ticket.
   useEffect(() => {
-    // Only save pending if user confirmed 6 numbers for this cycle and not already saved
+    // Only commit if:
+    //  - Ticket is confirmed
+    //  - Picked length is 6
+    //  - Not already committed for this cycle
     if (
       picked.length === 6 &&
       isConfirmed &&
-      (!pendingTicketRef.current || pendingTicketRef.current.cycle !== cycleIndex)
+      ticketCommittedCycle.current !== cycleIndex
     ) {
+      // Commit ticket and deduct credits
+      wallet.addConfirmedTicket({
+        date: new Date().toISOString(),
+        numbers: picked.slice(),
+      });
+      ticketCommittedCycle.current = cycleIndex;
+
+      // Store pending ticket for prize awarding (as before)
       pendingTicketRef.current = {
         cycle: cycleIndex,
         ticket: {
           date: new Date().toISOString(),
           numbers: picked.slice(),
         },
-        entered: false,
+        entered: true, // It is now fully entered
       };
+      console.log("[useTicketCommitManager] Confirmed ticket and deducted credits for cycle", cycleIndex, picked);
     }
-    // If user unconfirms, or unselects numbers, or on new cycle, clear pending ref unless it's for THIS cycle and still confirmed
+
+    // If not confirmed, reset pending ticket if present & not for the current cycle
     if (
-      (!isConfirmed || picked.length !== 6) ||
-      (pendingTicketRef.current && pendingTicketRef.current.cycle !== cycleIndex)
+      (!isConfirmed || picked.length !== 6) &&
+      pendingTicketRef.current && pendingTicketRef.current.cycle !== cycleIndex
     ) {
       pendingTicketRef.current = null;
     }
-  }, [picked, isConfirmed, cycleIndex]);
-
-  // No-op on state change (all handling done in DrawEngineContext now)
+  }, [picked, isConfirmed, cycleIndex, wallet]);
 
   return {
     ticketCommittedCycle,
