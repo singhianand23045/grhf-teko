@@ -82,6 +82,12 @@ export function DrawEngineProvider({ children }: { children: React.ReactNode }) 
   } = useResultBar({ show: false, credits: null }, 5000);
 
   // Reveal animation logic
+  // CHANGE: Always use last picked per cycle for this cycleIndex when available
+  const confirmedUserNumbers =
+    lastPickedPerCycle[cycleIndex] && lastPickedPerCycle[cycleIndex].length === 6
+      ? lastPickedPerCycle[cycleIndex]
+      : picked;
+
   const {
     drawnNumbers,
     isRevealDone,
@@ -89,7 +95,7 @@ export function DrawEngineProvider({ children }: { children: React.ReactNode }) 
     instantlyFinishReveal: hookInstantlyFinishReveal,
     cleanupRevealTimeouts,
     revealStartedForCycle,
-  } = useRevealAnimation(sets, SETS_PER_CYCLE, SET_SIZE);
+  } = useRevealAnimation(sets, SETS_PER_CYCLE, SET_SIZE, confirmedUserNumbers);
 
   // Use new hook for ticket commit/confirmation and pending tracking
   const { ticketCommittedCycle, pendingTicketRef } = useTicketCommitManager(

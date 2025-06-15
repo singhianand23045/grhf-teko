@@ -1,6 +1,20 @@
+
 import { useRef, useState } from "react";
 
-export function useRevealAnimation(sets: number[][], SETS_PER_CYCLE: number, SET_SIZE: number) {
+/**
+ * Animates reveal of numbers, now in per-row order:
+ * - For each row, reveal all numbers that are matches first, then non-matches, then next row.
+ * @param sets - All 6x6 drawn numbers
+ * @param SETS_PER_CYCLE - How many sets (rows) per draw
+ * @param SET_SIZE - Size of each set (row)
+ * @param userNumbers - Confirmed user's picks (6 numbers)
+ */
+export function useRevealAnimation(
+  sets: number[][],
+  SETS_PER_CYCLE: number,
+  SET_SIZE: number,
+  userNumbers: number[] // new param!
+) {
   // Animates reveal of numbers for a given cycle
   const [drawnNumbers, setDrawnNumbers] = useState<number[]>([]);
   const [isRevealDone, setIsRevealDone] = useState(false);
@@ -12,22 +26,40 @@ export function useRevealAnimation(sets: number[][], SETS_PER_CYCLE: number, SET
   const REVEAL_DURATION_SEC = 18; // Changed to 18s for 1 second per number
   const REVEAL_PER_NUMBER_SEC = REVEAL_DURATION_SEC / REVEAL_TOTAL_NUMBERS; // 1s per number
 
+  // Helper: return the correct reveal sequence per requirements
+  function buildRevealSequence(setsForDraw: number[][], userNums: number[]): number[] {
+    if (!userNums || userNums.length !== 6) {
+      // fallback: flat in order
+      return setsForDraw.flat();
+    }
+    const revealSeq: number[] = [];
+    for (const row of setsForDraw) {
+      // Matches first
+      const matches = row.filter((n) => userNums.includes(n));
+      const rest = row.filter((n) => !userNums.includes(n));
+      revealSeq.push(...matches, ...rest);
+    }
+    return revealSeq;
+  }
+
   function startReveal(cycle: number) {
     revealTimeouts.current.forEach(clearTimeout);
     revealTimeouts.current = [];
     // cycle 0: sets 0‒2, cycle 1: sets 3‒5
     const startSet = cycle * SETS_PER_CYCLE;
     const activeSets = sets.slice(startSet, startSet + SETS_PER_CYCLE);
-    // Flatten the active sets
-    const poolSlice = activeSets.flat();
+
+    // Find the correct sequence (matches in each row first, then the rest, per row)
+    const sequence = buildRevealSequence(activeSets, userNumbers);
+
     setDrawnNumbers([]);
     setIsRevealDone(false);
 
-    for (let i = 0; i < poolSlice.length; i++) {
+    for (let i = 0; i < sequence.length; i++) {
       revealTimeouts.current.push(
         setTimeout(() => {
-          setDrawnNumbers((prev) => [...prev, poolSlice[i]]);
-          if (i === poolSlice.length - 1) setIsRevealDone(true);
+          setDrawnNumbers((prev) => [...prev, sequence[i]]);
+          if (i === sequence.length - 1) setIsRevealDone(true);
         }, REVEAL_PER_NUMBER_SEC * 1000 * i)
       );
     }
@@ -39,7 +71,8 @@ export function useRevealAnimation(sets: number[][], SETS_PER_CYCLE: number, SET
     revealTimeouts.current = [];
     const startSet = cycle * SETS_PER_CYCLE;
     const activeSets = sets.slice(startSet, startSet + SETS_PER_CYCLE);
-    setDrawnNumbers(activeSets.flat());
+    const sequence = buildRevealSequence(activeSets, userNumbers);
+    setDrawnNumbers(sequence);
     setIsRevealDone(true);
   }
 
@@ -58,3 +91,4 @@ export function useRevealAnimation(sets: number[][], SETS_PER_CYCLE: number, SET
     revealStartedForCycle
   };
 }
+
