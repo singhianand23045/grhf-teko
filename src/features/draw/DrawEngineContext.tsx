@@ -11,6 +11,7 @@ import { calculateWinnings } from "./calculateWinnings";
 import { useRevealAnimation } from "./useRevealAnimation";
 import { shouldAwardTicket } from "./walletAwardUtils";
 import { useJackpotHandlers } from "./useJackpotHandlers";
+import { useResultBar } from "./useResultBar";
 
 const SETS_COUNT = 6;
 const SET_SIZE = 6;
@@ -57,8 +58,14 @@ export function DrawEngineProvider({ children }: { children: React.ReactNode }) 
     console.log("[DrawEngineContext] cycleTicketCountRef after reset:", { ...cycleTicketCountRef.current });
   }
 
-  const [resultBar, setResultBar] = useState<{ show: boolean; credits: number | null }>({ show: false, credits: null });
-  const resultTimeout = useRef<NodeJS.Timeout | null>(null);
+  // --- Replace resultBar state and timeout logic with custom hook ---
+  const {
+    resultBar,
+    showResultBar,
+    triggerResultBar,
+    cleanup: cleanupResultBarTimeout,
+    setResultBar,
+  } = useResultBar({ show: false, credits: null }, 5000);
 
   // Generate 6 sets of 6 numbers, once per session
   const setsRef = useRef<number[][] | null>(null);
@@ -302,31 +309,15 @@ export function DrawEngineProvider({ children }: { children: React.ReactNode }) 
         }
       }
 
-      // Show correct banner for 5s
-      setResultBar(({ show }) => ({
-        show: true,
-        credits: resultType === "jackpot" ? jackpotContext.jackpot : totalWinnings
-      }));
-      if (resultTimeout.current) clearTimeout(resultTimeout.current);
-      resultTimeout.current = setTimeout(() => {
-        setResultBar({ show: false, credits: null });
-      }, 5000);
+      // Show correct banner for 5s using useResultBar
+      showResultBar(resultType === "jackpot" ? jackpotContext.jackpot : totalWinnings);
     }
     // Clean up timeout if component unmounts
     return () => {
-      if (resultTimeout.current) clearTimeout(resultTimeout.current);
+      cleanupResultBarTimeout();
     };
-// eslint-disable-next-line
+    // eslint-disable-next-line
   }, [isRevealDone, cycleIndex, sets, wallet, jackpotContext]);
-
-  // Helper for explicit triggering (could be used for test)
-  function triggerResultBar() {
-    setResultBar((curr) => ({ show: true, credits: curr.credits }));
-    if (resultTimeout.current) clearTimeout(resultTimeout.current);
-    resultTimeout.current = setTimeout(() => {
-      setResultBar({ show: false, credits: null });
-    }, 5000);
-  }
 
   return (
     <DrawEngineContext.Provider
