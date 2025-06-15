@@ -1,112 +1,101 @@
-
-import React from "react";
-import { useDrawEngine } from "./DrawEngineContext";
-import { useNumberSelection } from "../number-select/NumberSelectionContext";
-import { useTimer } from "../timer/timer-context";
-import RevealRoulettePanel from "./RevealRoulettePanel";
+import React, { useContext, useEffect, useRef } from "react";
+import { DrawEngineContext } from "./DrawEngineContext";
+import { NumberSelectionContext } from "../number-select/NumberSelectionContext";
+import { WalletContext } from "../wallet/WalletContext";
+import { SETS_COUNT, SET_SIZE } from "./drawConstants";
 import ResultBar from "./ResultBar";
-
-// Use a single global font/circle size in this file
-const BASE_FONT_SIZE = "1rem";
-const BASE_DIAM = "2.2rem"; // same as used elsewhere (LotteryTicket)
-
-const ENABLE_ROULETTE_ANIMATION = false;
+import { useResultBar } from "./useResultBar";
+import { useTimer } from "../timer/timer-context";
 
 export default function RevealPanel() {
-  const { drawnNumbers, revealResult } = useDrawEngine();
-  const { picked: userNumbers } = useNumberSelection();
-  const { state } = useTimer();
+  const { sets, drawnNumbers } = useContext(DrawEngineContext);
+  const { confirmedNumbers } = useContext(NumberSelectionContext);
+  const { awardCredits } = useContext(WalletContext);
 
-  if (ENABLE_ROULETTE_ANIMATION) {
-    return <RevealRoulettePanel />;
-  }
+  // ResultBar state and handlers
+  const { resultBar, showResultBar, hideResultBar, cleanup } = useResultBar();
 
-  // --- Legacy fallback, unreachable with ENABLE_ROULETTE_ANIMATION true ---
-  // Always maintain 18 slots (3 rows × 6 columns)
-  // PHASE LOGIC: only fill with numbers if state is "REVEAL", otherwise all slots undefined for black circles
-  const slots: (number | undefined)[] =
-    state === "REVEAL"
-      ? Array.from({ length: 18 }, (_, idx) =>
-          drawnNumbers[idx] !== undefined ? drawnNumbers[idx] : undefined
-        )
-      : Array(18).fill(undefined);
+  // Timer logic: show/hide result bar exactly from 0:25 to 0:15
+  const { countdown } = useTimer();
+  const timerTriggered = useRef(false);
 
-  // Break into 3 sets of 6 numbers each for display
-  const drawnSets: (number | undefined)[][] = [[], [], []];
-  for (let row = 0; row < 3; row++) {
-    drawnSets[row] = [];
-    for (let col = 0; col < 6; col++) {
-      drawnSets[row][col] = slots[row * 6 + col];
+  useEffect(() => {
+    // Listen for the countdown value to reach 00:25
+    if (!timerTriggered.current && countdown === "00:25") {
+      // Calculate winnings here
+      let totalCreditsWon = 0;
+      if (sets) {
+        for (let i = 0; i < sets.length; i++) {
+          const matches = sets[i].filter((number) => confirmedNumbers.has(number)).length;
+          let creditsWon = 0;
+
+          if (matches === 5) creditsWon = 100;
+          else if (matches === 4) creditsWon = 40;
+          else if (matches === 3) creditsWon = 20;
+          else if (matches === 2) creditsWon = 10;
+
+          totalCreditsWon += creditsWon;
+        }
+        // Award credits
+        awardCredits(totalCreditsWon);
+      }
+      showResultBar(totalCreditsWon);
+      timerTriggered.current = true;
     }
-  }
-
-  // Used to highlight slots matching user ticket
-  const userSet = new Set(userNumbers);
+    // Hide the bar at "00:15"
+    if (timerTriggered.current && countdown === "00:15") {
+      hideResultBar();
+      timerTriggered.current = false;
+    }
+    // Cleanup on unmount
+    return cleanup;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [countdown, showResultBar, hideResultBar, cleanup, sets, confirmedNumbers, awardCredits]);
 
   return (
-    <div className="flex flex-col items-center w-full h-full overflow-y-hidden">
+    <div className="flex flex-col items-center justify-center w-full h-full">
+      {/* Result message bar */}
       <ResultBar
-        visible={!!revealResult.show}
-        creditsWon={revealResult.credits}
-        jackpot={Boolean(revealResult.credits && revealResult.credits > 0 && revealResult.credits >= 1000)}
+        visible={resultBar.show}
+        creditsWon={resultBar.credits}
       />
-      <div className="w-full max-w-full flex flex-col justify-center items-center py-0">
-        <div className="w-full space-y-1">
-          {drawnSets.map((set, rowIdx) => (
-            <div
-              key={rowIdx}
-              className="flex flex-nowrap justify-center items-center gap-2 w-full max-w-full min-h-[30px]"
-            >
-              {set.map((n, colIdx) => {
-                const baseCircleStyle = {
-                  width: BASE_DIAM,
-                  minWidth: 28,
-                  height: BASE_DIAM,
-                  minHeight: 28,
-                  fontSize: BASE_FONT_SIZE,
-                  lineHeight: 1.05,
-                  padding: 0,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  // boxSizing removed to fix TS error
-                };
-                if (n === undefined) {
+      <div className="w-full flex flex-col items-center justify-center h-full py-4">
+        <div className="w-full space-y-4">
+          {sets &&
+            sets.map((set, rowIdx) => (
+              <div
+                key={rowIdx}
+                className="flex flex-nowrap justify-center items-center gap-4 w-full max-w-full min-h-[40px]"
+              >
+                {set.map((number, colIdx) => {
+                  const isDrawn = drawnNumbers.includes(number);
+                  const isMatched = confirmedNumbers.has(number);
                   return (
                     <span
                       key={colIdx}
-                      className="flex items-center justify-center rounded-full bg-black border-2 border-black select-none aspect-square transition-all"
-                      style={baseCircleStyle}
-                      aria-hidden
-                    ></span>
-                  );
-                }
-                if (userSet.has(n)) {
-                  return (
-                    <span
-                      key={colIdx}
-                      className="flex items-center justify-center rounded-full bg-green-500 text-white font-black shadow-green-300 shadow-lg border-[2px] border-green-700 select-none transition-all aspect-square animate-scale-in"
-                      style={baseCircleStyle}
+                      className={`flex items-center justify-center rounded-full border-2 select-none aspect-square transition-all
+                        ${isDrawn
+                          ? "bg-white text-black border-black font-semibold"
+                          : "bg-black text-white border-black"}
+                        ${isMatched && isDrawn ? "animate-pulse border-green-500 text-green-600 font-extrabold" : ""}
+                      `}
+                      style={{
+                        width: "clamp(2.2rem, 7vw, 3rem)",
+                        minWidth: 40,
+                        height: "clamp(2.2rem, 7vw, 3rem)",
+                        minHeight: 40,
+                        fontSize: "clamp(0.9rem, 4.5vw, 1.1rem)",
+                        lineHeight: 1.1,
+                      }}
                     >
-                      {n}
+                      {isDrawn ? number : null}
                     </span>
                   );
-                }
-                return (
-                  <span
-                    key={colIdx}
-                    className="flex items-center justify-center rounded-full bg-white text-black font-black border-[2.5px] border-black shadow-md select-none aspect-square animate-scale-in transition-all"
-                    style={baseCircleStyle}
-                  >
-                    {n}
-                  </span>
-                );
-              })}
-            </div>
-          ))}
+                })}
+              </div>
+            ))}
         </div>
       </div>
     </div>
   );
 }
-
