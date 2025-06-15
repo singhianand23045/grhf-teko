@@ -21,12 +21,18 @@ const LOGICAL_HEIGHT = 874; // Should match page layout
  * - Confirmed/user numbers: 40%
  */
 
+import TimerSection from "./TimerSection";
+import JackpotSection from "../jackpot/JackpotSection";
+import DrawNumbersSection from "../draw/DrawNumbersSection";
+import CreditsSection from "../wallet/CreditsSection";
+import ConfirmedNumbersSection from "../number-select/ConfirmedNumbersSection";
+
 const JACKPOT_TIMER_HEIGHT = 0.15;
 const SPACER_HEIGHT = 0.02; // reduce a bit for extra space
 const DRAW_SECTION_HEIGHT = 0.30; // changed from 0.35 to 0.30
 
 export default function TimerDisplay() {
-  const { countdown, state, resetDemo } = useTimer();
+  const { state, resetDemo } = useTimer();
 
   // JACKPOT + TIMER HEADER -- Phase 5 top row
   const JackpotTimerHeader = (
@@ -187,11 +193,14 @@ export default function TimerDisplay() {
         minHeight: LOGICAL_HEIGHT,
       }}
     >
-      {JackpotTimerHeader}
+      <div className="w-full flex flex-row items-center justify-between">
+        <JackpotSection />
+        <TimerSection />
+      </div>
       {Spacer}
       {state === "REVEAL" ? RevealSectionWithTicket : DrawSection}
-      <CreditsBar />
-      {state !== "REVEAL" && ConfirmedSection}
+      <CreditsSection />
+      {state !== "REVEAL" && <ConfirmedNumbersSection />}
     </div>
   );
 }
