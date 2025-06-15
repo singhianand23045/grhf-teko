@@ -49,6 +49,7 @@ export function DrawEngineProvider({ children }: { children: React.ReactNode }) 
     } else {
       console.log(`[DrawEngineContext] Already have a ticket for cycle ${cycle} from ${debugSource} — no increment`);
     }
+    // Debug print state
     console.log("[DrawEngineContext] cycleTicketCountRef after increment:", { ...cycleTicketCountRef.current });
   }
 
@@ -65,6 +66,7 @@ export function DrawEngineProvider({ children }: { children: React.ReactNode }) 
       // Forcibly ensure ticket count is captured for prevCycle IF the user picked numbers for that cycle
       const userPicked = lastPickedPerCycle[prevCycle];
       if (userPicked && userPicked.length === 6 && !cycleTicketCountRef.current[prevCycle]) {
+        console.log(`[DrawEngineContext] (cycle advance) Trying to increment ticket for previous cycle=${prevCycle}`);
         incrementTicketCountForCycle(prevCycle, "catchup-on-cycle-advance");
       }
     }
@@ -173,7 +175,11 @@ export function DrawEngineProvider({ children }: { children: React.ReactNode }) 
   // New: Commit ticket to wallet/credit only AFTER REVEAL phase ends (when timer ticks to next cycle)
   // Moved to useTicketCommitManager
 
-  useJackpotHandlers(cycleIndex, cycleTicketCountRef, resetTicketCountForCycle);
+  // Enhanced logging for jackpot handlers effect
+  useJackpotHandlers(cycleIndex, cycleTicketCountRef, (cycle) => {
+    console.log(`[DrawEngineContext -> JackpotHandlers] Reset ticket count for cycle=${cycle}`);
+    resetTicketCountForCycle(cycle);
+  });
 
   // PHASE 5 Payoff Handling: 
   useEffect(() => {
