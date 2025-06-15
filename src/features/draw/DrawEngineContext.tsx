@@ -72,12 +72,17 @@ export function DrawEngineProvider({ children }: { children: React.ReactNode }) 
   function incrementTicketCountForCycle(cycle: number) {
     if (!cycleTicketCountRef.current[cycle]) {
       cycleTicketCountRef.current[cycle] = 1;
+      console.log(`[DrawEngineContext] First ticket for cycle ${cycle} - count=${cycleTicketCountRef.current[cycle]}`);
     } else {
       cycleTicketCountRef.current[cycle]++;
+      console.log(`[DrawEngineContext] Additional ticket for cycle ${cycle} - count=${cycleTicketCountRef.current[cycle]}`);
     }
+    console.log("[DrawEngineContext] cycleTicketCountRef after increment:", {...cycleTicketCountRef.current});
   }
   function resetTicketCountForCycle(cycle: number) {
+    console.log(`[DrawEngineContext] Resetting ticket count for cycle ${cycle}`);
     delete cycleTicketCountRef.current[cycle];
+    console.log("[DrawEngineContext] cycleTicketCountRef after reset:", {...cycleTicketCountRef.current});
   }
 
   // Reveal logic: reveal all numbers in 9 seconds, one every 0.5s (18 numbers)
@@ -280,11 +285,13 @@ export function DrawEngineProvider({ children }: { children: React.ReactNode }) 
 
   // NEW: When a new cycle begins (state goes from REVEAL/COMPLETE to OPEN), increase jackpot by #tickets from previous cycle
   useEffect(() => {
+    console.log(`[DrawEngineContext] useEffect: cycleIndex changed to ${cycleIndex}`);
     // Whenever cycleIndex changes (a new draw cycle begins),
     // use the ticket count of previous cycle to increase the jackpot
     if (cycleIndex > 0) {
       const prevCycle = cycleIndex - 1;
       const tickets = cycleTicketCountRef.current[prevCycle] || 0;
+      console.log(`[DrawEngineContext] Previous cycle ${prevCycle} had ${tickets} tickets`);
       if (tickets > 0) {
         console.log(`[DrawEngineContext] Adding $${tickets} to jackpot for cycle ${prevCycle}`);
         jackpotContext.addToJackpot(tickets);
@@ -293,6 +300,7 @@ export function DrawEngineProvider({ children }: { children: React.ReactNode }) 
     }
     // Also reset count if demo is reset (cycleIndex = 0)
     if (cycleIndex === 0) {
+      console.log("[DrawEngineContext] Resetting ALL ticket counts (demo reset)");
       cycleTicketCountRef.current = {};
     }
   // Only depend on cycleIndex and jackpotContext
