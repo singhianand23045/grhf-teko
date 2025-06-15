@@ -1,4 +1,3 @@
-
 import React from "react";
 
 type Ball3DProps = {
@@ -17,11 +16,9 @@ export default function Ball3D({
   // Determine color based on user pick (highlight)
   const isSpinning = !!spinning;
 
-  // CHANGED: For spinning balls, always use the roulette gradient with more visual depth
+  // REVISED: All balls (spinning or stopped) use the white/silver gradient unless highlighted
   const ballBackground = highlight
     ? "bg-green-500"
-    : isSpinning
-    ? "bg-gradient-to-br from-slate-900 via-slate-700 to-neutral-500"
     : "bg-gradient-to-b from-white via-slate-100 to-slate-300";
 
   const borderColor = highlight
