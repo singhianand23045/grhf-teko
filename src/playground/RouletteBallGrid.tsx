@@ -1,4 +1,7 @@
+
 import React, { useState, useEffect, useRef } from "react";
+import Ball3D from "./Ball3D";
+import { useSpinSetting } from "./useSpinSetting";
 
 // Ball state per slot: spinning or stopped with a number
 type GridBall =
@@ -47,8 +50,9 @@ export default function RouletteBallGrid({
   // -3: left fastest, -2: left fast, -1: left slow; 1: right slow, 2: right fast, 3: right fastest
   const [spinSetting, setSpinSetting] = useState(1); // Start with right slow
   const gridRef = useRef<HTMLDivElement | null>(null);
-  const touchStartX = useRef<number | null>(null);
-  const SWIPE_THRESHOLD = 30; // px
+
+  // Attach swipe/touch handlers
+  const { attachSwipeHandlers } = useSpinSetting(reveal, setSpinSetting);
 
   useEffect(() => {
     // Reset for new round
@@ -94,212 +98,10 @@ export default function RouletteBallGrid({
   // Touch swipe handlers for the grid
   useEffect(() => {
     const grid = gridRef.current;
-    if (!grid) return;
-    if (reveal) return; // do not allow touching during reveal
-
-    function handleTouchStart(e: TouchEvent) {
-      if (e.touches.length !== 1) return;
-      touchStartX.current = e.touches[0].clientX;
-    }
-    function handleTouchEnd(e: TouchEvent) {
-      if (touchStartX.current === null) return;
-      const touchEndX = e.changedTouches[0].clientX;
-      const dx = touchEndX - touchStartX.current;
-      if (Math.abs(dx) > SWIPE_THRESHOLD) {
-        setSpinSetting((prev) => {
-          let next = prev;
-          if (dx < 0) {
-            // swipe left
-            if (prev > -3) {
-              // special case: going from right slow (1) to left slow (-1)
-              if (prev === 1) {
-                next = -1;
-              } else if (prev === 2) {
-                next = 1;
-              } else if (prev === 3) {
-                next = 2;
-              } else {
-                next = prev - 1;
-                if (next === 0) next = -1;
-              }
-            }
-          } else {
-            // swipe right
-            if (prev < 3) {
-              // special case: going from left slow (-1) to right slow (1)
-              if (prev === -1) {
-                next = 1;
-              } else if (prev === -2) {
-                next = -1;
-              } else if (prev === -3) {
-                next = -2;
-              } else {
-                next = prev + 1;
-                if (next === 0) next = 1;
-              }
-            }
-          }
-          // Clamp just in case
-          if (next < -3) next = -3;
-          if (next > 3) next = 3;
-          if (next === 0) next = prev < 0 ? -1 : 1; // just safety
-          return next;
-        });
-      }
-      touchStartX.current = null;
-    }
-    grid.addEventListener("touchstart", handleTouchStart);
-    grid.addEventListener("touchend", handleTouchEnd);
-
-    return () => {
-      grid.removeEventListener("touchstart", handleTouchStart);
-      grid.removeEventListener("touchend", handleTouchEnd);
-    };
-  }, [reveal]);
-
-  function Ball3D({
-    spinning,
-    number,
-    highlight,
-    spinConfig,
-  }: {
-    spinning?: boolean;
-    number?: number;
-    highlight?: boolean;
-    spinConfig?: { direction: number; speed: number };
-  }) {
-    // Determine color based on user pick (highlight)
-    const ballBackground = highlight
-      ? "bg-green-500"
-      : "bg-gradient-to-b from-white via-slate-100 to-slate-300";
-    const borderColor = highlight
-      ? "border-green-600/60"
-      : "border-slate-500/40";
-    const ballBoxShadow = highlight
-      ? "0 3px 16px 2px rgba(34,197,94,0.28), 0 0.5px 2.8px 0px #eaf3fa"
-      : "0 3px 8px 2px rgba(80,90,120,0.20), 0 0.5px 2.8px 0px #eaf3fa";
-
-    // Dynamic animation config
-    let glossAnimation = undefined;
-    let glossAnimationDirection = undefined;
-    let glossDuration = undefined;
-    if (spinning && spinConfig) {
-      glossAnimation =
-        spinConfig.direction === 1
-          ? "roulette-ball-gloss-move-right"
-          : "roulette-ball-gloss-move-left";
-      glossDuration = `${spinConfig.speed}s`;
-    }
-
-    return (
-      <div
-        className={`relative flex items-center justify-center aspect-square`}
-        style={{
-          width: 38,
-          height: 38,
-          minWidth: 28,
-          minHeight: 28,
-        }}
-      >
-        {/* Ball surface */}
-        <span
-          className={`
-            absolute inset-0 rounded-full
-            ${ballBackground}
-            shadow-lg border-[2.5px] ${borderColor}
-          `}
-          style={{
-            boxShadow: ballBoxShadow,
-            transition: "background 0.3s",
-          }}
-          aria-hidden
-        />
-        {/* Gloss for spinning, static gloss for stopped */}
-        <span
-          className="absolute left-0 top-0 w-full h-full rounded-full pointer-events-none overflow-hidden"
-          aria-hidden
-          style={{ zIndex: 2 }}
-        >
-          {spinning ? (
-            <span
-              className="block absolute left-[-40%] top-1/4 w-2/3 h-1/2"
-              style={{
-                background:
-                  "linear-gradient(100deg, rgba(255,255,255,0.33) 0%, rgba(255,255,255,0.9) 30%, rgba(255,255,255,0.09) 100%)",
-                filter: "blur(2.5px)",
-                borderRadius: "40%",
-                transform: "rotate(-14deg)",
-                animation: glossAnimation
-                  ? `${glossAnimation} ${glossDuration} linear infinite`
-                  : undefined,
-              }}
-            />
-          ) : highlight ? (
-            // Subtle gloss over green if highlighted
-            <span
-              className="block absolute left-[18%] top-1/4 w-2/3 h-2/5"
-              style={{
-                background:
-                  "linear-gradient(96deg, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0.25) 45%, rgba(255,255,255,0.05) 100%)",
-                filter: "blur(1.8px)",
-                borderRadius: "50%",
-                transform: "rotate(-15deg)",
-                opacity: 0.9,
-              }}
-            />
-          ) : (
-            // Standard gloss for stopped white ball
-            <span
-              className="block absolute left-[20%] top-1/4 w-2/3 h-1/2"
-              style={{
-                background:
-                  "linear-gradient(100deg, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0.6) 35%, rgba(255,255,255,0.07) 98%)",
-                filter: "blur(2.1px)",
-                borderRadius: "40%",
-                transform: "rotate(-14deg)",
-                opacity: 0.85,
-              }}
-            />
-          )}
-        </span>
-        {/* Center highlight - only show if not highlighted */}
-        {!highlight && (
-          <span
-            className="absolute"
-            style={{
-              top: "18%",
-              left: "38%",
-              width: 8,
-              height: 8,
-              borderRadius: "50%",
-              background: "radial-gradient(circle at 40% 40%, #fff 85%, #e0ebfc11 100%)",
-              opacity: 0.82,
-              filter: "blur(1px)",
-            }}
-            aria-hidden
-          />
-        )}
-        {/* Number overlay */}
-        {typeof number === "number" && (
-          <span
-            className={`relative font-extrabold text-base select-none`}
-            style={{
-              zIndex: 10,
-              color: highlight ? "#111" : "#222",
-              textShadow: highlight
-                ? "0 2px 7px #99f6e0ee"
-                : "0 1px 6px #d4dfff88",
-              fontFamily: "Poppins, Inter, sans-serif",
-              letterSpacing: "-0.02em",
-              userSelect: "none",
-            }}
-          >
-            {number}
-          </span>
-        )}
-      </div>
-    );
-  }
+    if (!grid || reveal) return;
+    const detach = attachSwipeHandlers(grid);
+    return detach;
+  }, [reveal, attachSwipeHandlers]);
 
   // For swipe demo: show current spin setting (optional visual debug)
   const currentSpinConf = getSpinConfig(spinSetting);
@@ -330,24 +132,7 @@ export default function RouletteBallGrid({
       </div>
       {/* Optional debug: show current setting (can delete) */}
       {/* <div className="mt-2 text-xs text-slate-500">{spinSetting < 0 ? "⟲" : "⟳"} {currentSpinConf.label}</div> */}
-      <style>{`
-        @keyframes roulette-ball-gloss-move-right {
-          0%   { left: -45%; opacity: 0.2;}
-          12%  { opacity: 0.5;}
-          38%  { opacity: 0.98;}
-          50%  { left: 55%; opacity: 1;}
-          80%  { opacity: .5;}
-          100% { left: 102%; opacity: 0.2;}
-        }
-        @keyframes roulette-ball-gloss-move-left {
-          0%   { left: 102%; opacity: 0.2;}
-          12%  { opacity: 0.5;}
-          38%  { opacity: 0.98;}
-          50%  { left: -45%; opacity: 1;}
-          80%  { opacity: .5;}
-          100% { left: -80%; opacity: 0.2;}
-        }
-      `}</style>
     </div>
   );
 }
+
