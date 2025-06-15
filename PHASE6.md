@@ -17,6 +17,7 @@
     - When a ball stops spinning, the corresponding number appears in its place.
     - The stopped ball visually transitions from the spinning style to a static style.
     - **Each ball now stops at an exact 1 second interval** (updated from 0.5s), to match current app timing.
+    - **Reveal order update:** For each row, balls/numbers that match the user's confirmed picks are revealed (stopped and number shown) first (in any order), then the rest of the balls in that row, then proceed to the next row.
 3. **Number Highlight**
     - Numbers that match the user’s picks are highlighted (e.g., green color/border as currently done).
 4. **Grid Consistency**
@@ -24,7 +25,8 @@
 
 ### User Acceptance Criteria
 - [ ] Before the reveal, all 18 balls spin; no numbers are shown.
-- [ ] During the reveal, each ball stops spinning and reveals its number one after the other at **1 second intervals**.
+- [ ] During the reveal, each ball stops spinning and reveals its number one after the other at **1 second intervals** per the new reveal order (see below).
+- [ ] **Within each row, reveal all numbers that match the user's picks (in any order), then the other numbers in the row, then move to the next row.**
 - [ ] Numbers that match the user's selection are highlighted visually.
 - [ ] The display is visually stable throughout all phases; no layout issues occur.
 - [ ] All revealed numbers remain visible until the next game round.
@@ -33,7 +35,7 @@
 ### Tests
 - **Visual / Unit**
   - [ ] 18 balls render and spin prior to the reveal.
-  - [ ] Balls stop spinning in correct order, one at a time, at **1s per ball** (updated; was 0.5s), with the drawn number displayed.
+  - [ ] Balls stop spinning and reveal drawn numbers in correct per-row order: first matching picks for that row, then the remaining numbers in that row, row-by-row, at **1s per ball**.
   - [ ] User-picked numbers are highlighted as described.
 - **Integration**
   - [ ] Switching between game phases correctly swaps between spinning balls and revealed numbers.

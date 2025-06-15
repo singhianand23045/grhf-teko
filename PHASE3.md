@@ -13,7 +13,11 @@ In each cycle, a set of 18 numbers (3 sets of 6) is revealed on screen in a time
 - The drawn numbers area is a fixed grid of 3 rows and 6 columns (18 slots in total).
 - When the timer is not ready to draw (before 0:45), all slots show filled black circles, and maintain their layout even when not filled.
 - At 0:45, the reveal phase begins.
-- During reveal, one number appears (“pops in”) every **1 second** (was 0.5s), in left-to-right, top-to-bottom order.
+- **Reveal Sequence (Updated):**
+  - The reveal proceeds by rows, starting with the first row, then second, then third.
+  - For each row: numbers that match the user's confirmed (picked) numbers are revealed first for that row (in any order), followed by the remaining numbers in that row (also in any order).
+  - Only after all numbers in the current row are revealed does the reveal sequence move to the next row.
+  - Each number in the sequence is revealed one at a time at **exactly 1 second intervals**.
 - All revealed numbers remain visible and persist on the screen until the timer reaches 0:00.
 - After the draw, the screen stays on the revealed numbers until the timer restarts or the demo completes.
 
@@ -44,7 +48,7 @@ In each cycle, a set of 18 numbers (3 sets of 6) is revealed on screen in a time
 ## Demo Flow
 
 **Cycle 1:**
-- Open (number selection) → Cut Off → Reveal phase (0:45–0:36, numbers revealed at 1s intervals)
+- Open (number selection) → Cut Off → Reveal phase (0:45–0:36, numbers revealed at 1s intervals, prioritized by per-row matches first)
 - From 0:27 to 0:00, all numbers remain visible.
 
 **Cycle 2:**
@@ -59,6 +63,7 @@ In each cycle, a set of 18 numbers (3 sets of 6) is revealed on screen in a time
 - The display of the drawn numbers never overshadows or obscures the user's confirmed numbers, and their space is never reduced or taken over by the draw results.
 - The timer, drawn numbers, and confirmed numbers are presented in visually separate sections that do not overflow into each other's areas.
 - Proper win/loss message (with credit sum if win) is shown for **10 seconds** above drawn numbers from timer 0:25 to 0:15 at the end of each draw, then disappears.
+- **Draw reveal sequence in each row now prioritizes user-matching numbers:** for each row, numbers that match confirmed/picked numbers are revealed first (in any order), then the rest; after the row completes, the sequence moves to the next row.
 - **The user's confirmed numbers are checked independently against each row (draw), winnings for each row are determined and summed, and this total is shown in the feedback message. Winnings are not determined by the total number matched in the overall grid, but by the sum of matches per row.**
 
 ---
@@ -68,5 +73,4 @@ In each cycle, a set of 18 numbers (3 sets of 6) is revealed on screen in a time
 - [ ] After each draw, correct result message (win/loss) appears for exactly **10 seconds** (from 0:25 to 0:15), is visually distinct and correctly placed.
 - [ ] The sum of winnings from all three rows is shown if the user wins, not just the total matches across all 18 numbers.
 - [ ] The per-row calculation is used: for each of the 3 rows (draws), award is determined and the total is the sum of all row results.
-- [ ] Each number is revealed at exactly **1 second intervals** (updated from 0.5s).
-
+- [ ] **Reveal order:** For each row, matching numbers for that row are revealed first (in any order), followed by the remainder in that row (in any order), then the next row (row-by-row). One number appears at each exact **1 second interval**.
