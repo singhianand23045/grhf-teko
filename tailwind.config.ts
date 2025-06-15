@@ -1,4 +1,13 @@
+
 import type { Config } from "tailwindcss";
+
+// Robinhood color palette (2024 main branding)
+// - Green: #00c805, #00af5b
+// - Black: #19181a
+// - White: #ffffff
+// - Gray: #f5f7fa, #e9ebed, #c4c7cc
+// - Accent: #ffd300 (yellow), #ff6859 (red), #00afff (blue)
+// These values can be adjusted as needed.
 
 export default {
 	darkMode: ["class"],
@@ -61,6 +70,18 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
+				},
+				robinhood: {
+					green: "#00c805",         // Primary Robinhood green
+					darkgreen: "#00af5b",     // Alternate green, often used for buttons
+					black: "#19181a",
+					white: "#ffffff",
+					bggray: "#f5f7fa",
+					bordergray: "#e9ebed",
+					cardgray: "#c4c7cc",
+					yellow: "#ffd300",
+					red: "#ff6859",
+					blue: "#00afff"
 				}
 			},
 			borderRadius: {
@@ -94,3 +115,4 @@ export default {
 	},
 	plugins: [require("tailwindcss-animate")],
 } satisfies Config;
+
