@@ -33,23 +33,6 @@ interface DrawEngineContextType {
 
 const DrawEngineContext = createContext<DrawEngineContextType | undefined>(undefined);
 
-function incrementTicketCountForCycle(cycle: number, debugSource = "unknown") {
-  if (!cycleTicketCountRef.current[cycle]) {
-    cycleTicketCountRef.current[cycle] = 1;
-    console.log(`[DrawEngineContext] First ticket for cycle ${cycle} from ${debugSource} - count=1`);
-  } else {
-    cycleTicketCountRef.current[cycle]++;
-    console.log(`[DrawEngineContext] Additional ticket for cycle ${cycle} from ${debugSource} - count=${cycleTicketCountRef.current[cycle]}`);
-  }
-  console.log("[DrawEngineContext] cycleTicketCountRef after increment:", {...cycleTicketCountRef.current});
-}
-
-function resetTicketCountForCycle(cycle: number) {
-  console.log(`[DrawEngineContext] Resetting ticket count for cycle ${cycle}`);
-  delete cycleTicketCountRef.current[cycle];
-  console.log("[DrawEngineContext] cycleTicketCountRef after reset:", {...cycleTicketCountRef.current});
-}
-
 export function DrawEngineProvider({ children }: { children: React.ReactNode }) {
   const { state, cycleIndex } = useTimer();
   // Wallet & Confirmed numbers
@@ -59,6 +42,25 @@ export function DrawEngineProvider({ children }: { children: React.ReactNode }) 
 
   // Add this new ref to count tickets per cycle:
   const cycleTicketCountRef = useRef<{[cycle: number]: number}>({});
+
+  // --- MOVED INSIDE DrawEngineProvider: helpers for ticket count ---
+  function incrementTicketCountForCycle(cycle: number, debugSource = "unknown") {
+    if (!cycleTicketCountRef.current[cycle]) {
+      cycleTicketCountRef.current[cycle] = 1;
+      console.log(`[DrawEngineContext] First ticket for cycle ${cycle} from ${debugSource} - count=1`);
+    } else {
+      cycleTicketCountRef.current[cycle]++;
+      console.log(`[DrawEngineContext] Additional ticket for cycle ${cycle} from ${debugSource} - count=${cycleTicketCountRef.current[cycle]}`);
+    }
+    console.log("[DrawEngineContext] cycleTicketCountRef after increment:", {...cycleTicketCountRef.current});
+  }
+
+  function resetTicketCountForCycle(cycle: number) {
+    console.log(`[DrawEngineContext] Resetting ticket count for cycle ${cycle}`);
+    delete cycleTicketCountRef.current[cycle];
+    console.log("[DrawEngineContext] cycleTicketCountRef after reset:", {...cycleTicketCountRef.current});
+  }
+
   const [drawnNumbers, setDrawnNumbers] = useState<number[]>([]);
   const [isRevealDone, setIsRevealDone] = useState(false);
    const [resultBar, setResultBar] = useState<{ show: boolean; credits: number | null }>({ show: false, credits: null });
