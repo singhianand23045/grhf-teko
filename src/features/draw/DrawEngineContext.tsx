@@ -40,25 +40,26 @@ export function DrawEngineProvider({ children }: { children: React.ReactNode }) 
   const { picked } = useNumberSelection();
   const jackpotContext = useJackpot();
 
-  // Add this new ref to count tickets per cycle:
-  const cycleTicketCountRef = useRef<{[cycle: number]: number}>({});
+  // Count of tickets per cycle — for future multi-player
+  const cycleTicketCountRef = useRef<{ [cycle: number]: number }>({});
 
   // --- MOVED INSIDE DrawEngineProvider: helpers for ticket count ---
   function incrementTicketCountForCycle(cycle: number, debugSource = "unknown") {
+    // Only allow a single ticket per user per cycle. (one increment per cycle)
     if (!cycleTicketCountRef.current[cycle]) {
       cycleTicketCountRef.current[cycle] = 1;
       console.log(`[DrawEngineContext] First ticket for cycle ${cycle} from ${debugSource} - count=1`);
     } else {
-      cycleTicketCountRef.current[cycle]++;
-      console.log(`[DrawEngineContext] Additional ticket for cycle ${cycle} from ${debugSource} - count=${cycleTicketCountRef.current[cycle]}`);
+      // Already has a ticket this cycle for this user—ignore (single-player mode)
+      console.log(`[DrawEngineContext] Already have a ticket for cycle ${cycle} from ${debugSource} — no increment`);
     }
-    console.log("[DrawEngineContext] cycleTicketCountRef after increment:", {...cycleTicketCountRef.current});
+    console.log("[DrawEngineContext] cycleTicketCountRef after increment:", { ...cycleTicketCountRef.current });
   }
 
   function resetTicketCountForCycle(cycle: number) {
     console.log(`[DrawEngineContext] Resetting ticket count for cycle ${cycle}`);
     delete cycleTicketCountRef.current[cycle];
-    console.log("[DrawEngineContext] cycleTicketCountRef after reset:", {...cycleTicketCountRef.current});
+    console.log("[DrawEngineContext] cycleTicketCountRef after reset:", { ...cycleTicketCountRef.current });
   }
 
   const [drawnNumbers, setDrawnNumbers] = useState<number[]>([]);
@@ -139,15 +140,29 @@ export function DrawEngineProvider({ children }: { children: React.ReactNode }) 
   // We'll track if a ticket for the current cycle was already committed
   const ticketCommittedCycle = useRef<number | null>(null);
 
+  // On demo reset, also reset committed-cycle tracking so that tickets get allowed/incremented on new demo start
+  useEffect(() => {
+    if (cycleIndex === 0) {
+      ticketCommittedCycle.current = null;
+      // Also fully reset all possible ticket counts to handle demo resets
+      cycleTicketCountRef.current = {};
+      console.log("[DrawEngineContext] Demo RESET: ticketCommittedCycle and all ticket counts reset");
+    }
+  }, [cycleIndex]);
+
   // PHASE 1: On ticket confirmation, deduct credits but don't increment jackpot yet
   useEffect(() => {
-    if (picked.length === 6 && cycleIndex !== ticketCommittedCycle.current) {
+    // Confirm the ticket only ONCE per cycle per user
+    if (
+      picked.length === 6 &&
+      ticketCommittedCycle.current !== cycleIndex
+    ) {
       console.log(`[DrawEngineContext] Committing ticket (picked/confirmed) for cycle ${cycleIndex}:`, picked);
       wallet.addConfirmedTicket({
         date: new Date().toISOString(),
         numbers: picked.slice(),
       });
-      // Don't increase jackpot here!
+      // Only increment if never done this cycle
       incrementTicketCountForCycle(cycleIndex, "picked-confirm");
       ticketCommittedCycle.current = cycleIndex;
       lastPickedPerCycle.current[cycleIndex] = picked.slice();
@@ -286,30 +301,30 @@ export function DrawEngineProvider({ children }: { children: React.ReactNode }) 
     // eslint-disable-next-line
   }, [state, cycleIndex, wallet]);
 
-  // NEW: When a new cycle begins (state goes from REVEAL/COMPLETE to OPEN), increase jackpot by #tickets from previous cycle
+  // When a new cycle begins, increase jackpot by 1 ONLY if user had a valid ticket last cycle.
   useEffect(() => {
     console.log(`[DrawEngineContext] useEffect: cycleIndex changed to ${cycleIndex}`);
-    // Whenever cycleIndex changes (a new draw cycle begins),
-    // use the ticket count of previous cycle to increase the jackpot
     if (cycleIndex > 0) {
       const prevCycle = cycleIndex - 1;
-      const tickets = cycleTicketCountRef.current[prevCycle] || 0;
-      console.log(`[DrawEngineContext] Previous cycle ${prevCycle} had ${tickets} tickets`);
+      // Only ever +$1 for user's ticket last cycle (single-user demo); future: would sum for multiplayer
+      const tickets = cycleTicketCountRef.current[prevCycle] ? 1 : 0;
+      console.log(`[DrawEngineContext] Previous cycle ${prevCycle} had ${tickets} ticket(s)`);
       if (tickets > 0) {
         console.log(`[DrawEngineContext] Adding $${tickets} to jackpot for cycle ${prevCycle}! Jackpot before: ${jackpotContext.jackpot}`);
-        jackpotContext.addToJackpot(tickets);
-        console.log(`[DrawEngineContext] Jackpot should now be: ${jackpotContext.jackpot + tickets} (pending re-render)`);
+        jackpotContext.addToJackpot(1); // only ever +$1 for this user/cycle
+        console.log(`[DrawEngineContext] Jackpot should now be: ${jackpotContext.jackpot + 1} (pending re-render)`);
         resetTicketCountForCycle(prevCycle);
       }
     }
-    // Also reset count if demo is reset (cycleIndex = 0)
+    // Clean everything on reset
     if (cycleIndex === 0) {
-      console.log("[DrawEngineContext] Resetting ALL ticket counts (demo reset)");
       cycleTicketCountRef.current = {};
+      ticketCommittedCycle.current = null;
+      console.log("[DrawEngineContext] Resetting ALL ticket counts and ticketCommittedCycle (demo reset)");
     }
-    // FIX: Reset ticketCommittedCycle between draws so it allows confirming a ticket for the current cycle
+    // Always allow ticket to be committed in new cycle
     ticketCommittedCycle.current = null;
-  // Only depend on cycleIndex and jackpotContext
+    // Only depend on cycleIndex and jackpotContext
   }, [cycleIndex, jackpotContext]);
 
   // PHASE 5 Payoff Handling: 
