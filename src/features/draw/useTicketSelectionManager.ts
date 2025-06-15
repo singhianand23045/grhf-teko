@@ -41,12 +41,30 @@ export function useTicketSelectionManager(cycleIndex: number) {
     // No else needed: purely initial commit logic
   }, [picked, cycleIndex, wallet]);
 
-  // On demo reset, clear commit tracking
+  // NEW: On cycle change, capture/transfer previous cycle's picks if still valid for jackpot
   useEffect(() => {
+    if (cycleIndex > 0) {
+      const prevCycle = cycleIndex - 1;
+      // If no valid entry exists for prevCycle, but last entry for current cycle is valid, set it
+      if (
+        !lastPickedPerCycle.current[prevCycle] ||
+        lastPickedPerCycle.current[prevCycle].length !== 6
+      ) {
+        // Try to use current cycle picks (should reflect last confirmed!)
+        if (picked && picked.length === 6) {
+          lastPickedPerCycle.current[prevCycle] = picked.slice();
+          console.log(
+            `[useTicketSelectionManager] Copied picked numbers for prevCycle ${prevCycle} on cycle change:`,
+            lastPickedPerCycle.current[prevCycle]
+          );
+        }
+      }
+    }
+    // On demo reset, clear commit tracking
     if (cycleIndex === 0) {
       ticketCommittedCycle.current = null;
     }
-  }, [cycleIndex]);
+  }, [cycleIndex, picked]);
 
   return {
     lastPickedPerCycle: lastPickedPerCycle.current,
