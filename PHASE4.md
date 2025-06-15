@@ -26,7 +26,7 @@
 - **Balance Management:**
   - Start with `balance = 100` credits for every new player/session.
   - For each draw in which the player participates (i.e., submits and confirms a 6-number ticket):
-    - **Deduct 10 credits** from the balance upon confirmation, regardless of results.  
+    - **Deduct 30 credits** from the balance upon confirmation, regardless of results.  
     - **Winnings Calculation:** 
       - For each row, count how many confirmed numbers match the 6 numbers from that row only.
       - For each row, award credits according to payout rules:
@@ -38,6 +38,7 @@
       - **Sum the total winnings across all three rows for the cycle.**
     - No credits are deducted for non-valid entries (unconfirmed or <6 selections).
     - Balance is updated after each result.
+  - **Each confirmed, valid ticket entry now costs 30 credits (was 10 previously).**
 
 - **Persistence:**
   - Wallet balance must persist between app reloads (e.g., use localStorage).
@@ -60,14 +61,14 @@
 ### 3. Acceptance Criteria
 
 - [ ] Submitting fewer than 6 numbers for a draw does **not** deduct credits or submit a ticket.
-- [ ] Submitting and **confirming 6 numbers** for a draw deducts **10 credits** regardless of outcome; ticket is recorded and eligible for winnings.
+- [ ] Submitting and **confirming 6 numbers** for a draw deducts **30 credits** regardless of outcome; ticket is recorded and eligible for winnings.
 - [ ] Submitting a ticket with 6 numbers but **not confirming** before cut-off results in **no deduction**, entry is discarded, and no ticket is recorded.
 - [ ] After each draw, the user's ticket is checked **independently against each of the 3 rows in the grid**.
   - [ ] For each row, number of matches is used to determine the credits awarded (as above), and total winnings are summed.
 - [ ] Multiple wins in multiple draws are credited to balance additively.
 - [ ] The wallet balance is restored correctly on app reload.
 - [ ] Ticket selection resets automatically at the start of each new draw cycle; previous balance remains unchanged.
-- [ ] The Credits section always appears, takes up 5% of the total logical height, and "Add credits" and the credit number are properly positioned.
+- [ ] The Credits section always appears, takes up 5% of the total logical height, and "Add credits", the balance are properly positioned.
 - [ ] The correct feedback message is displayed at the right time, with correct text and duration, and does not interfere with grid layout.
 - [ ] Feedback message and credited amount are correct for the sum of row winnings as appropriate.
 
@@ -78,7 +79,7 @@
 #### Unit/Logic Tests
 
 - [ ] Submitting a ticket with <6 numbers does not affect balance.
-- [ ] Submitting and confirming a ticket with exactly 6 numbers immediately subtracts 10 credits from balance and records the ticket.
+- [ ] Submitting and confirming a ticket with exactly 6 numbers immediately subtracts **30 credits** from balance and records the ticket.
 - [ ] Submitting a ticket with no 6/6 matches:
     - [ ] Regular row credit winnings are computed and summed.
     - [ ] If the user matches in multiple rows, total regular winnings are credited.
@@ -92,3 +93,4 @@
 - [ ] The credits section always appears, takes up 5% of the total logical height, and "Add credits", the balance are properly positioned.
 - [ ] The correct feedback message is displayed at the right time, with the correct text and duration, and does not interfere with grid layout.
 - [ ] Feedback message and credited amount are correct for the sum of row winnings, as appropriate.
+

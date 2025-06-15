@@ -25,6 +25,7 @@
   - 1 or 0 matches: **0 credits**
   - **These prizes are summed across all rows, additive per ticket.**
 - Only confirmed tickets with exactly 6 selected numbers before cut-off are eligible for entry; others are ignored and not charged.
+- **Each confirmed, valid ticket entry now costs 30 credits (was 10 previously).**
 - **Both wallet balance and jackpot pool must persist** across page reloads (localStorage).
 - After each draw, the ticketing/selection resets, but wallet and jackpot do not (unless jackpot is won).
 - The UI/UX must:
@@ -50,8 +51,8 @@
 ## 3. Acceptance Criteria
 
 - [ ] Only tickets with exactly 6 confirmed selections are entered; others are ignored and do not affect wallet/jackpot.
-- [ ] Each valid entry deducts 10 credits and increases jackpot pool by $1.
-- [ ] If 6/6 is matched in any row, user wins the full jackpot for that draw, and jackpot resets for the next cycle.
+- [ ] Each valid entry deducts **30 credits** and increases jackpot pool by $1.
+- [ ] If 6/6 is matched in any row, user wins jackpot only (credits user with jackpot, resets pool, no regular credits).
 - [ ] If no 6/6 match, user receives the sum of regular credit payouts per row, if any.
 - [ ] A draw result never grants both the jackpot and additional credit prizes for the same ticket.
 - [ ] Wallet and jackpot pool values persist on reload.
@@ -65,7 +66,7 @@
 
 ### Logic/Unit Tests
 - [ ] Submitting a ticket with <6 numbers does not deduct credits or add to jackpot.
-- [ ] Confirmed ticket with 6 picks deducts 10 credits, adds $1 to jackpot, and records ticket.
+- [ ] Confirmed ticket with 6 picks deducts **30 credits**, adds $1 to jackpot, and records ticket.
 - [ ] Ticket matching 6/6 in any row wins jackpot only (credits user with jackpot, resets pool, no regular credits).
 - [ ] Ticket matching less than 6 in all rows gets appropriate sum of regular credit payouts.
 - [ ] Both wallet balance and jackpot persist after reload.
