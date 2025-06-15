@@ -1,63 +1,52 @@
-import React, { createContext, useContext, useEffect, useRef } from "react";
+
+import React, { createContext, useContext } from "react";
 import { useTimer } from "../timer/timer-context";
 import { useWallet } from "../wallet/WalletContext";
 import { useJackpot } from "../jackpot/JackpotContext";
-import { getCreditsForMatches } from "./getCreditsForMatches";
-import { calculateWinnings } from "./calculateWinnings";
-import { useRevealAnimation } from "./useRevealAnimation";
-import { shouldAwardTicket } from "./walletAwardUtils";
-import { useJackpotHandlers } from "./useJackpotHandlers";
-import { useResultBar } from "./useResultBar";
-
-// === new hooks and constants extracted ===
-import {
-  SETS_COUNT,
-  SET_SIZE,
-  SETS_PER_CYCLE,
-  REVEAL_TOTAL_NUMBERS,
-  REVEAL_DURATION_SEC,
-  REVEAL_PER_NUMBER_SEC,
-} from "./drawConstants";
 import { useDrawSets } from "./useDrawSets";
 import { useTicketSelectionManager } from "./useTicketSelectionManager";
 import { useTicketCommitManager } from "./useTicketCommitManager";
+import { useResultBar } from "./useResultBar";
+import { useRevealAnimation } from "./useRevealAnimation";
+import { 
+  SETS_PER_CYCLE, 
+  SET_SIZE 
+} from "./drawConstants";
+
+// New hooks for separate logic
+import { useDrawPrizes } from "./useDrawPrizes";
+import { useResultBarVisibility } from "./useResultBarVisibility";
 
 interface DrawEngineContextType {
   drawnNumbers: number[];
   isRevealDone: boolean;
-  startReveal: (cycleIndex: number, revealDurationSec: number) => void;
+  startReveal: (cycleIndex: number, revealDurationSec?: number) => void;
   instantlyFinishReveal: () => void;
   sets: number[][];
   revealResult: { show: boolean; credits: number | null };
   triggerResultBar: () => void;
 }
 
-const DrawEngineContext = createContext<DrawEngineContextType | undefined>(
-  undefined
-);
+const DrawEngineContext = createContext<DrawEngineContextType | undefined>(undefined);
 
 export function DrawEngineProvider({ children }: { children: React.ReactNode }) {
   const { state, cycleIndex } = useTimer();
   const wallet = useWallet();
   const jackpotContext = useJackpot();
-
-  // Add a ref to keep track of last processed cycleIndex for result logic
-  const resultAwardedForCycle = useRef<number | null>(null);
-
-  // Modular constants and hooks
   const sets = useDrawSets();
   const { lastPickedPerCycle, picked } = useTicketSelectionManager(cycleIndex);
 
+  const resultBarTimeoutMs = 5000;
   const {
     resultBar,
     showResultBar,
     triggerResultBar,
     cleanup: cleanupResultBarTimeout,
     setResultBar,
-    hideResultBar, // <-- add this
-  } = useResultBar({ show: false, credits: null }, 5000);
+    hideResultBar,
+  } = useResultBar({ show: false, credits: null }, resultBarTimeoutMs);
 
-  // Reveal animation logic: always use last picked per cycle if available
+  // Reveal animation
   const confirmedUserNumbers =
     lastPickedPerCycle[cycleIndex] && lastPickedPerCycle[cycleIndex].length === 6
       ? lastPickedPerCycle[cycleIndex]
@@ -66,10 +55,9 @@ export function DrawEngineProvider({ children }: { children: React.ReactNode }) 
   const {
     drawnNumbers,
     isRevealDone,
-    startReveal: hookStartReveal,
-    instantlyFinishReveal: hookInstantlyFinishReveal,
+    startReveal: _startReveal,
+    instantlyFinishReveal: _instantlyFinishReveal,
     cleanupRevealTimeouts,
-    revealStartedForCycle,
   } = useRevealAnimation(
     sets,
     SETS_PER_CYCLE,
@@ -77,7 +65,6 @@ export function DrawEngineProvider({ children }: { children: React.ReactNode }) 
     confirmedUserNumbers
   );
 
-  // Ticket commit/confirmation and pending tracking
   const { ticketCommittedCycle, pendingTicketRef } = useTicketCommitManager(
     cycleIndex,
     sets,
@@ -89,171 +76,36 @@ export function DrawEngineProvider({ children }: { children: React.ReactNode }) 
     () => {}
   );
 
-  const startReveal = (cycle: number) => {
-    hookStartReveal(cycle);
-  };
-
-  const instantlyFinishReveal = () => {
-    hookInstantlyFinishReveal(cycleIndex);
-  };
-
-  // === FIX: Trigger reveal when entering REVEAL state ===
-  React.useEffect(() => {
-    if (state === "REVEAL") {
-      startReveal(cycleIndex);
-    }
-    // Optionally, cleanup reveal timeouts when leaving REVEAL state:
-    if (state !== "REVEAL") {
-      cleanupRevealTimeouts();
-    }
-    // eslint-disable-next-line
-  }, [state, cycleIndex]);
-
-  // On demo reset, also reset committed-cycle tracking so tickets get allowed/incremented on new demo start
-  useEffect(() => {
-    if (cycleIndex === 0) {
-      console.log("[DrawEngineContext] Demo RESET: all ticket counts reset");
-    }
-    // Reset awarded flag on game reset:
-    resultAwardedForCycle.current = null;
-  }, [cycleIndex]);
-
-  // On REVEAL DONE, process credits logic -- but only once per cycle!
-  useEffect(() => {
-    if (
-      isRevealDone &&
-      cycleIndex !== null &&
-      resultAwardedForCycle.current !== cycleIndex
-    ) {
-      // Only process once for this cycle
-      resultAwardedForCycle.current = cycleIndex;
-
-      const startSet = cycleIndex * SETS_PER_CYCLE;
-      const activeSets = sets.slice(startSet, startSet + SETS_PER_CYCLE);
-
-      let userNumbers: number[] = [];
-      // Strictly only use picks/committed tickets with exactly 6 numbers
-      if (
-        lastPickedPerCycle[cycleIndex] &&
-        lastPickedPerCycle[cycleIndex].length === 6
-      ) {
-        userNumbers = lastPickedPerCycle[cycleIndex];
-      } else if (
-        pendingTicketRef.current &&
-        pendingTicketRef.current.cycle === cycleIndex &&
-        pendingTicketRef.current.ticket.numbers.length === 6
-      ) {
-        userNumbers = pendingTicketRef.current.ticket.numbers;
-      } else {
-        // EXTRA: warn if any partial pick is being considered
-        if (
-          lastPickedPerCycle[cycleIndex] &&
-          lastPickedPerCycle[cycleIndex].length !== 6
-        ) {
-          console.warn(
-            `[DrawEngineContext] WARNING: lastPickedPerCycle[${cycleIndex}] used in draw with incorrect length:`,
-            lastPickedPerCycle[cycleIndex]
-          );
-        }
-        if (
-          pendingTicketRef.current &&
-          pendingTicketRef.current.cycle === cycleIndex &&
-          pendingTicketRef.current.ticket.numbers.length !== 6
-        ) {
-          console.warn(
-            `[DrawEngineContext] WARNING: pendingTicketRef.current.ticket.numbers used in draw with incorrect length:`,
-            pendingTicketRef.current.ticket.numbers
-          );
-        }
-      }
-
-      // ADDITIONAL GUARD: Prevent awarding for <6 or >6 numbers
-      if (userNumbers.length !== 6) {
-        console.warn(
-          `[DrawEngineContext] Aborting prize/ticket logic: userNumbers is not length 6:`,
-          userNumbers
-        );
-        // Show result bar as "try again" or nothing, but do NOT award
-        showResultBar(0);
-        cleanupResultBarTimeout();
-        return;
-      }
-
-      // ONCE PER CYCLE, only now DEDUCT CREDITS and add ticket
-      let ticketWasEntered = false;
-      if (
-        pendingTicketRef.current &&
-        pendingTicketRef.current.cycle === cycleIndex &&
-        !pendingTicketRef.current.entered &&
-        userNumbers.length === 6
-      ) {
-        wallet.addConfirmedTicket({
-          date: pendingTicketRef.current.ticket.date,
-          numbers: pendingTicketRef.current.ticket.numbers,
-        });
-        pendingTicketRef.current.entered = true;
-        ticketWasEntered = true;
-      }
-
-      // Calculate and award winnings
-      const { jackpotWon, rowWinnings, totalWinnings, resultType } =
-        calculateWinnings(userNumbers, activeSets, jackpotContext.jackpot);
-
-      if (userNumbers.length === 6 && ticketWasEntered) {
-        if (jackpotWon) {
-          wallet.awardTicketWinnings(activeSets, [0, 0, 0], totalWinnings);
-          jackpotContext.resetJackpot();
-        } else {
-          wallet.awardTicketWinnings(activeSets, rowWinnings, totalWinnings);
-        }
-      }
-
-      showResultBar(
-        resultType === "jackpot"
-          ? jackpotContext.jackpot
-          : totalWinnings
-      );
-    }
-    return () => {
-      cleanupResultBarTimeout();
-    };
-    // eslint-disable-next-line
-  }, [
+  // Prize and awarding logic
+  useDrawPrizes({
     isRevealDone,
     cycleIndex,
     sets,
-    wallet,
-    jackpotContext,
-    lastPickedPerCycle,
-    pendingTicketRef,
     SETS_PER_CYCLE,
     SET_SIZE,
+    lastPickedPerCycle,
+    picked,
+    wallet,
+    jackpotContext,
     showResultBar,
-    cleanupResultBarTimeout
-  ]);
+    cleanupResultBarTimeout,
+    pendingTicketRef,
+  });
 
-  // Hide ResultBar immediately when not in REVEAL state:
-  React.useEffect(() => {
-    if (state !== "REVEAL" && resultBar.show) {
-      hideResultBar();
-    }
-    // Always clear result on entering OPEN or on reset:
-    if (state === "OPEN" && resultBar.show) {
-      hideResultBar();
-    }
-    // Optionally also clear when moving into CUT_OFF or COMPLETE to guarantee bar is not visible
-    if ((state === "CUT_OFF" || state === "COMPLETE") && resultBar.show) {
-      hideResultBar();
-    }
-    // eslint-disable-next-line
-  }, [state, cycleIndex]);
+  // ResultBar phase visibility/cleanup
+  useResultBarVisibility({
+    state,
+    cycleIndex,
+    resultBar,
+    hideResultBar
+  });
 
-  // On demo reset or app load, guarantee resultBar is cleared
-  useEffect(() => {
-    // On first mount or reset, always hide the bar
-    hideResultBar();
-    resultAwardedForCycle.current = null;
-  }, [cycleIndex]);
+  const startReveal = (cycleIdx: number) => {
+    _startReveal(cycleIdx);
+  };
+  const instantlyFinishReveal = () => {
+    _instantlyFinishReveal(cycleIndex);
+  };
 
   return (
     <DrawEngineContext.Provider
