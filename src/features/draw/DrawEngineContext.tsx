@@ -39,6 +39,9 @@ export function DrawEngineProvider({ children }: { children: React.ReactNode }) 
   const wallet = useWallet();
   const { picked } = useNumberSelection();
   const jackpotContext = useJackpot();
+
+  // Add this new ref to count tickets per cycle:
+  const cycleTicketCountRef = useRef<{[cycle: number]: number}>({});
   const [drawnNumbers, setDrawnNumbers] = useState<number[]>([]);
   const [isRevealDone, setIsRevealDone] = useState(false);
    const [resultBar, setResultBar] = useState<{ show: boolean; credits: number | null }>({ show: false, credits: null });
@@ -64,6 +67,18 @@ export function DrawEngineProvider({ children }: { children: React.ReactNode }) 
     ticket: { date: string; numbers: number[]; matches: number };
     entered: boolean;
   } | null>(null);
+
+  // Helper: count ticket per cycle, initialize if missing
+  function incrementTicketCountForCycle(cycle: number) {
+    if (!cycleTicketCountRef.current[cycle]) {
+      cycleTicketCountRef.current[cycle] = 1;
+    } else {
+      cycleTicketCountRef.current[cycle]++;
+    }
+  }
+  function resetTicketCountForCycle(cycle: number) {
+    delete cycleTicketCountRef.current[cycle];
+  }
 
   // Reveal logic: reveal all numbers in 9 seconds, one every 0.5s (18 numbers)
   const REVEAL_TOTAL_NUMBERS = SETS_PER_CYCLE * SET_SIZE; // 18
@@ -114,23 +129,20 @@ export function DrawEngineProvider({ children }: { children: React.ReactNode }) 
   // We'll track if a ticket for the current cycle was already committed
   const ticketCommittedCycle = useRef<number | null>(null);
 
-  // STEP 1: When user confirms a valid ticket, deduct 10 credits and add $1 to jackpot
+  // PHASE 1: On ticket confirmation, deduct credits but don't increment jackpot yet
   useEffect(() => {
     if (picked.length === 6 && cycleIndex !== ticketCommittedCycle.current) {
       // Only commit once per cycle!
-      // The 18 drawn numbers for this cycle:
       const startSet = cycleIndex * SETS_PER_CYCLE;
       const activeSets = sets.slice(startSet, startSet + SETS_PER_CYCLE);
       const allDrawn = activeSets.flat();
-      // matches always zero until REVEAL
       const ticket = {
         date: new Date().toISOString(),
         numbers: picked.slice(),
-        // matches and creditChange are handled by context
       };
-      // Immediate -10 credit, will update with matches (if needed) in REVEAL
       wallet.addConfirmedTicket(ticket);
-      jackpotContext.addToJackpot(1); // New: add $1 per valid ticket
+      // Don't increase jackpot here!
+      incrementTicketCountForCycle(cycleIndex);
       ticketCommittedCycle.current = cycleIndex;
       lastPickedPerCycle.current[cycleIndex] = picked.slice();
       console.log("[DrawEngineContext] Committed ticket for cycle", cycleIndex, picked);
@@ -265,6 +277,26 @@ export function DrawEngineProvider({ children }: { children: React.ReactNode }) 
     }
     // eslint-disable-next-line
   }, [state, cycleIndex, wallet]);
+
+  // NEW: When a new cycle begins (state goes from REVEAL/COMPLETE to OPEN), increase jackpot by #tickets from previous cycle
+  useEffect(() => {
+    // Whenever cycleIndex changes (a new draw cycle begins),
+    // use the ticket count of previous cycle to increase the jackpot
+    if (cycleIndex > 0) {
+      const prevCycle = cycleIndex - 1;
+      const tickets = cycleTicketCountRef.current[prevCycle] || 0;
+      if (tickets > 0) {
+        console.log(`[DrawEngineContext] Adding $${tickets} to jackpot for cycle ${prevCycle}`);
+        jackpotContext.addToJackpot(tickets);
+        resetTicketCountForCycle(prevCycle);
+      }
+    }
+    // Also reset count if demo is reset (cycleIndex = 0)
+    if (cycleIndex === 0) {
+      cycleTicketCountRef.current = {};
+    }
+  // Only depend on cycleIndex and jackpotContext
+  }, [cycleIndex, jackpotContext]);
 
   // PHASE 5 Payoff Handling: 
   // When all numbers are revealed, check for jackpot win and handle result/awards.
