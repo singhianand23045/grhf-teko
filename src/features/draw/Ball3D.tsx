@@ -1,7 +1,6 @@
 
 import React from "react";
 
-// Use a single global font/circle size in this file
 const CIRCLE_DIAM = 35; // px
 const NUMBER_FONT_SIZE = "1.05rem";
 
@@ -20,23 +19,24 @@ export default function Ball3D({
 }: Ball3DProps) {
   const isSpinning = !!spinning;
 
+  // Remove all outlines and background for non-highlighted, non-spinning balls
   const ballBackground = highlight
     ? "bg-green-500"
     : isSpinning
     ? "bg-gradient-to-br from-slate-900 via-slate-700 to-neutral-500"
-    : "bg-gradient-to-b from-white via-slate-100 to-slate-300";
+    : ""; // No background for stopped, not-highlighted balls
 
   const borderColor = highlight
     ? "border-green-600/60"
     : isSpinning
     ? "border-black"
-    : "border-slate-500/40";
+    : ""; // No border for stopped, not-highlighted balls
 
   const ballBoxShadow = highlight
     ? "0 3px 16px 2px rgba(34,197,94,0.28), 0 0.5px 2.8px 0px #eaf3fa"
     : isSpinning
     ? "0 3px 14px 2px rgba(50,50,60,0.36), 0 0.5px 2.8px 0px #222a"
-    : "0 3px 8px 2px rgba(80,90,120,0.20), 0 0.5px 2.8px 0px #eaf3fa";
+    : ""; // No shadow for stopped, not-highlighted balls
 
   let glossAnimation = undefined;
   let glossDuration = undefined;
@@ -58,19 +58,24 @@ export default function Ball3D({
         minHeight: 28,
       }}
     >
-      <span
-        className={`
-          absolute inset-0 rounded-full
-          ${ballBackground}
-          shadow-lg border-[2.5px] ${borderColor}
-        `}
-        style={{
-          boxShadow: ballBoxShadow,
-          transition: "background 0.3s",
-        }}
-        aria-hidden
-      />
+      {/* Main ball surface */}
+      {(highlight || isSpinning) && (
+        <span
+          className={`
+            absolute inset-0 rounded-full
+            ${ballBackground}
+            shadow-lg ${borderColor ? "border-[2.5px]" : ""}
+            ${borderColor}
+          `}
+          style={{
+            boxShadow: ballBoxShadow,
+            transition: "background 0.3s",
+          }}
+          aria-hidden
+        />
+      )}
 
+      {/* Gloss/shine layer */}
       <span
         className="absolute left-0 top-0 w-full h-full rounded-full pointer-events-none overflow-hidden"
         aria-hidden
@@ -102,36 +107,9 @@ export default function Ball3D({
               opacity: 0.9,
             }}
           />
-        ) : (
-          <span
-            className="block absolute left-[20%] top-1/4 w-2/3 h-1/2"
-            style={{
-              background:
-                "linear-gradient(100deg, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0.6) 35%, rgba(255,255,255,0.07) 98%)",
-              filter: "blur(2.1px)",
-              borderRadius: "40%",
-              transform: "rotate(-14deg)",
-              opacity: 0.85,
-            }}
-          />
-        )}
+        ) : null}
       </span>
-      {!highlight && !isSpinning && (
-        <span
-          className="absolute"
-          style={{
-            top: "18%",
-            left: "38%",
-            width: 8,
-            height: 8,
-            borderRadius: "50%",
-            background: "radial-gradient(circle at 40% 40%, #fff 85%, #e0ebfc11 100%)",
-            opacity: 0.82,
-            filter: "blur(1px)",
-          }}
-          aria-hidden
-        />
-      )}
+      {!highlight && !isSpinning && null}
       {typeof number === "number" && (
         <span
           className={`relative font-extrabold select-none`}

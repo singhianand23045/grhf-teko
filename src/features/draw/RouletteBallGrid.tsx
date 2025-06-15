@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from "react";
 import Ball3D from "./Ball3D";
 import { useSpinSetting } from "./useSpinSetting";
@@ -101,15 +100,14 @@ export default function RouletteBallGrid({
 
   // Render balls based on revealedCount
   return (
-    <div className="flex flex-col items-center w-full">
-      <div className="inline-block p-2 bg-white rounded-xl shadow">
+    <div className="flex flex-col items-center w-full bg-robinhood-green"> {/* GREEN background */}
+      <div>
         <div
           className="grid grid-cols-6 grid-rows-3 gap-3 touch-pan-x"
           ref={gridRef}
         >
           {Array.from({ length: ROWS * COLS }).map((_, i) => {
             if (!reveal || i >= revealedCount) {
-              // Not yet revealed: always spinning, always current spin config
               return (
                 <Ball3D
                   key={"spin" + i}
@@ -118,7 +116,6 @@ export default function RouletteBallGrid({
                 />
               );
             } else {
-              // Revealed: stopped, show number and highlight if user picked
               const number = numbersToReveal[i];
               const isUserPick = userPicks.includes(number);
               return (
