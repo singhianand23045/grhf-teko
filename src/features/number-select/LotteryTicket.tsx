@@ -10,15 +10,17 @@ export default function LotteryTicket({ compact = false }: { compact?: boolean }
   const { picked } = useNumberSelection();
   const sorted = [...picked].sort((a, b) => a - b);
 
-  // Debugging output
-  // console.log("[LotteryTicket] Rendered: picked =", picked);
-
   return (
     <div
-      className={`w-full flex flex-col items-center justify-center px-2 ${compact ? "" : "mt-2 mb-2"}`}
-      style={compact ? { marginTop: 0, marginBottom: 0, paddingTop: 0, paddingBottom: 0 } : {}}
+      className={`flex flex-col items-center justify-center w-full px-2 ${compact ? "" : "mt-2 mb-2"}`}
+      style={{
+        marginTop: compact ? 0 : undefined,
+        marginBottom: compact ? 0 : undefined,
+        paddingTop: 0,
+        paddingBottom: 0,
+      }}
     >
-      <div className={`mb-2 font-bold text-lg tracking-wide text-[#217d37] ${compact ? "mt-0" : ""}`}>
+      <div className={`mb-2 font-bold text-lg tracking-wide text-[#217d37] ${compact ? "mt-0" : ""} text-center w-full`}>
         Your Numbers
       </div>
       <div
@@ -48,7 +50,7 @@ export default function LotteryTicket({ compact = false }: { compact?: boolean }
           </span>
         ))}
       </div>
-      <div className={`mt-2 text-sm text-muted-foreground text-center px-2 ${compact ? "mt-1" : ""}`}>
+      <div className={`mt-2 text-sm text-muted-foreground text-center px-2 ${compact ? "mt-1" : ""} w-full`}>
         Numbers locked in until next round!
       </div>
     </div>
