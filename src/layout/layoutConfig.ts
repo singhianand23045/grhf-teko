@@ -25,15 +25,15 @@ export const layoutConfig: SectionLayoutConfig[] = [
     key: "jackpot",
     height: "15%",
     font: "font-bold text-yellow-700 text-6xl",
-    // Unified background for consistency
-    bg: "from-white to-green-50"
+    // Set to plain white
+    bg: "from-white to-white"
   },
   {
     key: "timer",
     height: "15%",
     font: "font-mono font-extrabold text-blue-900 text-3xl",
-    // Unified background for consistency
-    bg: "from-white to-green-50"
+    // Set to plain white
+    bg: "from-white to-white"
   },
   {
     key: "drawNumbers",
