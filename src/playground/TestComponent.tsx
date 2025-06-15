@@ -35,12 +35,14 @@ const TestComponent = () => {
           {numbersToReveal.join(", ")}
         </span>
       </div>
+      {/* --- Only this section is replaced with the roulette animation grid for Phase 6 --- */}
       <RouletteBallGrid
         numbersToReveal={numbersToReveal}
         reveal={reveal}
         userPicks={userPicks}
         onDone={() => setDone(true)}
       />
+      {/* ------------------------------------------------------------------------------ */}
       <div className="flex gap-2 flex-wrap justify-center mt-2">
         <button
           className="px-3 py-1 rounded bg-yellow-300 font-bold hover:bg-yellow-400 transition"
@@ -77,3 +79,4 @@ const TestComponent = () => {
 };
 
 export default TestComponent;
+
