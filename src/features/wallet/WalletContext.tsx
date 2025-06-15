@@ -106,12 +106,20 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
         }
       }
 
-      // We ONLY update matches and creditChange, never deduct again!
+      // New: Only allow creditChange to INCREASE from -30 if user won something.
+      let newCreditChange = ticketToAward.creditChange;
+      if (totalWinnings > 0) {
+        newCreditChange = ticketToAward.creditChange + totalWinnings;
+      } else if (ticketToAward.creditChange < -30) {
+        // Defensive: Never let it deduct again
+        console.warn("[WalletContext] Defensive: ticket's creditChange is less than -30, this should not happen!", ticketToAward);
+        newCreditChange = -30;
+      } // else: leave at whatever it was (-30, i.e. only initial deduction)
+
       const updatedTicket: TicketType = {
         ...ticketToAward,
         matches: totalMatches,
-        // Keep initial deduction, just add winnings if any:
-        creditChange: ticketToAward.creditChange + totalWinnings,
+        creditChange: newCreditChange,
       };
 
       const updatedHistory = [...prevHistory];
