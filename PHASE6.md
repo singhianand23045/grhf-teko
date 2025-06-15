@@ -1,4 +1,3 @@
-
 # Phase 6: Roulette Ball Draw Animation (Prototype)
 
 ## Feature Spec: Roulette Ball Draw Animation (Prototype)
@@ -24,19 +23,20 @@
 
 ### User Acceptance Criteria
 - [ ] Before the reveal, all 18 balls spin; no numbers are shown.
-- [ ] During the reveal, each ball stops spinning and reveals its number one after the other at **1 second intervals**.
+- [ ] During the reveal, each ball stops spinning and reveals its number one after the other at **1s per ball** (updated; was 0.5s), with the drawn number displayed.
 - [ ] Numbers that match the user's selection are highlighted visually.
 - [ ] The display is visually stable throughout all phases; no layout issues occur.
 - [ ] All revealed numbers remain visible until the next game round.
+- [ ] Result message ("Congrats" or "Try again") is shown above the numbers for **10 seconds** (from 0:25 to 0:15 on the timer), then disappears.
 
 ### Tests
 - **Visual / Unit**
   - [ ] 18 balls render and spin prior to the reveal.
   - [ ] Balls stop spinning in correct order, one at a time, at **1s per ball** (updated; was 0.5s), with the drawn number displayed.
   - [ ] User-picked numbers are highlighted as described.
+  - [ ] **Result message ("Congrats!" or "Try again") is visible for exactly 10 seconds, from 0:25 to 0:15.**
 - **Integration**
   - [ ] Switching between game phases correctly swaps between spinning balls and revealed numbers.
   - [ ] Grid layout remains correct and unchanged throughout.
 - **Regression**
   - [ ] Removing or editing this feature doesn’t break existing reveal/grid drawing features.
-
