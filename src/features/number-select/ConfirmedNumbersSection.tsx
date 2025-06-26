@@ -4,8 +4,6 @@ import NumberSelectionPanel from "./NumberSelectionPanel";
 import { Button } from "@/components/ui/button";
 import { Repeat } from "lucide-react";
 
-const LOGICAL_HEIGHT = 874;
-
 export default function ConfirmedNumbersSection() {
   const { state, resetDemo } = useTimer();
 
@@ -14,8 +12,6 @@ export default function ConfirmedNumbersSection() {
       className="flex flex-col items-center justify-center w-full flex-shrink-0 flex-grow-0 overflow-y-hidden"
       style={{
         height: "40%",
-        minHeight: Math.floor(LOGICAL_HEIGHT * 0.4),
-        maxHeight: Math.ceil(LOGICAL_HEIGHT * 0.4),
       }}
     >
       {/* During selection phases */}
