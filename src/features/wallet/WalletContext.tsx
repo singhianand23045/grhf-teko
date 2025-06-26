@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { getCreditsForMatches } from "../draw/getCreditsForMatches";
 
@@ -13,12 +14,14 @@ export type TicketType = {
   matches: number;
   creditChange: number;
   winnings?: number; // <-- for display only
+  processed?: boolean; // <-- to track if ticket has been processed for winnings
+  cycle?: number; // <-- to track which cycle this ticket belongs to
 };
 
 type WalletContextType = {
   balance: number;
   history: TicketType[];
-  addConfirmedTicket: (ticket: Omit<TicketType, "id" | "creditChange" | "matches" | "winnings">) => void;
+  addConfirmedTicket: (ticket: Omit<TicketType, "id" | "creditChange" | "matches" | "winnings" | "processed">) => void;
   awardTicketWinnings: (cycleRows: number[][], rowWinnings: number[], totalWinnings: number) => void;
   resetWallet: () => void;
 };
@@ -68,13 +71,14 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
     console.log("[WalletContext] Provider rendered with balance:", balance, "history:", history);
   });
 
-  function addConfirmedTicket(ticketCore: Omit<TicketType, "id" | "creditChange" | "matches" | "winnings">) {
+  function addConfirmedTicket(ticketCore: Omit<TicketType, "id" | "creditChange" | "matches" | "winnings" | "processed">) {
     const newTicket: TicketType = {
       ...ticketCore,
       id: Math.random().toString(36).slice(2) + Date.now(),
       matches: 0,
-      creditChange: -30,
+      creditChange: -30, // Always -30 for ticket purchase
       winnings: 0,
+      processed: false, // Mark as unprocessed initially
     };
     setBalance(prev => {
       const newBal = prev - 30;
@@ -89,19 +93,22 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
   }
 
   /**
-   * Only awards winnings for the FIRST pending ticket (with matches === 0), and NEVER mutates creditChange field.
+   * Only awards winnings for the FIRST unprocessed ticket, and marks it as processed.
    */
   function awardTicketWinnings(cycleRows: number[][], rowWinnings: number[], totalWinnings: number) {
     setHistory(prevHistory => {
       if (!prevHistory.length) return prevHistory;
-      // Only update the FIRST pending ticket (matches === 0 && creditChange === -30)
+      
+      // Find the FIRST unprocessed ticket (processed === false or undefined)
       const idx = prevHistory.findIndex(
-        (t) => t.matches === 0 && t.creditChange === -30
+        (t) => !t.processed && t.creditChange === -30
       );
+      
       if (idx === -1) {
-        console.log("[WalletContext] No pending ticket found for awarding, skipping.");
+        console.log("[WalletContext] No unprocessed ticket found for awarding, skipping.");
         return prevHistory;
       }
+      
       const ticketToAward = prevHistory[idx];
 
       let totalMatches = 0;
@@ -111,37 +118,29 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
         }
       }
 
-      // Always: winnings are added to balance; ticket's creditChange is never mutated.
+      // Update the ticket with matches, winnings, and mark as processed
       const updatedTicket: TicketType = {
         ...ticketToAward,
         matches: totalMatches,
-        // creditChange: ticketToAward.creditChange, // never change after confirmation
         winnings: totalWinnings, // for display ONLY
+        processed: true, // Mark as processed to prevent reuse
       };
 
       const updatedHistory = [...prevHistory];
       updatedHistory[idx] = updatedTicket;
 
-      // Award winnings to balance (NEVER mutate creditChange)
+      // Award winnings to balance (separate from ticket's creditChange)
       if (totalWinnings > 0) {
         setBalance((prevBal) => {
           const newBal = prevBal + totalWinnings;
           console.log("[WalletContext] Awarding winnings:", totalWinnings, "Old balance:", prevBal, "New balance:", newBal);
           return newBal;
         });
-      } else if (totalWinnings < 0) {
-        // Defensive: This should never happen: winnings should not be negative
-        setBalance((prevBal) => {
-          const newBal = prevBal + totalWinnings;
-          console.error("[WalletContext] ERROR: Negative winnings detected, adjusting balance! totalWinnings:", totalWinnings, "Old:", prevBal, "New:", newBal);
-          return newBal;
-        });
       } else {
-        // totalWinnings === 0: NO CHANGE to balance. Log for debugging.
-        console.log("[WalletContext] No winnings to add and NO deduction. Balance remains unchanged.");
+        console.log("[WalletContext] No winnings to add. Balance remains unchanged.");
       }
 
-      console.log("[WalletContext] Awarded payout for ticket:", updatedTicket, "rowWinnings:", rowWinnings, "totalWinnings:", totalWinnings, "Updated history:", updatedHistory);
+      console.log("[WalletContext] Processed ticket:", updatedTicket, "rowWinnings:", rowWinnings, "totalWinnings:", totalWinnings, "Updated history:", updatedHistory);
       return updatedHistory;
     });
   }

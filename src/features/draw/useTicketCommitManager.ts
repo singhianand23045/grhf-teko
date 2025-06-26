@@ -1,4 +1,3 @@
-
 import { useRef, useEffect } from "react";
 import { useWallet } from "../wallet/WalletContext";
 import { useNumberSelection } from "../number-select/NumberSelectionContext";
@@ -32,8 +31,9 @@ export function useTicketCommitManager(
     // Reset on new cycle
     ticketCommittedCycle.current = null;
     pendingTicketRef.current = null;
-    prevIsConfirmed.current = false;
-  }, [cycleIndex]);
+    // FIX: Keep prevIsConfirmed in sync with actual confirmation state instead of blindly resetting
+    prevIsConfirmed.current = isConfirmed;
+  }, [cycleIndex, isConfirmed]);
 
   useEffect(() => {
     // Only commit if transitioning from NOT confirmed to confirmed (user action)
@@ -47,6 +47,7 @@ export function useTicketCommitManager(
       wallet.addConfirmedTicket({
         date: new Date().toISOString(),
         numbers: picked.slice(),
+        cycle: cycleIndex, // Add cycle tracking
       });
       ticketCommittedCycle.current = cycleIndex;
 
