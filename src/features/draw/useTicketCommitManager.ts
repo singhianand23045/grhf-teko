@@ -31,9 +31,9 @@ export function useTicketCommitManager(
     // Reset on new cycle
     ticketCommittedCycle.current = null;
     pendingTicketRef.current = null;
-    // FIX: Keep prevIsConfirmed in sync with actual confirmation state instead of blindly resetting
+    // FIX: Keep prevIsConfirmed in sync with actual confirmation state at cycle change
     prevIsConfirmed.current = isConfirmed;
-  }, [cycleIndex, isConfirmed]);
+  }, [cycleIndex]); // Only depend on cycleIndex, not isConfirmed
 
   useEffect(() => {
     // Only commit if transitioning from NOT confirmed to confirmed (user action)
