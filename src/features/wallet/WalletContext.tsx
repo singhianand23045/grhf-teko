@@ -22,7 +22,7 @@ type WalletContextType = {
   balance: number;
   history: TicketType[];
   addConfirmedTicket: (ticket: Omit<TicketType, "id" | "creditChange" | "matches" | "winnings" | "processed">) => void;
-  awardTicketWinnings: (cycleRows: number[][], rowWinnings: number[], totalWinnings: number) => void;
+  awardTicketWinnings: (cycleRows: number[][], rowWinnings: number[], totalWinnings: number, currentCycle: number) => void;
   resetWallet: () => void;
 };
 
@@ -93,19 +93,19 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
   }
 
   /**
-   * Only awards winnings for the FIRST unprocessed ticket, and marks it as processed.
+   * Awards winnings for the FIRST unprocessed ticket from the specified cycle, and marks it as processed.
    */
-  function awardTicketWinnings(cycleRows: number[][], rowWinnings: number[], totalWinnings: number) {
+  function awardTicketWinnings(cycleRows: number[][], rowWinnings: number[], totalWinnings: number, currentCycle: number) {
     setHistory(prevHistory => {
       if (!prevHistory.length) return prevHistory;
       
-      // Find the FIRST unprocessed ticket (processed === false or undefined)
+      // Find the FIRST unprocessed ticket for the current cycle
       const idx = prevHistory.findIndex(
-        (t) => !t.processed && t.creditChange === -30
+        (t) => !t.processed && t.creditChange === -30 && t.cycle === currentCycle
       );
       
       if (idx === -1) {
-        console.log("[WalletContext] No unprocessed ticket found for awarding, skipping.");
+        console.log("[WalletContext] No unprocessed ticket found for cycle", currentCycle, "skipping.");
         return prevHistory;
       }
       
@@ -140,7 +140,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
         console.log("[WalletContext] No winnings to add. Balance remains unchanged.");
       }
 
-      console.log("[WalletContext] Processed ticket:", updatedTicket, "rowWinnings:", rowWinnings, "totalWinnings:", totalWinnings, "Updated history:", updatedHistory);
+      console.log("[WalletContext] Processed ticket for cycle", currentCycle, ":", updatedTicket, "rowWinnings:", rowWinnings, "totalWinnings:", totalWinnings, "Updated history:", updatedHistory);
       return updatedHistory;
     });
   }

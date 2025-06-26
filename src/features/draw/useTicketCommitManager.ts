@@ -1,3 +1,4 @@
+
 import { useRef, useEffect } from "react";
 import { useWallet } from "../wallet/WalletContext";
 import { useNumberSelection } from "../number-select/NumberSelectionContext";
@@ -43,11 +44,11 @@ export function useTicketCommitManager(
       !prevIsConfirmed.current &&
       ticketCommittedCycle.current !== cycleIndex
     ) {
-      // Commit ticket and deduct credits
+      // Commit ticket and deduct credits - SET THE CYCLE PROPERTY
       wallet.addConfirmedTicket({
         date: new Date().toISOString(),
         numbers: picked.slice(),
-        cycle: cycleIndex, // Add cycle tracking
+        cycle: cycleIndex, // Ensure cycle is set for proper matching
       });
       ticketCommittedCycle.current = cycleIndex;
 
