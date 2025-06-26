@@ -180,10 +180,10 @@ export default function AnalyticsPage() {
       <div
         className="relative flex flex-col items-center justify-center shadow-xl rounded-2xl border border-gray-200 bg-white overflow-hidden"
         style={{
-          width: 402,
-          height: 874,
-          maxWidth: 402,
-          maxHeight: 874,
+          width: "min(100vw, 402px)",
+          height: "100vh",
+          maxWidth: "100vw",
+          maxHeight: "100vh",
         }}
       >
         <main className="flex flex-col flex-1 items-center w-full px-2 py-8 h-full pb-24">

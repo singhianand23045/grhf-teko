@@ -3,9 +3,6 @@ import React from "react";
 import { useWallet } from "./WalletContext";
 import { Button } from "@/components/ui/button";
 
-// LOGICAL_HEIGHT must match the constant used in TimerDisplay and Index
-const LOGICAL_HEIGHT = 874;
-
 export default function CreditsBar() {
   const { balance } = useWallet();
   React.useEffect(() => {
@@ -16,7 +13,7 @@ export default function CreditsBar() {
     <div
       className="flex flex-row items-center justify-between w-full px-4 bg-gradient-to-r from-amber-50 to-green-50 border-y border-gray-200 transition-all select-none"
       style={{
-        height: Math.round(LOGICAL_HEIGHT * 0.05), // 5% of logical screen
+        height: "5vh",
         minHeight: 30,
         maxHeight: 60,
       }}

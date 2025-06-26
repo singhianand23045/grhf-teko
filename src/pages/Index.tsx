@@ -11,10 +11,10 @@ const Index = () => {
       <div
         className="relative flex flex-col items-center justify-center shadow-xl rounded-2xl border border-gray-200 bg-white overflow-hidden"
         style={{
-          width: LOGICAL_WIDTH,
-          height: LOGICAL_HEIGHT,
-          maxWidth: LOGICAL_WIDTH,
-          maxHeight: LOGICAL_HEIGHT,
+          width: "min(100vw, 402px)",
+          height: "100vh",
+          maxWidth: "100vw",
+          maxHeight: "100vh",
         }}
       >
         {/* MAIN CONTENT: removed pb-24 to avoid gap above tabs */}

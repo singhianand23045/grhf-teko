@@ -28,7 +28,7 @@ export default function MainTabs() {
 
   return (
     <nav
-      className="fixed bottom-0 left-1/2 -translate-x-1/2 w-[402px] max-w-full z-30 bg-white h-16 flex items-center border-t border-gray-200"
+      className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[402px] z-30 bg-white h-16 flex items-center border-t border-gray-200"
       // removed rounded-b-2xl and ensured border for visual separation, but flush with edge
       style={{
         borderBottomLeftRadius: 0,
@@ -70,4 +70,3 @@ export default function MainTabs() {
     </nav>
   );
 }
-
