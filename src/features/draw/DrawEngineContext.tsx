@@ -92,6 +92,7 @@ export function DrawEngineProvider({ children }: { children: React.ReactNode }) 
     showResultBar,
     cleanupResultBarTimeout,
     pendingTicketRef,
+    revealStartedForCycle, // Pass the ref to ensure reveal started
   });
 
   // ResultBar phase visibility/cleanup

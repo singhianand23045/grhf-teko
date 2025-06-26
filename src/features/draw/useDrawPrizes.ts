@@ -24,6 +24,7 @@ type UseDrawPrizesArgs = {
     ticket: { date: string; numbers: number[] };
     entered: boolean;
   } | null>;
+  revealStartedForCycle: React.MutableRefObject<number | null>; // New parameter
 };
 
 export function useDrawPrizes({
@@ -38,12 +39,19 @@ export function useDrawPrizes({
   showResultBar,
   cleanupResultBarTimeout,
   pendingTicketRef,
+  revealStartedForCycle, // New parameter
 }: UseDrawPrizesArgs) {
   const resultAwardedForCycle = useRef<number | null>(null);
+
+  // Reset resultAwardedForCycle when cycle changes
+  useEffect(() => {
+    resultAwardedForCycle.current = null;
+  }, [cycleIndex]);
 
   useEffect(() => {
     if (
       isRevealDone &&
+      revealStartedForCycle.current === cycleIndex && // Ensure reveal really started for this cycle
       cycleIndex !== null &&
       resultAwardedForCycle.current !== cycleIndex
     ) {
@@ -116,6 +124,7 @@ export function useDrawPrizes({
     pendingTicketRef,
     SETS_PER_CYCLE,
     showResultBar,
-    cleanupResultBarTimeout
+    cleanupResultBarTimeout,
+    revealStartedForCycle
   ]);
 }
