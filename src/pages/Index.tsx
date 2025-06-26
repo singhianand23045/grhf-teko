@@ -2,7 +2,8 @@
 import MainTabs from "@/components/MainTabs";
 import FlexibleLayout from "@/layout/FlexibleLayout";
 
-const LOGICAL_WIDTH = 402;  // Reference max width
+const LOGICAL_WIDTH = 402;  // iPhone 16 Pro logical width
+const LOGICAL_HEIGHT = 874; // iPhone 16 Pro logical height
 
 const Index = () => {
   return (
@@ -10,10 +11,10 @@ const Index = () => {
       <div
         className="relative flex flex-col items-center justify-center shadow-xl rounded-2xl border border-gray-200 bg-white overflow-hidden"
         style={{
-          width: "100%",
-          height: "100svh",
+          width: LOGICAL_WIDTH,
+          height: LOGICAL_HEIGHT,
           maxWidth: LOGICAL_WIDTH,
-          maxHeight: "100svh",
+          maxHeight: LOGICAL_HEIGHT,
         }}
       >
         {/* MAIN CONTENT: removed pb-24 to avoid gap above tabs */}

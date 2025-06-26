@@ -7,6 +7,8 @@ import CreditsSection from "../features/wallet/CreditsSection";
 import DrawNumbersSection from "../features/draw/DrawNumbersSection";
 import ConfirmedNumbersSection from "../features/number-select/ConfirmedNumbersSection";
 
+const LOGICAL_WIDTH = 402;
+const LOGICAL_HEIGHT = 874;
 
 export default function FlexibleLayout() {
   // For easy reference, map keys to components
