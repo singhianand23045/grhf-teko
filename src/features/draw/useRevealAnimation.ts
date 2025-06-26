@@ -1,5 +1,5 @@
 
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 
 /**
  * Animates reveal of numbers, now in per-row order:
@@ -8,12 +8,14 @@ import { useRef, useState } from "react";
  * @param SETS_PER_CYCLE - How many sets (rows) per draw
  * @param SET_SIZE - Size of each set (row)
  * @param userNumbers - Confirmed user's picks (6 numbers)
+ * @param cycleIndex - Current cycle index to reset state on cycle changes
  */
 export function useRevealAnimation(
   sets: number[][],
   SETS_PER_CYCLE: number,
   SET_SIZE: number,
-  userNumbers: number[] // new param!
+  userNumbers: number[], // new param!
+  cycleIndex: number // new param to track cycle changes
 ) {
   // Animates reveal of numbers for a given cycle
   const [drawnNumbers, setDrawnNumbers] = useState<number[]>([]);
@@ -25,6 +27,16 @@ export function useRevealAnimation(
   const REVEAL_TOTAL_NUMBERS = SETS_PER_CYCLE * SET_SIZE; // e.g. 18
   const REVEAL_DURATION_SEC = 18; // Changed to 18s for 1 second per number
   const REVEAL_PER_NUMBER_SEC = REVEAL_DURATION_SEC / REVEAL_TOTAL_NUMBERS; // 1s per number
+
+  // Reset reveal state when cycle changes to prevent premature prize awarding
+  useEffect(() => {
+    setIsRevealDone(false);
+    setDrawnNumbers([]);
+    revealStartedForCycle.current = null;
+    // Clear any pending timeouts
+    revealTimeouts.current.forEach(clearTimeout);
+    revealTimeouts.current = [];
+  }, [cycleIndex]);
 
   // Helper: return the correct reveal sequence per requirements
   function buildRevealSequence(setsForDraw: number[][], userNums: number[]): number[] {
@@ -91,4 +103,3 @@ export function useRevealAnimation(
     revealStartedForCycle
   };
 }
-

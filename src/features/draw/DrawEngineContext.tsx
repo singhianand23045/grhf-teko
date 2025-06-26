@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useEffect } from "react";
 import { useTimer } from "../timer/timer-context";
 import { useWallet } from "../wallet/WalletContext";
@@ -62,7 +63,8 @@ export function DrawEngineProvider({ children }: { children: React.ReactNode }) 
     sets,
     SETS_PER_CYCLE,
     SET_SIZE,
-    confirmedUserNumbers
+    confirmedUserNumbers,
+    cycleIndex // Pass cycleIndex to reset state on cycle changes
   );
 
   const { ticketCommittedCycle, pendingTicketRef } = useTicketCommitManager(
