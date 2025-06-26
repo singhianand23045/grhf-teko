@@ -77,7 +77,6 @@ export function useDrawPrizes({
 
       if (userNumbers.length !== 6) {
         showResultBar(0);
-        cleanupResultBarTimeout();
         return;
       }
 
@@ -111,7 +110,6 @@ export function useDrawPrizes({
         showResultBar(0);
         console.log("[Prize] Not a valid or entered ticket for prize awarding.");
       }
-      cleanupResultBarTimeout();
     }
     // eslint-disable-next-line
   }, [
