@@ -6,6 +6,8 @@ import DrawNumbersSection from "../draw/DrawNumbersSection";
 import CreditsSection from "../wallet/CreditsSection";
 import ConfirmedNumbersSection from "../number-select/ConfirmedNumbersSection";
 
+const LOGICAL_HEIGHT = 874;
+
 export default function TimerDisplay() {
   const { state } = useTimer();
 
@@ -15,6 +17,7 @@ export default function TimerDisplay() {
       className="flex flex-col w-full h-full"
       style={{
         height: "100%",
+        minHeight: LOGICAL_HEIGHT,
       }}
     >
       {/* Header row: Jackpot & Timer */}
