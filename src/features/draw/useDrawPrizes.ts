@@ -73,22 +73,6 @@ export function useDrawPrizes({
         return;
       }
 
-      // REMOVE - ticket entry and deduction at result time!
-      // let ticketWasEntered = false;
-      // if (
-      //   pendingTicketRef.current &&
-      //   pendingTicketRef.current.cycle === cycleIndex &&
-      //   !pendingTicketRef.current.entered &&
-      //   userNumbers.length === 6
-      // ) {
-      //   wallet.addConfirmedTicket({
-      //     date: pendingTicketRef.current.ticket.date,
-      //     numbers: pendingTicketRef.current.ticket.numbers,
-      //   });
-      //   pendingTicketRef.current.entered = true;
-      //   ticketWasEntered = true;
-      // }
-
       // Calculate winnings; never grant both types for same ticket
       const { jackpotWon, rowWinnings, totalWinnings, resultType } =
         calculateWinnings(userNumbers, activeSets, jackpotContext.jackpot);
@@ -100,17 +84,17 @@ export function useDrawPrizes({
       if (userNumbers.length === 6 /* && ticketWasEntered */) {
         if (jackpotWon) {
           // Award jackpot ONLY, then reset pool - NO regular credits
-          wallet.awardTicketWinnings(activeSets, [0, 0, 0], jackpotContext.jackpot);
+          wallet.awardTicketWinnings(activeSets, [0, 0, 0], jackpotContext.jackpot, cycleIndex);
           // Don't forget to reset jackpot
           jackpotContext.resetJackpot();
           showResultBar(jackpotContext.jackpot);
           console.log("[Prize] JACKPOT WIN, awarded", jackpotContext.jackpot);
         } else if (totalWinnings > 0) {
-          wallet.awardTicketWinnings(activeSets, rowWinnings, totalWinnings);
+          wallet.awardTicketWinnings(activeSets, rowWinnings, totalWinnings, cycleIndex);
           showResultBar(totalWinnings);
           console.log("[Prize] CREDIT WIN, awarded", totalWinnings, rowWinnings);
         } else {
-          wallet.awardTicketWinnings(activeSets, [0,0,0], 0);
+          wallet.awardTicketWinnings(activeSets, [0,0,0], 0, cycleIndex);
           showResultBar(0);
           console.log("[Prize] NO WIN, awarded nothing.");
         }
@@ -135,4 +119,3 @@ export function useDrawPrizes({
     cleanupResultBarTimeout
   ]);
 }
-
