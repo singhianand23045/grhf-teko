@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from "react";
 import Ball3D from "./Ball3D";
 import { useSpinSetting } from "./useSpinSetting";
@@ -30,7 +29,7 @@ const SPIN_SETTINGS = [
 
 function getSpinConfig(spinLevel: number) {
   // spinLevel: -3..-1 for left, 1..3 for right. 0 forbidden.
-  if (spinLevel < 0) return SPIN_SETTINGS[-spinLevel - 1];
+  if (spinLevel < 0) return SPIN_SETTINGS[spinLevel + 3]; // -3→0, -2→1, -1→2
   if (spinLevel > 0) return SPIN_SETTINGS[spinLevel + 2];
   // fallback right slow
   return SPIN_SETTINGS[3];
@@ -137,4 +136,3 @@ export default function RouletteBallGrid({
     </div>
   );
 }
-

@@ -24,7 +24,7 @@ const SPIN_SETTINGS = [
 ];
 
 function getSpinConfig(spinLevel: number) {
-  if (spinLevel < 0) return SPIN_SETTINGS[-spinLevel - 1];
+  if (spinLevel < 0) return SPIN_SETTINGS[spinLevel + 3]; // -3→0, -2→1, -1→2
   if (spinLevel > 0) return SPIN_SETTINGS[spinLevel + 2];
   return SPIN_SETTINGS[3];
 }
