@@ -12,6 +12,14 @@ export function useTicketSelectionManager(cycleIndex: number) {
   // Cache last picked numbers per cycle (persists across rerenders)
   const lastPickedPerCycle = useRef<{ [cycle: number]: number[] }>({});
 
+  // Clear cache when new game starts (cycleIndex resets to 0)
+  useEffect(() => {
+    if (cycleIndex === 0) {
+      lastPickedPerCycle.current = {};
+      console.log("[useTicketSelectionManager] Cleared cache for new game");
+    }
+  }, [cycleIndex]);
+
   // When picked numbers update AND are confirmed, record them for the current cycle
   useEffect(() => {
     if (picked && picked.length === 6 && isConfirmed) {
