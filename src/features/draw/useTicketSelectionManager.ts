@@ -4,42 +4,42 @@ import { useNumberSelection } from "../number-select/NumberSelectionContext";
 
 /**
  * Tracks last picked numbers per cycle.
- * Does NOT commit tickets or deduct credits.
+ * Only stores numbers when they are confirmed, preventing unconfirmed picks from incrementing jackpot.
  */
 export function useTicketSelectionManager(cycleIndex: number) {
-  const { picked } = useNumberSelection();
+  const { picked, isConfirmed } = useNumberSelection();
 
   // Cache last picked numbers per cycle (persists across rerenders)
   const lastPickedPerCycle = useRef<{ [cycle: number]: number[] }>({});
 
-  // When picked numbers update, record them for the current cycle
+  // When picked numbers update AND are confirmed, record them for the current cycle
   useEffect(() => {
-    if (picked && picked.length === 6) {
+    if (picked && picked.length === 6 && isConfirmed) {
       lastPickedPerCycle.current[cycleIndex] = picked.slice();
-      // Cache for future reference/recalc
+      console.log(`[useTicketSelectionManager] Stored confirmed numbers for cycle ${cycleIndex}:`, picked);
     }
-  }, [picked, cycleIndex]);
+  }, [picked, isConfirmed, cycleIndex]);
 
   // On cycle change, capture/transfer previous cycle's picks if still valid for jackpot
   useEffect(() => {
     if (cycleIndex > 0) {
       const prevCycle = cycleIndex - 1;
-      // If no valid entry exists for prevCycle, but last entry for current cycle is valid, set it
+      // If no valid entry exists for prevCycle, but current selection is confirmed and valid, set it
       if (
         !lastPickedPerCycle.current[prevCycle] ||
         lastPickedPerCycle.current[prevCycle].length !== 6
       ) {
-        // Try to use current cycle picks (should reflect last confirmed!)
-        if (picked && picked.length === 6) {
+        // Try to use current cycle picks only if they are confirmed
+        if (picked && picked.length === 6 && isConfirmed) {
           lastPickedPerCycle.current[prevCycle] = picked.slice();
           console.log(
-            `[useTicketSelectionManager] Copied picked numbers for prevCycle ${prevCycle} on cycle change:`,
+            `[useTicketSelectionManager] Copied confirmed numbers for prevCycle ${prevCycle} on cycle change:`,
             lastPickedPerCycle.current[prevCycle]
           );
         }
       }
     }
-  }, [cycleIndex, picked]);
+  }, [cycleIndex, picked, isConfirmed]);
 
   return {
     lastPickedPerCycle: lastPickedPerCycle.current,
