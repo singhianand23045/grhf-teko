@@ -17,8 +17,14 @@ const Index = () => {
           maxHeight: "100vh",
         }}
       >
-        {/* MAIN CONTENT: removed pb-24 to avoid gap above tabs */}
-        <main className="flex flex-col w-full items-center px-4 py-8 h-full">
+        {/* MAIN CONTENT: subtract bottom nav height (4rem) from viewport height */}
+        <main 
+          className="flex flex-col w-full items-center px-4 py-8"
+          style={{
+            height: "calc(100vh - 4rem)",
+            overflow: "hidden"
+          }}
+        >
           <FlexibleLayout />
         </main>
         {/* Bottom Tabs */}
