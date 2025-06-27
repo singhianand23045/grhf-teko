@@ -8,6 +8,7 @@ import { useTicketSelectionManager } from "./useTicketSelectionManager";
 import { useTicketCommitManager } from "./useTicketCommitManager";
 import { useResultBar } from "./useResultBar";
 import { useRevealAnimation } from "./useRevealAnimation";
+import { useJackpotHandlers } from "./useJackpotHandlers";
 import { 
   SETS_PER_CYCLE, 
   SET_SIZE 
@@ -77,6 +78,9 @@ export function DrawEngineProvider({ children }: { children: React.ReactNode }) 
     picked,
     () => {}
   );
+
+  // Jackpot handlers - increment jackpot when cycle advances with valid tickets
+  useJackpotHandlers(cycleIndex, lastPickedPerCycle);
 
   // Prize and awarding logic
   useDrawPrizes({
