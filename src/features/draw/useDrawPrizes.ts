@@ -60,22 +60,34 @@ export function useDrawPrizes({
       const startSet = cycleIndex * SETS_PER_CYCLE;
       const activeSets = sets.slice(startSet, startSet + SETS_PER_CYCLE);
 
-      // Always strictly require 6 numbers - skip if not valid
+      // Always strictly require 6 numbers and verify an actual ticket exists
       let userNumbers: number[] = [];
+      let hasValidTicket = false;
+      
+      // Check if there's a valid ticket for this cycle in wallet history
+      const hasUnprocessedTicket = wallet.history.some(
+        (ticket: any) => !ticket.processed && ticket.cycle === cycleIndex && ticket.creditChange === -30
+      );
+
       if (
         lastPickedPerCycle[cycleIndex] &&
-        lastPickedPerCycle[cycleIndex].length === 6
+        lastPickedPerCycle[cycleIndex].length === 6 &&
+        hasUnprocessedTicket
       ) {
         userNumbers = lastPickedPerCycle[cycleIndex];
+        hasValidTicket = true;
       } else if (
         pendingTicketRef.current &&
         pendingTicketRef.current.cycle === cycleIndex &&
-        pendingTicketRef.current.ticket.numbers.length === 6
+        pendingTicketRef.current.ticket.numbers.length === 6 &&
+        hasUnprocessedTicket
       ) {
         userNumbers = pendingTicketRef.current.ticket.numbers;
+        hasValidTicket = true;
       }
 
-      if (userNumbers.length !== 6) {
+      // Only proceed if we have both valid numbers AND a confirmed ticket
+      if (userNumbers.length !== 6 || !hasValidTicket) {
         showResultBar(0);
         return;
       }
@@ -85,30 +97,21 @@ export function useDrawPrizes({
         calculateWinnings(userNumbers, activeSets, jackpotContext.jackpot);
 
       // PHASE 5 handle: only award EITHER jackpot OR credits
-      // Only grant winnings if there is a *confirmed* ticket for this cycle,
-      // i.e., userNumbers length === 6 and ticket was already entered at confirmation.
-      // (In the fixed logic, validation is handled at ticket entry. Award winnings only once.)
-      if (userNumbers.length === 6 /* && ticketWasEntered */) {
-        if (jackpotWon) {
-          // Award jackpot ONLY, then reset pool - NO regular credits
-          wallet.awardTicketWinnings(activeSets, [0, 0, 0], jackpotContext.jackpot, cycleIndex);
-          // Don't forget to reset jackpot
-          jackpotContext.resetJackpot();
-          showResultBar(jackpotContext.jackpot);
-          console.log("[Prize] JACKPOT WIN, awarded", jackpotContext.jackpot);
-        } else if (totalWinnings > 0) {
-          wallet.awardTicketWinnings(activeSets, rowWinnings, totalWinnings, cycleIndex);
-          showResultBar(totalWinnings);
-          console.log("[Prize] CREDIT WIN, awarded", totalWinnings, rowWinnings);
-        } else {
-          wallet.awardTicketWinnings(activeSets, [0,0,0], 0, cycleIndex);
-          showResultBar(0);
-          console.log("[Prize] NO WIN, awarded nothing.");
-        }
+      if (jackpotWon) {
+        // Award jackpot ONLY, then reset pool - NO regular credits
+        wallet.awardTicketWinnings(activeSets, [0, 0, 0], jackpotContext.jackpot, cycleIndex);
+        // Don't forget to reset jackpot
+        jackpotContext.resetJackpot();
+        showResultBar(jackpotContext.jackpot);
+        console.log("[Prize] JACKPOT WIN, awarded", jackpotContext.jackpot);
+      } else if (totalWinnings > 0) {
+        wallet.awardTicketWinnings(activeSets, rowWinnings, totalWinnings, cycleIndex);
+        showResultBar(totalWinnings);
+        console.log("[Prize] CREDIT WIN, awarded", totalWinnings, rowWinnings);
       } else {
-        // Not a valid or entered ticket: always show "try again"
+        wallet.awardTicketWinnings(activeSets, [0,0,0], 0, cycleIndex);
         showResultBar(0);
-        console.log("[Prize] Not a valid or entered ticket for prize awarding.");
+        console.log("[Prize] NO WIN, awarded nothing.");
       }
     }
     // eslint-disable-next-line
