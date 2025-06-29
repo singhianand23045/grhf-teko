@@ -50,14 +50,10 @@ export default function RouletteBallGrid({
   const currentSpinConf = getSpinConfig(spinSetting);
 
   return (
-    <div className="flex flex-col items-center w-full max-w-full overflow-hidden">
-      <div className="w-full max-w-full px-2">
+    <div className="flex flex-col items-center w-full">
+      <div>
         <div
-          className="grid grid-cols-6 grid-rows-3 gap-1 sm:gap-2 md:gap-3 touch-pan-x w-full max-w-full"
-          style={{
-            maxWidth: "min(100%, 350px)",
-            margin: "0 auto"
-          }}
+          className="grid grid-cols-6 grid-rows-3 gap-3 touch-pan-x"
           ref={gridRef}
         >
           {Array.from({ length: ROWS * COLS }).map((_, i) => {

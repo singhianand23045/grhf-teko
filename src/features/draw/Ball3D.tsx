@@ -1,7 +1,8 @@
 
 import React from "react";
 
-const NUMBER_FONT_SIZE = "0.9rem"; // Reduced for better mobile fit
+const CIRCLE_DIAM = 35; // px
+const NUMBER_FONT_SIZE = "1.05rem";
 
 type Ball3DProps = {
   spinning?: boolean;
@@ -49,10 +50,12 @@ export default function Ball3D({
 
   return (
     <div
-      className={`relative flex items-center justify-center aspect-square w-full max-w-[35px]`}
+      className={`relative flex items-center justify-center aspect-square`}
       style={{
-        minWidth: 24,
-        minHeight: 24,
+        width: CIRCLE_DIAM,
+        height: CIRCLE_DIAM,
+        minWidth: 28,
+        minHeight: 28,
       }}
     >
       {/* Main ball surface */}
