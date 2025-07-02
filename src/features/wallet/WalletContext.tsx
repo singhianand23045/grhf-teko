@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { getCreditsForMatches } from "../draw/getCreditsForMatches";
 
@@ -27,7 +26,7 @@ type WalletContextType = {
 };
 
 const LOCAL_STORAGE_KEY = "wallet";
-const STARTING_BALANCE = 100;
+const STARTING_BALANCE = 200;
 
 const WalletContext = createContext<WalletContextType | undefined>(undefined);
 
