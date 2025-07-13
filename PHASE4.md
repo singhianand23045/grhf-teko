@@ -23,7 +23,7 @@
   - If the user selects 6 numbers but **does not confirm** before cut-off, the entry is **discarded**—no credits are deducted, no ticket is recorded.
 
 - **Balance Management:**
-  - Start with `balance = 100` credits for every new player/session.
+  - Start with `balance = 200` credits for every new player/session.
   - For each draw in which the player participates (i.e., submits and confirms a 6-number ticket):
     - **Deduct 30 credits** from the balance upon confirmation, regardless of results.  
     - **Winnings Calculation:** 
