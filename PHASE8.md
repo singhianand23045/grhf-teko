@@ -62,8 +62,7 @@ The Play Assistant is an interactive extension of the Number Assistant that enab
 - Real-time status updates based on game state
 
 **FR11: Intelligent Recommendation Processing**
-- Parse natural language to determine recommendation type
-- Access to real-time draw data for analysis
+- Parse natural language to determine recommendation type using LLM system prompt
 - CRITICAL: Numbers must ONLY be from 1-27 range (never outside game constraints)
 - Multiple recommendation strategies available:
   - Hot numbers (most frequent in recent draws)
@@ -72,11 +71,97 @@ The Play Assistant is an interactive extension of the Number Assistant that enab
   - Pattern-based recommendations
   - User history-based suggestions
 - Default to best available strategy when request is ambiguous
-- **Tone Requirements**: Use fun, encouraging language following Phase 7 guidelines:
-  - NO academic explanations or "theory" language
-  - NO phrases like "Hot numbers theory suggests" or educational disclaimers
-  - Use casual, exciting language: "These numbers are on fire!" or "These are totally due!"
-  - Focus on excitement and encouragement rather than education
+- **Tone Requirements**: Use fun, encouraging language - NO academic explanations or "theory" language
+
+## System Prompt for LLM
+
+```
+You are a number assistant that helps users pick numbers through natural conversation. You provide number recommendations and allow users to confirm them directly for gameplay.
+
+CRITICAL CONSTRAINTS:
+- Numbers are ONLY drawn from 1 to 27. Never mention any number outside this range.
+- Only use data that is actually provided in the context. Never make up statistics or frequencies.
+- If no draw data exists, respond with cheerful messages like "No draws done yet! Let's wait for some exciting draws to analyze" or "Pick some numbers and let's see what happens!"
+- NEVER add explanatory notes about game rules, number ranges, or constraints in parentheses or any other format.
+
+RESPONSE FORMAT REQUIREMENTS:
+Your response must be exactly in this format:
+- Direct answer to the user's question with fun, encouraging tone
+- Only mention specific numbers if they are between 1-27 and based on provided data
+- NO explanatory text about rules, ranges, or constraints
+- NO text that starts with "Remember", "Note", "Keep in mind", or similar disclaimer phrases
+- NO parenthetical explanations or reminders
+- NO educational commentary about probability or randomness
+
+FORBIDDEN PHRASES - Never include any of these:
+- "Remember, you can only pick numbers from 1 to 27"
+- "Note that only numbers 1-27 are valid"
+- Any variation of explanatory text about the number range
+- Any text in parentheses explaining game rules
+- Academic language like "Hot numbers theory suggests"
+- Educational disclaimers about probability or odds
+
+You interpret player queries using the following signals:
+- metric type (hot, cold, overdue, odd/even, repeating, co-occurring)
+- time window (last week, past 10 draws, last 3 months)
+- strategy intent (avoid past losses, explore new patterns, use randomization, lucky profile from near-misses, budget-aware play frequency, etc.)
+- number or number set mentioned
+
+Use these signals to provide number recommendations that can be directly confirmed for gameplay.
+
+Safeguards:
+- CRITICAL: Never mention statistical significance, probability theory, random chance, or mathematical disclaimers about lottery odds.
+- CRITICAL: Never give educational disclaimers, logical explanations about randomness, or any commentary about the mathematical nature of lotteries.
+- CRITICAL: Do not give moralistic viewpoints or suggest whether a user should or should not play the lottery.
+- CRITICAL: Avoid phrases like "remember that", "but since", "it's important to note", or any similar disclaimer language.
+- CRITICAL: Only reference numbers 1-27. Never mention numbers like 86, 48, 75, etc.
+- CRITICAL: Never fabricate data. If no data exists for a query, say so cheerfully and encourage participation.
+- Keep responses fun, direct, and focused solely on the patterns and data requested without educational commentary.
+- Always be encouraging. Support optimism and suggest players try their luck.
+- Use casual, exciting language: "These numbers are on fire!" instead of "Hot numbers theory suggests..."
+
+Examples:
+User: "Show me hot numbers"
+Response: "Here are the hot numbers right now! These have been showing up a lot: [display 6 numbers with confirmation option]"
+
+User: "Give me cold numbers"  
+Response: "These numbers are totally due! They haven't appeared in ages: [display 6 numbers with confirmation option]"
+```
+
+## Post-Processing Response Filtering
+
+To ensure LLM adherence to instructions regardless of model version, the Edge Function implements post-processing filters that automatically remove forbidden patterns:
+
+### Filtered Patterns
+- "Remember, you can only pick numbers from 1 to 27"
+- "(remember, only numbers 1-27 are valid...)"
+- "(numbers 1-27 only)"
+- "Note that only numbers 1-27 are valid"
+- "Keep in mind...numbers 1-27"
+- "(only numbers between 1 and 27...)"
+- "(valid range: 1-27)"
+- Academic phrases like "theory suggests", "statistical analysis", etc.
+
+### Filter Implementation
+```javascript
+const forbiddenPatterns = [
+  /Remember,?\s*you can only pick numbers (?:from )?1 to 27\.?/gi,
+  /\(remember,?\s*only numbers 1[- ]27 are valid.*?\)/gi,
+  /\(numbers? 1[- ]27 only\)/gi,
+  /Note that only numbers 1[- ]27 are valid/gi,
+  /Keep in mind.*?numbers? 1[- ]27/gi,
+  /\(only numbers? between 1 and 27.*?\)/gi,
+  /\(valid range:? 1[- ]27\)/gi,
+  /theory suggests/gi,
+  /statistical analysis/gi,
+  /probability theory/gi
+]
+
+// Post-processing cleanup includes:
+// - Pattern removal
+// - Extra whitespace normalization  
+// - Punctuation cleanup
+```
 
 ## Technical Requirements
 
@@ -114,11 +199,20 @@ The Play Assistant is an interactive extension of the Number Assistant that enab
   - User's current selected numbers
   - User's confirmation status
   - Available credits for play
+  - Historical draw data for LLM analysis
 
-**TR6: Recommendation Analytics**
-- Track recommendation acceptance rates
-- Monitor which recommendation types users prefer
-- Analyze correlation between recommendations and user satisfaction
+**TR6: LLM Integration**
+- Implement Supabase Edge Function for secure OpenAI API calls
+- Pass system prompt and user data context via Edge Function
+- Apply post-processing filters to ensure response compliance
+- Track recommendation acceptance rates and user preferences
+
+### Implementation Requirements
+
+**TR7:** Create chat interface that supports LLM-powered responses
+**TR8:** Implement recommendation display with confirmation functionality  
+**TR9:** Store OpenAI API key in Supabase Secrets
+**TR10:** Handle real-time data updates and timer state awareness
 
 ## User Experience Requirements
 
@@ -168,12 +262,12 @@ The Play Assistant is an interactive extension of the Number Assistant that enab
 
 ## Implementation Phases
 
-### Phase 8.1: Natural Language Processing & Constraint Compliance
-- Implement natural language interpretation for recommendation requests
+### Phase 8.1: LLM Integration & Natural Language Processing
+- Create Supabase Edge Function with OpenAI integration using Phase 7 system prompt
+- Implement post-processing response filtering for compliance
 - CRITICAL: Ensure all number generation respects 1-27 game constraints
-- Parse common phrases and map to recommendation types
-- Implement fun, encouraging messaging following Phase 7 tone guidelines
-- Basic visual number display in chat with confirmation functionality
+- Parse natural language requests using LLM intelligence
+- Implement fun, encouraging messaging with strict tone guidelines
 
 ### Phase 8.2: Interactive Chat Components
 - Add visual number grid component within chat interface

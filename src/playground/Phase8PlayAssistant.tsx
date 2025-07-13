@@ -24,46 +24,45 @@ interface ChatMessage {
   timestamp: Date;
 }
 
-// Mock recommendation generator - respects 1-27 range and uses fun, encouraging tone
-function generateRecommendation(type: RecommendationType): NumberRecommendation {
-  // Only use numbers 1-27 (Bug 1 fix)
-  const validNumbers = Array.from({ length: 27 }, (_, i) => i + 1);
-  let numbers: number[] = [];
-  let reasoning = "";
-  
-  switch (type) {
-    case "hot":
-      // Simulate hot numbers (frequently drawn) - only 1-27
-      numbers = [7, 14, 19, 23, 3, 11];
-      reasoning = "These numbers have been showing up a lot lately! 7 and 14 are really on fire.";
-      break;
-    case "cold":
-      // Simulate cold numbers (overdue) - only 1-27
-      numbers = [2, 15, 18, 24, 6, 21];
-      reasoning = "These numbers are due for their moment! 15 and 24 haven't shown up in ages.";
-      break;
-    case "balanced":
-      // Mix of high/low, even/odd - only 1-27
-      numbers = [4, 9, 16, 22, 13, 26];
-      reasoning = "A nice balanced mix! Got some low, some high, and a good even-odd spread.";
-      break;
-    case "pattern":
-      // Pattern-based - only 1-27
-      numbers = [5, 10, 15, 20, 25, 12];
-      reasoning = "Love the pattern vibes! These numbers have a nice rhythm to them.";
-      break;
-    case "history":
-      // Based on user history (mock) - only 1-27
-      numbers = [1, 8, 17, 27, 12, 22];
-      reasoning = "Something totally fresh for you! These are completely different from your usual picks.";
-      break;
+// Call the LLM edge function for intelligent responses
+async function callAssistantAPI(message: string, context: any) {
+  try {
+    const response = await fetch('https://xtjbjypjlodzhjbdfuyc.supabase.co/functions/v1/chat-assistant', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        message,
+        context
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`API error: ${response.status}`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Assistant API error:', error);
+    return {
+      message: "I'm having trouble right now. Let me suggest some numbers anyway!",
+      recommendation: generateFallbackRecommendation()
+    };
   }
+}
+
+// Fallback recommendation generator for when API fails
+function generateFallbackRecommendation(): NumberRecommendation {
+  const validNumbers = Array.from({ length: 27 }, (_, i) => i + 1);
+  const shuffled = validNumbers.sort(() => 0.5 - Math.random());
+  const numbers = shuffled.slice(0, 6).sort((a, b) => a - b);
   
   return {
     numbers,
-    type,
-    reasoning,
-    confidence: 0.7 + Math.random() * 0.3 // 70-100%
+    type: "balanced",
+    reasoning: "A nice balanced mix for you!",
+    confidence: 0.75
   };
 }
 
@@ -182,19 +181,29 @@ export default function Phase8PlayAssistant() {
     }
   };
 
-  const handleRecommendationRequest = (type: RecommendationType) => {
-    const recommendation = generateRecommendation(type);
-    
-    // Use fun, encouraging messages that match Phase 7 tone
-    const messages = {
-      hot: "Here are the hot numbers right now! These have been showing up a lot:",
-      cold: "These numbers are totally due! They haven't appeared in ages:",
-      balanced: "Here's a perfectly balanced set for you:",
-      pattern: "Check out these pattern numbers - they have a nice flow:",
-      history: "Something completely different for you to try:"
+  const handleRecommendationRequest = async (message: string) => {
+    // Prepare context for LLM
+    const context = {
+      timerState,
+      selectedNumbers: picked,
+      credits: 100, // Mock credits
+      drawHistory: [] // Mock draw history
     };
-    
-    addMessage("recommendation", messages[type], recommendation);
+
+    try {
+      const response = await callAssistantAPI(message, context);
+      
+      if (response.recommendation) {
+        addMessage("recommendation", response.message, response.recommendation);
+      } else {
+        addMessage("assistant", response.message);
+      }
+    } catch (error) {
+      console.error('Error calling assistant:', error);
+      // Fallback to local recommendation
+      const fallback = generateFallbackRecommendation();
+      addMessage("recommendation", "Let me suggest some numbers for you:", fallback);
+    }
   };
 
   const handleConfirmRecommendation = (numbers: number[]) => {
@@ -222,26 +231,31 @@ export default function Phase8PlayAssistant() {
     // Add user message
     addMessage("user", userMessage);
 
-    // Simulate processing delay
-    setTimeout(() => {
+    // Use LLM for intelligent response
+    setTimeout(async () => {
       // Check if user is asking for recommendations
       const recommendationType = parseRecommendationRequest(userMessage);
       
-      if (recommendationType) {
-        handleRecommendationRequest(recommendationType);
+      if (recommendationType || userMessage.toLowerCase().includes("number")) {
+        await handleRecommendationRequest(userMessage);
       } else {
-        // Regular chat response - fun and encouraging like Phase 7
-        const responses = [
-          "I'm here to help you pick some winning numbers! What kind of numbers are you feeling today?",
-          "Want some hot numbers that have been showing up lately? Or maybe some cold numbers that are due?",
-          "Let's find you some lucky numbers! Just ask for hot, cold, or balanced numbers.",
-          "Ready to pick some winners? I can suggest numbers based on recent patterns!"
-        ];
-        const randomResponse = responses[Math.floor(Math.random() * responses.length)];
-        addMessage("assistant", randomResponse);
+        // Regular chat response via LLM
+        const context = {
+          timerState,
+          selectedNumbers: picked,
+          credits: 100,
+          drawHistory: []
+        };
+        
+        try {
+          const response = await callAssistantAPI(userMessage, context);
+          addMessage("assistant", response.message);
+        } catch (error) {
+          addMessage("assistant", "I'm here to help you pick some winning numbers! What kind of numbers are you feeling today?");
+        }
       }
       setIsLoading(false);
-    }, 1000);
+    }, 500);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
