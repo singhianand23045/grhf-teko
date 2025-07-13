@@ -194,9 +194,11 @@ export default function Phase8PlayAssistant() {
       const response = await callAssistantAPI(message, context);
       
       if (response.recommendation) {
-        addMessage("recommendation", response.message, response.recommendation);
+        // Extract just the message text, not the JSON structure
+        addMessage("recommendation", response.message || "Here are some numbers for you:", response.recommendation);
       } else {
-        addMessage("assistant", response.message);
+        // Extract just the message text for regular responses
+        addMessage("assistant", response.message || "I'm here to help with number recommendations!");
       }
     } catch (error) {
       console.error('Error calling assistant:', error);
@@ -249,7 +251,8 @@ export default function Phase8PlayAssistant() {
         
         try {
           const response = await callAssistantAPI(userMessage, context);
-          addMessage("assistant", response.message);
+          // Extract just the message text, not the JSON structure
+          addMessage("assistant", response.message || "I'm here to help you pick some winning numbers!");
         } catch (error) {
           addMessage("assistant", "I'm here to help you pick some winning numbers! What kind of numbers are you feeling today?");
         }
