@@ -163,7 +163,7 @@ export default function Phase8PlayAssistant() {
   const getConfirmButtonText = () => {
     switch (timerState) {
       case "OPEN":
-        return "Confirm for This Draw";
+        return "Confirm Numbers";
       case "CUT_OFF":
       case "REVEAL":
       case "COMPLETE":

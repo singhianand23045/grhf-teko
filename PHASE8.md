@@ -15,7 +15,7 @@ The Play Assistant is an interactive extension of the Number Assistant that enab
 
 **FR2: Interactive Confirmation**
 - Transparent confirmation button with timer-aware text below recommended number set
-- Button text clearly indicates action: "Confirm for This Draw" vs "Queue for Next Draw"
+- Button text clearly indicates action: "Confirm Numbers" vs "Queue for Next Draw"
 - Button behavior changes based on timer status while maintaining clear user expectations
 - Visual feedback when user hovers/interacts with the confirmation option
 
@@ -31,7 +31,7 @@ The Play Assistant is an interactive extension of the Number Assistant that enab
 **FR4: Timer-Aware Functionality**
 - Assistant automatically checks current timer state before displaying confirmation options
 - Transparent button text clearly indicates what action will be taken:
-  - OPEN: "Confirm for This Draw" (immediate confirmation)
+  - OPEN: "Confirm Numbers" (immediate confirmation)
   - CUT_OFF/REVEAL/COMPLETE: "Queue for Next Draw" (queued for future)
 - User always knows exactly what will happen when they click
 
@@ -133,7 +133,7 @@ The Play Assistant is an interactive extension of the Number Assistant that enab
 **UX2: Natural Language Recommendation Flow**
 1. User asks for recommendations in natural language: "Show me some hot numbers" or "What should I pick?"
 2. Assistant interprets the request and determines appropriate recommendation type
-3. Display 6 numbers with transparent action button ("Confirm for This Draw" or "Queue for Next Draw")
+3. Display 6 numbers with transparent action button ("Confirm Numbers" or "Queue for Next Draw")
 4. User confirms → numbers are immediately processed based on clearly indicated action
 5. System handles timing logic with full user awareness of what action was taken
 
