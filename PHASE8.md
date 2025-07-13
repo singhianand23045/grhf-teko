@@ -223,6 +223,7 @@ const forbiddenPatterns = [
 - **Pure Chat Interface**: Focus entirely on natural conversation and number recommendations
 - **Hidden Complexity**: All draw status management happens seamlessly in the background
 - **Fun-First Design**: Interface emphasizes the enjoyment and excitement of getting recommendations
+- **Minimal UI Text**: No redundant explanatory text - let the chat experience speak for itself
 
 **UX2: Natural Language Recommendation Flow**
 1. User asks for recommendations in natural language: "Show me some hot numbers" or "What should I pick?"

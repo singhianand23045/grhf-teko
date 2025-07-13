@@ -21,12 +21,11 @@ export default function AnalyticsPage() {
           <h1 className="text-3xl font-bold mt-4 mb-1 text-slate-700">
             {isPhase8 ? "Play Assistant" : "Number Assistant"}
           </h1>
-          <span className="text-gray-500 mb-3 text-sm text-center px-4">
-            {isPhase8 
-              ? "Chat with me to get number recommendations and confirm them directly!"
-              : "Get help picking numbers, analyze hot/cold numbers, and get personalized suggestions."
-            }
-          </span>
+          {!isPhase8 && (
+            <span className="text-gray-500 mb-3 text-sm text-center px-4">
+              Get help picking numbers, analyze hot/cold numbers, and get personalized suggestions.
+            </span>
+          )}
           <AssistantRouter />
         </main>
         <MainTabs />
