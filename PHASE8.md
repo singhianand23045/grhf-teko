@@ -185,6 +185,9 @@ const forbiddenPatterns = [
 - Manage queued selections for future draws
 - Store recommendation context and reasoning
 - Clear state appropriately across draw cycles
+- **Persist chat history and queued numbers using localStorage**
+- **Restore chat state when component remounts after navigation**
+- **Maintain conversation continuity across tab switches**
 
 **TR4: Timer State Access**
 - Assistant functions need read access to timer state
@@ -224,6 +227,8 @@ const forbiddenPatterns = [
 - **Hidden Complexity**: All draw status management happens seamlessly in the background
 - **Fun-First Design**: Interface emphasizes the enjoyment and excitement of getting recommendations
 - **Minimal UI Text**: No redundant explanatory text - let the chat experience speak for itself
+- **Persistent Chat History**: Chat messages and queued numbers persist across tab navigation using localStorage
+- **Session Continuity**: Users can switch between tabs and return to find their conversation intact
 
 **UX2: Natural Language Recommendation Flow**
 1. User asks for recommendations in natural language: "Show me some hot numbers" or "What should I pick?"

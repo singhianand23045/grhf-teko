@@ -128,10 +128,17 @@ function NumberGrid({ numbers, onConfirm, buttonText, isConfirmed }: {
 }
 
 export default function Phase8PlayAssistant() {
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  // Load messages from localStorage on component mount
+  const [messages, setMessages] = useState<ChatMessage[]>(() => {
+    const savedMessages = localStorage.getItem('playAssistantMessages');
+    return savedMessages ? JSON.parse(savedMessages) : [];
+  });
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [queuedNumbers, setQueuedNumbers] = useState<number[]>([]);
+  const [queuedNumbers, setQueuedNumbers] = useState<number[]>(() => {
+    const savedQueued = localStorage.getItem('playAssistantQueuedNumbers');
+    return savedQueued ? JSON.parse(savedQueued) : [];
+  });
   
   const chatRef = useRef<HTMLDivElement>(null);
   const { state: timerState, countdown, cycleIndex } = useTimer();
@@ -143,6 +150,16 @@ export default function Phase8PlayAssistant() {
       chatRef.current.scrollTop = chatRef.current.scrollHeight;
     }
   }, [messages]);
+
+  // Persist messages to localStorage whenever they change
+  useEffect(() => {
+    localStorage.setItem('playAssistantMessages', JSON.stringify(messages));
+  }, [messages]);
+
+  // Persist queued numbers to localStorage whenever they change
+  useEffect(() => {
+    localStorage.setItem('playAssistantQueuedNumbers', JSON.stringify(queuedNumbers));
+  }, [queuedNumbers]);
 
   // Handle queued numbers when timer opens
   useEffect(() => {
@@ -162,6 +179,13 @@ export default function Phase8PlayAssistant() {
       timestamp: new Date()
     };
     setMessages(prev => [...prev, newMessage]);
+  };
+
+  const clearChatHistory = () => {
+    setMessages([]);
+    localStorage.removeItem('playAssistantMessages');
+    localStorage.removeItem('playAssistantQueuedNumbers');
+    setQueuedNumbers([]);
   };
 
   const getConfirmButtonText = () => {
