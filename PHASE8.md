@@ -63,13 +63,19 @@ The Play Assistant is an interactive extension of the Number Assistant that enab
 **FR11: Intelligent Recommendation Processing**
 - Parse natural language to determine recommendation type
 - Access to real-time draw data for analysis
+- CRITICAL: Numbers must ONLY be from 1-27 range (never outside game constraints)
 - Multiple recommendation strategies available:
   - Hot numbers (most frequent in recent draws)
-  - Cold numbers (least frequent, "due" numbers)
+  - Cold numbers (least frequent, "due" numbers)  
   - Balanced sets (mix of high/low, even/odd)
   - Pattern-based recommendations
   - User history-based suggestions
 - Default to best available strategy when request is ambiguous
+- **Tone Requirements**: Use fun, encouraging language following Phase 7 guidelines:
+  - NO academic explanations or "theory" language
+  - NO phrases like "Hot numbers theory suggests" or educational disclaimers
+  - Use casual, exciting language: "These numbers are on fire!" or "These are totally due!"
+  - Focus on excitement and encouragement rather than education
 
 ## Technical Requirements
 
@@ -138,37 +144,52 @@ The Play Assistant is an interactive extension of the Number Assistant that enab
 
 ### Error Handling
 
-**UX4: Insufficient Data Scenarios**
-- When historical data is limited: suggest balanced selection with explanation
-- When user has no credits: show recommendations but disable confirmation with clear message
-- When system errors occur: graceful fallback to text-only recommendations
+**UX4: Game Constraint Compliance**
+- CRITICAL: All recommended numbers must be within 1-27 range
+- Validate number generation to prevent out-of-range recommendations
+- System should never suggest numbers like 89, 45, 73, etc.
 
-**UX5: Edge Case Management**
+**UX5: Messaging Tone Requirements**
+- Follow Phase 7 LLM prompt guidelines for encouraging, fun tone
+- FORBIDDEN: Academic language, theory explanations, educational disclaimers
+- REQUIRED: Casual, exciting language that builds anticipation
+- Examples: "These numbers are on fire!" vs "Hot numbers theory suggests..."
+
+**UX6: Technical Error Scenarios**
+- When historical data is limited: suggest balanced selection with encouraging message
+- When user has no credits: show recommendations but disable confirmation with clear message  
+- When system errors occur: graceful fallback to text-only recommendations with positive tone
+
+**UX7: Edge Case Management**
 - Handle rapid timer state changes during interaction
 - Manage concurrent user actions (manual selection + assistant recommendation)
 - Deal with network delays in recommendation processing
 
 ## Implementation Phases
 
-### Phase 8.1: Natural Language Processing
+### Phase 8.1: Natural Language Processing & Constraint Compliance
 - Implement natural language interpretation for recommendation requests
+- CRITICAL: Ensure all number generation respects 1-27 game constraints
 - Parse common phrases and map to recommendation types
+- Implement fun, encouraging messaging following Phase 7 tone guidelines
 - Basic visual number display in chat with confirmation functionality
 
 ### Phase 8.2: Interactive Chat Components
 - Add visual number grid component within chat interface
-- Implement confirmation button with timer state awareness
+- Implement confirmation button with simplified messaging (no technical timer details)
 - Integration with NumberSelectionContext
+- Remove academic/lecturing language from all user-facing text
 
-### Phase 8.3: Timer-Aware Queuing
-- Add automatic timer state detection
-- Implement queuing system for locked periods
-- Enhanced messaging for different timer states
+### Phase 8.3: Background Timer-Aware Processing
+- Add automatic timer state detection (hidden from user)
+- Implement queuing system for locked periods (seamless background processing)
+- Enhanced messaging with encouraging, fun tone throughout
 
-### Phase 8.4: Polish and Optimization
+### Phase 8.4: Polish and User Experience Optimization
 - Enhanced visual design for chat components
-- Performance optimization for real-time updates
-- Comprehensive error handling and edge cases
+- Performance optimization for real-time updates  
+- Comprehensive error handling with positive, encouraging messaging
+- Final review to ensure no academic language or out-of-range numbers
 
 
 ## Testing Requirements
