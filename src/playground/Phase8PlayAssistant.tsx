@@ -174,22 +174,29 @@ export default function Phase8PlayAssistant() {
   // Handle queued numbers when timer opens - automatically confirm them
   useEffect(() => {
     if (timerState === "OPEN" && queuedNumbers.length === 6) {
+      console.log("[Play Assistant] Auto-applying queued numbers:", queuedNumbers);
       setPicked(() => queuedNumbers);
+      
+      // Use a longer timeout to ensure setPicked state has updated
       setTimeout(() => {
-        confirm(); // Set isConfirmed to true in NumberSelectionContext
-        
-        // Automatically handle wallet transaction (credit deduction)
-        addConfirmedTicket({
-          date: new Date().toISOString(),
-          numbers: queuedNumbers,
-          cycle: cycleIndex
-        });
-        
-        setQueuedNumbers([]);
-        addMessage("assistant", "✅ Your queued numbers have been applied and confirmed for this draw!");
-      }, 100);
+        // Verify the state before confirming
+        if (queuedNumbers.length === 6) {
+          console.log("[Play Assistant] Auto-confirming queued numbers");
+          confirm(); // Set isConfirmed to true in NumberSelectionContext
+          
+          // Automatically handle wallet transaction (credit deduction)
+          addConfirmedTicket({
+            date: new Date().toISOString(),
+            numbers: queuedNumbers,
+            cycle: cycleIndex
+          });
+          
+          setQueuedNumbers([]);
+          addMessage("assistant", "✅ Your queued numbers have been applied and confirmed for this draw!");
+        }
+      }, 200); // Increased timeout to ensure state update
     }
-  }, [timerState, queuedNumbers, cycleIndex, confirm, addConfirmedTicket]);
+  }, [timerState, queuedNumbers, cycleIndex]);
 
   const addMessage = (type: ChatMessage["type"], content: string, recommendation?: NumberRecommendation) => {
     const newMessage: ChatMessage = {
@@ -262,19 +269,26 @@ export default function Phase8PlayAssistant() {
 
     if (timerState === "OPEN") {
       // Replace current selection and automatically confirm with full wallet transaction
+      console.log("[Play Assistant] Setting picked numbers:", numbers);
       setPicked(() => numbers);
+      
+      // Use a longer timeout to ensure setPicked state has updated
       setTimeout(() => {
-        confirm(); // Set isConfirmed to true in NumberSelectionContext
-        
-        // Automatically handle wallet transaction (credit deduction)
-        addConfirmedTicket({
-          date: new Date().toISOString(),
-          numbers: numbers,
-          cycle: cycleIndex
-        });
-        
-        addMessage("assistant", "🎯 Perfect! Your numbers are confirmed and you're all set for this draw. Good luck!");
-      }, 100);
+        // Verify the state before confirming
+        if (numbers.length === 6) {
+          console.log("[Play Assistant] Confirming recommendation numbers");
+          confirm(); // Set isConfirmed to true in NumberSelectionContext
+          
+          // Automatically handle wallet transaction (credit deduction)
+          addConfirmedTicket({
+            date: new Date().toISOString(),
+            numbers: numbers,
+            cycle: cycleIndex
+          });
+          
+          addMessage("assistant", "🎯 Perfect! Your numbers are confirmed and you're all set for this draw. Good luck!");
+        }
+      }, 200); // Increased timeout to ensure state update
     } else {
       // Queue for next draw (user doesn't need to know this technical detail)
       setQueuedNumbers(numbers);
