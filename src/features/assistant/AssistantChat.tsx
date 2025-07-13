@@ -118,9 +118,6 @@ export default function AssistantChat() {
   return (
     <div className="w-full max-w-xl flex flex-col mx-auto my-6 px-2">
       {/* Header */}
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-lg font-semibold">Number Helper</h2>
-      </div>
 
       {/* Chat area */}
       <div
