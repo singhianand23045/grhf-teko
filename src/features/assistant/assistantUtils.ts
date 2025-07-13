@@ -1,26 +1,6 @@
-// System prompt based on Phase 7 requirements
-const SYSTEM_PROMPT = `You are a lottery assistant. You help users understand past draw patterns and number analysis using domain-specific language.
+import { supabase } from "@/integrations/supabase/client";
 
-You interpret player queries using the following signals:
-- metric type (hot, cold, overdue, odd/even, repeating, co-occurring)
-- time window (last week, past 10 draws, last 3 months)
-- strategy intent (avoid past losses, explore new patterns, use randomization, lucky profile from near-misses, budget-aware play frequency, etc.)
-- number or number set mentioned
-
-You have access to:
-- Historical draw data
-- Definitions of lottery terms
-- The user's previously played or viewed numbers
-
-Use these signals to answer clearly and accurately.
-
-Safeguards:
-- Do not mention statistical significance or imply predictive accuracy, as lottery numbers are randomly generated.
-- Do not give moralistic viewpoints or suggest whether a user should or should not play the lottery.
-- Always be encouraging. If asked about play frequency or strategy, support optimism and suggest players try their luck more often if they wish.
-- If a player's most recent ticket matches between 1 and 5 numbers, proactively respond with positive framing. Emphasize progress and intuition (e.g., "1 number away from a prize" or "that was just shy of a big win!"). Reinforce anticipation for next play. Always remain supportive and fun-focused.
-
-Important: All data provided is from the current session only. When referring to "history" or "past performance", clarify that this refers to the current browser session.`;
+// System prompt moved to Edge Function
 
 // Get draws from localStorage
 export function getDrawsFromLocalStorage(): number[][] {
@@ -137,50 +117,27 @@ export function formatDataForLLM(sessionData: {
   return context;
 }
 
-// Send message to OpenAI API
-export async function sendToLLM(userMessage: string, contextData: string, apiKey: string): Promise<string> {
+// Send message to LLM via Supabase Edge Function
+export async function sendToLLM(userMessage: string, contextData: string): Promise<string> {
   try {
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${apiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'gpt-4',
-        messages: [
-          {
-            role: 'system',
-            content: SYSTEM_PROMPT
-          },
-          {
-            role: 'system',
-            content: `Here is the current session data:\n\n${contextData}`
-          },
-          {
-            role: 'user',
-            content: userMessage
-          }
-        ],
-        temperature: 0.7,
-        max_tokens: 500,
-      }),
+    const { data, error } = await supabase.functions.invoke('chat-assistant', {
+      body: {
+        message: userMessage,
+        contextData: contextData
+      }
     });
 
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.error?.message || `API request failed: ${response.status}`);
+    if (error) {
+      throw new Error(error.message || 'Failed to get response from assistant');
     }
 
-    const data = await response.json();
-    
-    if (!data.choices?.[0]?.message?.content) {
-      throw new Error('Invalid response from API');
+    if (!data?.response) {
+      throw new Error('Invalid response from assistant service');
     }
 
-    return data.choices[0].message.content.trim();
+    return data.response;
   } catch (error: any) {
     console.error('LLM API Error:', error);
-    throw new Error(error.message || 'Failed to connect to AI assistant');
+    throw new Error(error.message || 'Failed to connect to assistant service');
   }
 }

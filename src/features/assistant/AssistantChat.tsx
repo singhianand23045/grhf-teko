@@ -8,6 +8,7 @@ import { Settings, Send, AlertCircle } from "lucide-react";
 import { useWallet } from "@/features/wallet/WalletContext";
 import { useNumberSelection } from "@/features/number-select/NumberSelectionContext";
 import { getDrawsFromLocalStorage, formatDataForLLM, sendToLLM } from "./assistantUtils";
+import SetupAssistant from "@/components/SetupAssistant";
 
 interface Message {
   sender: "user" | "assistant";
@@ -18,24 +19,13 @@ interface Message {
 export default function AssistantChat() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
-  const [apiKey, setApiKey] = useState("");
-  const [showSettings, setShowSettings] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const [showSetup, setShowSetup] = useState(false);
   
   const chatRef = useRef<HTMLDivElement>(null);
   const { balance, history } = useWallet();
   const { picked, isConfirmed } = useNumberSelection();
-
-  // Load API key from localStorage on mount
-  useEffect(() => {
-    const savedKey = localStorage.getItem("openai_api_key");
-    if (savedKey) {
-      setApiKey(savedKey);
-    } else {
-      setShowSettings(true); // Show settings if no API key
-    }
-  }, []);
 
   // Auto-scroll to bottom
   useEffect(() => {
@@ -44,22 +34,8 @@ export default function AssistantChat() {
     }
   }, [messages]);
 
-  const saveApiKey = () => {
-    if (apiKey.trim()) {
-      localStorage.setItem("openai_api_key", apiKey.trim());
-      setShowSettings(false);
-      setError("");
-    }
-  };
-
   const sendMessage = async () => {
     if (!input.trim() || isLoading) return;
-    
-    if (!apiKey) {
-      setError("Please set your OpenAI API key first");
-      setShowSettings(true);
-      return;
-    }
 
     const userMessage = input.trim();
     setInput("");
@@ -89,7 +65,7 @@ export default function AssistantChat() {
       const contextData = formatDataForLLM(sessionData);
       
       // Send to LLM
-      const response = await sendToLLM(userMessage, contextData, apiKey);
+      const response = await sendToLLM(userMessage, contextData);
       
       // Add assistant response
       const assistantMessage: Message = {
@@ -100,7 +76,14 @@ export default function AssistantChat() {
       setMessages(prev => [...prev, assistantMessage]);
       
     } catch (err: any) {
-      setError(err.message || "Failed to get response from assistant");
+      const errorMessage = err.message || "Failed to get response from assistant";
+      
+      // Check if it's an API key error
+      if (errorMessage.includes("OpenAI API key") || errorMessage.includes("Missing")) {
+        setShowSetup(true);
+      } else {
+        setError(errorMessage);
+      }
       console.error("Assistant error:", err);
     } finally {
       setIsLoading(false);
@@ -114,76 +97,15 @@ export default function AssistantChat() {
     }
   };
 
-  if (showSettings) {
-    return (
-      <div className="w-full max-w-md mx-auto p-4">
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Settings className="w-5 h-5" />
-              OpenAI API Key Required
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <p className="text-sm text-muted-foreground">
-              To use the AI assistant, you need to provide your OpenAI API key. 
-              This will be stored locally in your browser.
-            </p>
-            <div className="space-y-2">
-              <label className="text-sm font-medium">API Key</label>
-              <Input
-                type="password"
-                placeholder="sk-..."
-                value={apiKey}
-                onChange={(e) => setApiKey(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && saveApiKey()}
-              />
-            </div>
-            {error && (
-              <Alert>
-                <AlertCircle className="h-4 w-4" />
-                <AlertDescription>{error}</AlertDescription>
-              </Alert>
-            )}
-            <div className="flex gap-2">
-              <Button onClick={saveApiKey} disabled={!apiKey.trim()}>
-                Save & Continue
-              </Button>
-              {apiKey && (
-                <Button variant="outline" onClick={() => setShowSettings(false)}>
-                  Cancel
-                </Button>
-              )}
-            </div>
-            <p className="text-xs text-muted-foreground">
-              Get your API key from{" "}
-              <a 
-                href="https://platform.openai.com/api-keys" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="text-blue-600 hover:underline"
-              >
-                OpenAI Platform
-              </a>
-            </p>
-          </CardContent>
-        </Card>
-      </div>
-    );
+  if (showSetup) {
+    return <SetupAssistant />;
   }
 
   return (
     <div className="w-full max-w-xl flex flex-col mx-auto my-6 px-2">
-      {/* Header with settings */}
+      {/* Header */}
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-lg font-semibold">Number Helper</h2>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => setShowSettings(true)}
-        >
-          <Settings className="w-4 h-4" />
-        </Button>
       </div>
 
       {/* Chat area */}
