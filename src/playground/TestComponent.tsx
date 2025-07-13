@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import RouletteBallGrid from "./RouletteBallGrid";
-import PlayAssistant from "./PlayAssistant";
+import Phase8PlayAssistant from "./Phase8PlayAssistant";
 
 // 18 numbers pool for demo
 const DEMO_NUMBERS = Array.from({ length: 18 }, (_, i) => i + 1);
@@ -26,12 +26,12 @@ const TestComponent = () => {
     <div className="w-full max-w-6xl mx-auto p-4">
       <Tabs defaultValue="play-assistant" className="w-full">
         <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="play-assistant">Play Assistant</TabsTrigger>
+          <TabsTrigger value="play-assistant">Phase 8: Play Assistant</TabsTrigger>
           <TabsTrigger value="roulette-demo">Roulette Demo</TabsTrigger>
         </TabsList>
         
         <TabsContent value="play-assistant" className="mt-6">
-          <PlayAssistant />
+          <Phase8PlayAssistant />
         </TabsContent>
         
         <TabsContent value="roulette-demo" className="mt-6">
