@@ -7,7 +7,6 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import Playground from "./pages/Playground";
-import AssistantPage from "./pages/Assistant";
 import { JackpotProvider } from "@/features/jackpot/JackpotContext";
 import { WalletProvider } from "@/features/wallet/WalletContext";
 import { TimerProvider } from "@/features/timer/timer-context";
@@ -27,7 +26,6 @@ const App = () => (
               <BrowserRouter>
                 <Routes>
                   <Route path="/" element={<Index />} />
-                  <Route path="/assistant" element={<AssistantPage />} />
                   <Route path="/playground" element={<Playground />} />
                   {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                   <Route path="*" element={<NotFound />} />

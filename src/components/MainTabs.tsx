@@ -1,30 +1,49 @@
 
-import { useLocation, useNavigate } from "react-router-dom";
 import { Home, Activity } from "lucide-react";
+import { createContext, useContext, useState } from "react";
 
 const TABS = [
   {
     value: "home",
     label: "Home",
-    path: "/",
     icon: Home,
   },
   {
     value: "assistant",
     label: "Assistant",
-    path: "/assistant",
     icon: Activity,
   },
 ];
 
-export default function MainTabs() {
-  const location = useLocation();
-  const navigate = useNavigate();
+type TabValue = "home" | "assistant";
 
-  const activeTab =
-    TABS.find((tab) =>
-      tab.path === "/" ? location.pathname === "/" : location.pathname.startsWith(tab.path)
-    )?.value || "home";
+interface TabContextType {
+  activeTab: TabValue;
+  setActiveTab: (tab: TabValue) => void;
+}
+
+const TabContext = createContext<TabContextType | undefined>(undefined);
+
+export function TabProvider({ children }: { children: React.ReactNode }) {
+  const [activeTab, setActiveTab] = useState<TabValue>("home");
+  
+  return (
+    <TabContext.Provider value={{ activeTab, setActiveTab }}>
+      {children}
+    </TabContext.Provider>
+  );
+}
+
+export function useTab() {
+  const context = useContext(TabContext);
+  if (!context) {
+    throw new Error("useTab must be used within TabProvider");
+  }
+  return context;
+}
+
+export default function MainTabs() {
+  const { activeTab, setActiveTab } = useTab();
 
   return (
     <nav
@@ -50,9 +69,7 @@ export default function MainTabs() {
                     : "text-gray-400 hover:text-indigo-500"
                 }`}
                 aria-label={tab.label}
-                onClick={() => {
-                  if (location.pathname !== tab.path) navigate(tab.path);
-                }}
+                onClick={() => setActiveTab(tab.value as TabValue)}
               >
                 <Icon
                   size={26}
