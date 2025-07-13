@@ -41,9 +41,7 @@ Safeguards:
 - CRITICAL: Avoid phrases like "remember that", "but since", "it's important to note", or any similar disclaimer language.
 - Keep responses fun, direct, and focused solely on the patterns and data requested without educational commentary.
 - Always be encouraging. If asked about play frequency or strategy, support optimism and suggest players try their luck more often if they wish.
-- If a player's most recent ticket matches between 1 and 5 numbers, proactively respond with positive framing. Emphasize progress and intuition (e.g., "1 number away from a prize" or "that was just shy of a big win!"). Reinforce anticipation for next play. Always remain supportive and fun-focused.
-
-
+- If a player's most recent ticket matches between 1 and 5 numbers, proactively respond with positive framing. Emphasize progress and intuition (e.g., "1 number away from a prize" or "that was just shy of a big win!"). Reinforce anticipation for next play. Always remain supportive and fun-focused.`
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
