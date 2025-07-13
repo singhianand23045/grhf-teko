@@ -1,9 +1,9 @@
-# Phase 7: Personal Lottery Assistant — Requirements Document
+# Phase 7: Number Assistant — Requirements Document
 
 ## System Prompt for LLM
 
 ```
-You are a lottery assistant. You help users understand past draw patterns and number analysis using domain-specific language.
+You are a number assistant. You help users pick numbers and understand past draw patterns using domain-specific language.
 
 You interpret player queries using the following signals:
 - metric type (hot, cold, overdue, odd/even, repeating, co-occurring)
@@ -87,23 +87,26 @@ The LLM needs access to:
 
 ## Implementation Requirements
 
-### Technical
+### Technical (Supabase Integration)
 - **IR1:** Add "Assistant" tab to main navigation
-- **IR2:** Implement chat interface with message history
-- **IR3:** Connect to ChatGPT API or equivalent LLM
-- **IR4:** Pass system prompt and user data context to LLM
-- **IR5:** Display LLM responses in chat format
+- **IR2:** Implement chat interface with message history  
+- **IR3:** Create Supabase Edge Function for secure LLM API calls
+- **IR4:** Store OpenAI API key in Supabase Secrets
+- **IR5:** Pass system prompt and user data context via Edge Function
+- **IR6:** Display LLM responses in chat format
 
 ### Data Integration
-- **IR6:** Access draw history from local storage or data store
-- **IR7:** Access user ticket history from existing contexts
-- **IR8:** Format data for LLM consumption
-- **IR9:** Handle real-time data updates
+- **IR7:** Access draw history from local storage or data store
+- **IR8:** Access user ticket history from existing contexts
+- **IR9:** Format data for LLM consumption in Edge Function
+- **IR10:** Handle real-time data updates
 
-### Performance
-- **IR10:** Respond to queries within 3 seconds
-- **IR11:** Maintain chat history within session only
-- **IR12:** Clear history on page refresh
+### Performance & Security
+- **IR11:** Respond to queries within 10 seconds (includes Edge Function latency)
+- **IR12:** Maintain chat history within session only
+- **IR13:** Clear history on page refresh
+- **IR14:** API keys never exposed to frontend
+- **IR15:** All LLM calls proxied through secure Edge Function
 
 ---
 
@@ -113,7 +116,7 @@ The LLM needs access to:
 - [ ] LLM receives complete user and draw data context
 - [ ] LLM follows system prompt behavior (encouraging, no predictions)
 - [ ] Chat maintains conversation history within session
-- [ ] Responses appear within 3 seconds
+- [ ] Responses appear within 10 seconds
 - [ ] No usage restrictions or warnings implemented
 
 ---
