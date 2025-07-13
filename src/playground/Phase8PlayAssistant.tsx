@@ -25,7 +25,7 @@ interface ChatMessage {
 }
 
 // Call the LLM edge function for intelligent responses
-async function callAssistantAPI(message: string, context: any) {
+async function callPlayAssistantAPI(message: string, context: any) {
   try {
     const response = await fetch('https://xtjbjypjlodzhjbdfuyc.supabase.co/functions/v1/chat-assistant', {
       method: 'POST',
@@ -44,7 +44,7 @@ async function callAssistantAPI(message: string, context: any) {
 
     return await response.json();
   } catch (error) {
-    console.error('Assistant API error:', error);
+    console.error('Play Assistant API error:', error);
     return {
       message: "I'm having trouble right now. Let me suggest some numbers anyway!",
       recommendation: generateFallbackRecommendation()
@@ -192,7 +192,7 @@ export default function Phase8PlayAssistant() {
     };
 
     try {
-      const response = await callAssistantAPI(message, context);
+      const response = await callPlayAssistantAPI(message, context);
       
       if (response.recommendation) {
         // Extract just the message text, not the JSON structure
@@ -202,7 +202,7 @@ export default function Phase8PlayAssistant() {
         addMessage("assistant", response.message || "I'm here to help with number recommendations!");
       }
     } catch (error) {
-      console.error('Error calling assistant:', error);
+      console.error('Error calling Play Assistant:', error);
       // Fallback to local recommendation
       const fallback = generateFallbackRecommendation();
       addMessage("recommendation", "Let me suggest some numbers for you:", fallback);
@@ -256,7 +256,7 @@ export default function Phase8PlayAssistant() {
         };
         
         try {
-          const response = await callAssistantAPI(userMessage, context);
+          const response = await callPlayAssistantAPI(userMessage, context);
           // Extract just the message text, not the JSON structure
           addMessage("assistant", response.message || "I'm here to help you pick some winning numbers!");
         } catch (error) {

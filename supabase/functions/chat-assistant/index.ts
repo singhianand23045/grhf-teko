@@ -37,7 +37,7 @@ function cleanResponse(text: string): string {
   return cleaned;
 }
 
-const systemPrompt = `You are a number assistant that helps users pick numbers through natural conversation. You provide number recommendations and allow users to confirm them directly for gameplay.
+const systemPrompt = `You are a lottery assistant that helps users pick numbers through natural conversation. You provide number recommendations and allow users to confirm them directly for gameplay.
 
 CRITICAL CONSTRAINTS:
 - Numbers are ONLY drawn from 1 to 27. Never mention any number outside this range.
@@ -162,7 +162,7 @@ Current Game Context:
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   } catch (error) {
-    console.error('Error in chat-assistant function:', error);
+    console.error('Error in lottery assistant function:', error);
     return new Response(JSON.stringify({ 
       error: error.message,
       message: "I'm having trouble right now. Try asking for some number recommendations!"

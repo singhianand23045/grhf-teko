@@ -16,7 +16,7 @@ interface Message {
   timestamp: Date;
 }
 
-export default function AssistantChat() {
+export default function NumberAssistantChat() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
