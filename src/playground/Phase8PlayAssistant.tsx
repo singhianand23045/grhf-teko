@@ -131,7 +131,15 @@ export default function Phase8PlayAssistant() {
   // Load messages from localStorage on component mount
   const [messages, setMessages] = useState<ChatMessage[]>(() => {
     const savedMessages = localStorage.getItem('playAssistantMessages');
-    return savedMessages ? JSON.parse(savedMessages) : [];
+    if (savedMessages) {
+      const parsed = JSON.parse(savedMessages);
+      // Convert timestamp strings/numbers back to Date objects
+      return parsed.map((msg: any) => ({
+        ...msg,
+        timestamp: new Date(msg.timestamp)
+      }));
+    }
+    return [];
   });
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
