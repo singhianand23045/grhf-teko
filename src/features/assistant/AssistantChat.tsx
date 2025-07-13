@@ -176,7 +176,7 @@ export default function AssistantChat() {
     <div className="w-full max-w-xl flex flex-col mx-auto my-6 px-2">
       {/* Header with settings */}
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-lg font-semibold">Lottery Assistant</h2>
+        <h2 className="text-lg font-semibold">Number Helper</h2>
         <Button
           variant="ghost"
           size="sm"
@@ -193,12 +193,12 @@ export default function AssistantChat() {
       >
         {messages.length === 0 && (
           <div className="text-center text-gray-400 py-20">
-            <p className="mb-4">Ask me about your lottery patterns and session data!</p>
+            <p className="mb-4">Ask me to help pick numbers for your next ticket!</p>
             <div className="text-[13px] text-sky-900 space-y-1">
               <p>"Which numbers are hot lately?"</p>
-              <p>"How have I been doing this session?"</p>
-              <p>"Show me numbers different from what I usually play"</p>
-              <p>"What are my near-miss patterns?"</p>
+              <p>"Help me pick 6 numbers"</p>
+              <p>"Show me numbers I haven't picked before"</p>
+              <p>"What numbers should I avoid?"</p>
             </div>
           </div>
         )}
@@ -249,7 +249,7 @@ export default function AssistantChat() {
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder="Ask about your lottery patterns..."
+          placeholder="Ask me to help pick numbers..."
           className="min-h-[48px] max-h-[120px]"
           disabled={isLoading}
         />
