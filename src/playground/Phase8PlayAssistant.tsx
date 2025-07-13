@@ -285,9 +285,6 @@ export default function Phase8PlayAssistant() {
                         onConfirm={() => handleConfirmRecommendation(message.recommendation!.numbers)}
                         buttonText={getConfirmButtonText()}
                       />
-                      <div className="mt-2 text-xs text-gray-600 italic">
-                        {message.recommendation.reasoning}
-                      </div>
                     </div>
                   )}
                   
