@@ -8,7 +8,7 @@ export default function AnalyticsPage() {
       <div
         className="relative flex flex-col items-center justify-center shadow-xl rounded-2xl border border-gray-200 bg-white overflow-hidden"
         style={{
-          width: "min(100vw, 402px)",
+          width: "100vw",
           height: "100vh",
           maxWidth: "100vw",
           maxHeight: "100vh",

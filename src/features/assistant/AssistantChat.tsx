@@ -116,13 +116,13 @@ export default function AssistantChat() {
   }
 
   return (
-    <div className="w-full max-w-xl flex flex-col mx-auto my-6 px-2">
+    <div className="w-full flex flex-col mx-auto my-6 px-2">
       {/* Header */}
 
       {/* Chat area */}
       <div
         ref={chatRef}
-        className="flex-1 min-h-[320px] max-h-[420px] mb-4 p-3 rounded-lg bg-slate-50/60 border border-slate-200 overflow-y-auto"
+        className="flex-1 mb-4 p-3 rounded-lg bg-slate-50/60 border border-slate-200 overflow-y-auto"
       >
         {messages.length === 0 && (
           <div className="text-center text-gray-400 py-20">
