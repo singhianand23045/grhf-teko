@@ -11,6 +11,7 @@
 
 - The app timer runs for 6 cycles, each of exactly 4:00 minutes (as in Phase 1).
 - The timer always starts from 4:00, counts to 0:00, and restarts for a new cycle after completion, up to 6 times.
+- The system generates 18 number sets (6 cycles × 3 sets per cycle) to ensure sufficient numbers are available for all 6 cycles.
 
 ### State Phases
 
