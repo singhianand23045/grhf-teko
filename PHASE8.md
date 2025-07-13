@@ -12,19 +12,13 @@ The Play Assistant is an interactive extension of the Number Assistant that enab
 - Assistant responses can display 6 numbers in a visual grid format
 - Numbers should match the styling of the main number selection grid
 - Each number appears as a clickable/selectable element
-- Include visual indicators showing these are AI recommendations
 
-**FR2: Contextual Reasoning Display**
-- Show why these numbers were selected (e.g., "hot numbers from last 20 draws")
-- Display frequency data or pattern information when available
-- Include confidence indicators or statistical context
-
-**FR3: Interactive Confirmation**
+**FR2: Interactive Confirmation**
 - "Confirm These Numbers" button below recommended number set
 - Button state changes based on timer status and game availability
 - Visual feedback when user hovers/interacts with the confirmation option
 
-### Timer-Aware Functionality
+**FR3: Timer-Aware Functionality**
 
 **FR4: Real-Time Timer Integration**
 - Assistant checks current timer state before displaying confirmation options
@@ -39,30 +33,27 @@ The Play Assistant is an interactive extension of the Number Assistant that enab
 - Persist queued selections across timer cycles
 - Auto-apply queued numbers when new draw opens
 
-### Game State Integration
+**FR6: Game State Integration**
 
-**FR6: Number Selection Integration**
+**FR7: Number Selection Integration**
 - Seamlessly integrate with existing NumberSelectionContext
-- Handle conflicts when user has partial selections:
-  - Replace existing selections (with confirmation)
-  - Merge with existing selections (avoid duplicates)
-  - Cancel and keep current selections
+- Replace any existing user selections with assistant recommendations
+- Direct confirmation without additional user approval required
 
-**FR7: Confirmation Flow Integration**
-- After assistant confirmation, numbers appear in main selection grid
-- User can still modify selections before final game confirmation
-- Maintain existing confirmation and credit deduction flow
-- Show clear distinction between assistant-selected and user-modified numbers
+**FR8: Confirmation Flow Integration**
+- Assistant confirmation immediately confirms numbers for the current draw
+- Bypass manual selection grid and proceed directly to ticket confirmation
+- Maintain existing credit deduction and game mechanics
 
-### Enhanced Assistant Capabilities
+**FR9: Enhanced Assistant Capabilities**
 
-**FR8: Rich Content Responses**
+**FR10: Rich Content Responses**
 - Assistant can render interactive UI components in chat
 - Support for custom number grid components within chat interface
 - Action buttons that trigger game state changes
 - Real-time status updates based on game state
 
-**FR9: Recommendation Intelligence**
+**FR11: Recommendation Intelligence**
 - Access to real-time draw data for analysis
 - Multiple recommendation strategies:
   - Hot numbers (most frequent)
@@ -120,10 +111,10 @@ The Play Assistant is an interactive extension of the Number Assistant that enab
 **UX1: Standard Recommendation Flow**
 1. User asks for number recommendations
 2. Assistant analyzes available data
-3. Display 6 numbers with reasoning
+3. Display 6 numbers with confirmation button
 4. Show appropriate confirmation option based on timer
-5. User confirms → numbers auto-populate in game
-6. User can modify and proceed with normal confirmation
+5. User confirms → numbers are immediately confirmed for the draw
+6. System proceeds directly to ticket confirmation and credit deduction
 
 **UX2: Queued Recommendation Flow**
 1. User requests recommendations during locked period
@@ -133,14 +124,12 @@ The Play Assistant is an interactive extension of the Number Assistant that enab
 5. When new draw opens, auto-populate queued numbers
 6. Notify user that queued numbers are now active
 
-**UX3: Conflict Resolution Flow**
-1. User has partial selections and requests assistant help
-2. Assistant detects conflict and offers options:
-   - "Replace your current selections with these 6 numbers?"
-   - "Add these numbers to your existing selections?"
-   - "Keep your selections and save these for later?"
-3. User chooses preferred resolution
-4. System applies changes accordingly
+**UX3: Existing Selection Replacement**
+1. User has existing selections and requests assistant help
+2. Assistant shows recommended numbers with confirmation option
+3. User confirms → system replaces existing selections automatically
+4. Numbers are immediately confirmed for the draw
+5. System proceeds to ticket confirmation
 
 ### Error Handling
 
