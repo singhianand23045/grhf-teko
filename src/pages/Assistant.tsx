@@ -3,7 +3,7 @@ import MainTabs from "@/components/MainTabs";
 import AssistantRouter from "@/components/AssistantRouter";
 import { ASSISTANT_VERSION } from "@/config/assistantConfig";
 
-export default function AnalyticsPage() {
+export default function AssistantPage() {
   const isPhase8 = ASSISTANT_VERSION === "phase8";
   
   return (

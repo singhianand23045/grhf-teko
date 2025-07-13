@@ -12,7 +12,7 @@ const TABS = [
   {
     value: "assistant",
     label: "Assistant",
-    path: "/analytics",
+    path: "/assistant",
     icon: Activity,
   },
 ];
