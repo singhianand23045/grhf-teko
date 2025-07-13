@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Send } from "lucide-react";
 import { useTimer } from "@/features/timer/timer-context";
 import { useNumberSelection } from "@/features/number-select/NumberSelectionContext";
+import { useWallet } from "@/features/wallet/WalletContext";
 
 type RecommendationType = "hot" | "cold" | "balanced" | "pattern" | "history";
 
@@ -151,6 +152,7 @@ export default function Phase8PlayAssistant() {
   const chatRef = useRef<HTMLDivElement>(null);
   const { state: timerState, countdown, cycleIndex } = useTimer();
   const { picked, setPicked, isConfirmed, confirm, canConfirm } = useNumberSelection();
+  const { addConfirmedTicket } = useWallet();
 
   // Auto-scroll to bottom
   useEffect(() => {
@@ -169,14 +171,25 @@ export default function Phase8PlayAssistant() {
     localStorage.setItem('playAssistantQueuedNumbers', JSON.stringify(queuedNumbers));
   }, [queuedNumbers]);
 
-  // Handle queued numbers when timer opens
+  // Handle queued numbers when timer opens - automatically confirm them
   useEffect(() => {
     if (timerState === "OPEN" && queuedNumbers.length === 6) {
       setPicked(() => queuedNumbers);
-      setQueuedNumbers([]);
-      addMessage("assistant", "✅ Your queued numbers have been applied to the current draw!");
+      setTimeout(() => {
+        confirm(); // Set isConfirmed to true in NumberSelectionContext
+        
+        // Automatically handle wallet transaction (credit deduction)
+        addConfirmedTicket({
+          date: new Date().toISOString(),
+          numbers: queuedNumbers,
+          cycle: cycleIndex
+        });
+        
+        setQueuedNumbers([]);
+        addMessage("assistant", "✅ Your queued numbers have been applied and confirmed for this draw!");
+      }, 100);
     }
-  }, [timerState, queuedNumbers]);
+  }, [timerState, queuedNumbers, cycleIndex, confirm, addConfirmedTicket]);
 
   const addMessage = (type: ChatMessage["type"], content: string, recommendation?: NumberRecommendation) => {
     const newMessage: ChatMessage = {
@@ -248,11 +261,19 @@ export default function Phase8PlayAssistant() {
     ));
 
     if (timerState === "OPEN") {
-      // Replace current selection and confirm
+      // Replace current selection and automatically confirm with full wallet transaction
       setPicked(() => numbers);
       setTimeout(() => {
-        confirm();
-        addMessage("assistant", "🎯 Perfect! Your numbers are confirmed. Good luck!");
+        confirm(); // Set isConfirmed to true in NumberSelectionContext
+        
+        // Automatically handle wallet transaction (credit deduction)
+        addConfirmedTicket({
+          date: new Date().toISOString(),
+          numbers: numbers,
+          cycle: cycleIndex
+        });
+        
+        addMessage("assistant", "🎯 Perfect! Your numbers are confirmed and you're all set for this draw. Good luck!");
       }, 100);
     } else {
       // Queue for next draw (user doesn't need to know this technical detail)
