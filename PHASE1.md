@@ -42,7 +42,7 @@
 - [ ] The "cut-off" state is triggered and visually indicated when the timer reaches 1:00, lasting through 0:45 inclusive.
 - [ ] The timer UI shows distinct visual styling (e.g., color or label) during the cut-off phase.
 - [ ] The jackpot/timer split header is always present at the very top.
-- [ ] After six cycles, "Demo Complete" is shown, and the timer does not continue.
+- [ ] After six cycles, "Demo Complete — 6 cycles finished." is shown, and the timer does not continue.
 - [ ] Clicking reset restarts the timer and clears any overlays or labels, returning to the original OPEN state.
 
 ## Tests

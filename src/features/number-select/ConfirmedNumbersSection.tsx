@@ -7,7 +7,7 @@ import { Repeat } from "lucide-react";
 const LOGICAL_HEIGHT = 874;
 
 export default function ConfirmedNumbersSection() {
-  const { state, resetDemo } = useTimer();
+  const { state, resetDemo, cycleIndex } = useTimer();
 
   return (
     <div
@@ -29,7 +29,7 @@ export default function ConfirmedNumbersSection() {
         <section className="w-full h-full flex flex-col items-center justify-center">
           <div className="flex flex-col items-center justify-center w-full max-w-md mx-auto">
             {state === "COMPLETE" && (
-              <p className="text-base font-semibold text-center mb-2">Demo Complete — 2 cycles finished.</p>
+              <p className="text-base font-semibold text-center mb-2">Demo Complete — {cycleIndex} cycles finished.</p>
             )}
             <LotteryTicket />
             {state === "COMPLETE" && (
