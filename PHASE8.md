@@ -46,15 +46,12 @@ The Play Assistant is an interactive extension of the Number Assistant that enab
 **FR7: Number Selection Integration**
 - Seamlessly integrate with existing NumberSelectionContext
 - Replace any existing user selections with assistant recommendations
-- **Auto-confirmation:** When user clicks confirmation button in chat, automatically complete the full transaction
-- **Wallet Integration:** Automatically deduct credits (30 credits per ticket) without additional user input
-- **Complete Flow:** From chat confirmation to final ticket submission without requiring separate confirmation screens
+- Direct confirmation without additional user approval required
 
-**FR8: Full Confirmation Flow Integration**
-- Assistant confirmation immediately handles all aspects: number selection, ticket creation, and credit deduction
-- **No Additional Steps:** User should not see any additional confirmation screens after clicking in chat
-- **Complete Transaction:** One click in chat completes the entire process automatically
-- Maintain existing credit deduction and game mechanics behind the scenes
+**FR8: Confirmation Flow Integration**
+- Assistant confirmation immediately confirms numbers for the current draw
+- Bypass manual selection grid and proceed directly to ticket confirmation
+- Maintain existing credit deduction and game mechanics
 
 **FR9: Enhanced Assistant Capabilities**
 
