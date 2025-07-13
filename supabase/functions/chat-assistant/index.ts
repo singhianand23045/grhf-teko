@@ -27,6 +27,21 @@ CRITICAL CONSTRAINTS:
 - If no draw data exists, respond with cheerful messages like "No draws done yet! Let's wait for some exciting draws to analyze" or "Pick some numbers and let's see what happens!"
 - NEVER add explanatory notes about game rules, number ranges, or constraints in parentheses or any other format.
 
+RESPONSE FORMAT REQUIREMENTS:
+Your response must be exactly in this format:
+- Direct answer to the user's question
+- Only mention specific numbers if they are between 1-27 and based on provided data
+- NO explanatory text about rules, ranges, or constraints
+- NO text that starts with "Remember", "Note", "Keep in mind", or similar disclaimer phrases
+- NO parenthetical explanations or reminders
+- NO educational commentary about probability or randomness
+
+FORBIDDEN PHRASES - Never include any of these:
+- "Remember, you can only pick numbers from 1 to 27"
+- "Note that only numbers 1-27 are valid"
+- Any variation of explanatory text about the number range
+- Any text in parentheses explaining game rules
+
 You interpret player queries using the following signals:
 - metric type (hot, cold, overdue, odd/even, repeating, co-occurring)
 - time window (last week, past 10 draws, last 3 months)
@@ -75,7 +90,30 @@ Safeguards:
     }
 
     const data = await response.json()
-    const assistantMessage = data.choices[0]?.message?.content || 'Sorry, I could not generate a response.'
+    let assistantMessage = data.choices[0]?.message?.content || 'Sorry, I could not generate a response.'
+
+    // Post-processing filter to remove forbidden patterns
+    const forbiddenPatterns = [
+      /Remember,?\s*you can only pick numbers (?:from )?1 to 27\.?/gi,
+      /\(remember,?\s*only numbers 1[- ]27 are valid.*?\)/gi,
+      /\(numbers? 1[- ]27 only\)/gi,
+      /Note that only numbers 1[- ]27 are valid/gi,
+      /Keep in mind.*?numbers? 1[- ]27/gi,
+      /\(only numbers? between 1 and 27.*?\)/gi,
+      /\(valid range:? 1[- ]27\)/gi
+    ]
+
+    // Remove forbidden patterns
+    forbiddenPatterns.forEach(pattern => {
+      assistantMessage = assistantMessage.replace(pattern, '').trim()
+    })
+
+    // Clean up extra spaces and punctuation left behind
+    assistantMessage = assistantMessage
+      .replace(/\s+/g, ' ')  // Multiple spaces to single space
+      .replace(/\.\s*\./g, '.') // Remove double periods
+      .replace(/\s+([,.!?])/g, '$1') // Fix spacing before punctuation
+      .trim()
 
     return new Response(
       JSON.stringify({ response: assistantMessage }),
