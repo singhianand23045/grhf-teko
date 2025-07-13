@@ -1,13 +1,15 @@
 
+import { SETS_COUNT } from './drawConstants';
+
 /**
- * Generates 6 sets of 6 unique numbers from 1 to 27 for draws.
+ * Generates sets of 6 unique numbers from 1 to 27 for draws.
  * Numbers are unique within a set, but can appear in multiple sets.
  * @returns number[][]
  */
 export function generateDrawSets(): number[][] {
   const max = 27;
   const setSize = 6;
-  const sets = 6;
+  const sets = SETS_COUNT;
 
   function getUniqueSet() {
     const pool = Array.from({ length: max }, (_, i) => i + 1);
