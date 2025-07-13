@@ -116,7 +116,7 @@ export default function AssistantChat() {
   }
 
   return (
-    <div className="w-full flex flex-col mx-auto my-6 px-2">
+    <div className="w-full flex flex-col flex-1 mx-auto px-2 h-full">
       {/* Header */}
 
       {/* Chat area */}
