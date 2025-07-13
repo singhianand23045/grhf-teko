@@ -24,37 +24,38 @@ interface ChatMessage {
   timestamp: Date;
 }
 
-// Mock recommendation generator
+// Mock recommendation generator - respects 1-27 range and uses fun, encouraging tone
 function generateRecommendation(type: RecommendationType): NumberRecommendation {
-  const allNumbers = Array.from({ length: 99 }, (_, i) => i + 1);
+  // Only use numbers 1-27 (Bug 1 fix)
+  const validNumbers = Array.from({ length: 27 }, (_, i) => i + 1);
   let numbers: number[] = [];
   let reasoning = "";
   
   switch (type) {
     case "hot":
-      // Simulate hot numbers (frequently drawn)
-      numbers = [7, 23, 34, 45, 67, 89];
-      reasoning = "These numbers have appeared most frequently in recent draws. Hot numbers theory suggests they might continue this trend.";
+      // Simulate hot numbers (frequently drawn) - only 1-27
+      numbers = [7, 14, 19, 23, 3, 11];
+      reasoning = "These numbers have been showing up a lot lately! 7 and 14 are really on fire.";
       break;
     case "cold":
-      // Simulate cold numbers (overdue)
-      numbers = [2, 15, 28, 41, 56, 73];
-      reasoning = "These numbers haven't appeared recently and might be 'due' for a draw. Cold numbers theory suggests they're overdue.";
+      // Simulate cold numbers (overdue) - only 1-27
+      numbers = [2, 15, 18, 24, 6, 21];
+      reasoning = "These numbers are due for their moment! 15 and 24 haven't shown up in ages.";
       break;
     case "balanced":
-      // Mix of high/low, even/odd
-      numbers = [8, 19, 32, 47, 61, 84];
-      reasoning = "A balanced selection with a mix of high/low numbers and even/odd distribution for optimal coverage.";
+      // Mix of high/low, even/odd - only 1-27
+      numbers = [4, 9, 16, 22, 13, 26];
+      reasoning = "A nice balanced mix! Got some low, some high, and a good even-odd spread.";
       break;
     case "pattern":
-      // Pattern-based
-      numbers = [11, 22, 33, 44, 55, 66];
-      reasoning = "These numbers follow a repeating pattern. Some players believe patterns can be lucky.";
+      // Pattern-based - only 1-27
+      numbers = [5, 10, 15, 20, 25, 12];
+      reasoning = "Love the pattern vibes! These numbers have a nice rhythm to them.";
       break;
     case "history":
-      // Based on user history (mock)
-      numbers = [5, 17, 29, 38, 52, 78];
-      reasoning = "Based on numbers you haven't selected recently. Diversifying your choices might improve your odds.";
+      // Based on user history (mock) - only 1-27
+      numbers = [1, 8, 17, 27, 12, 22];
+      reasoning = "Something totally fresh for you! These are completely different from your usual picks.";
       break;
   }
   
@@ -175,15 +176,17 @@ export default function Phase8PlayAssistant() {
 
   const handleRecommendationRequest = (type: RecommendationType) => {
     const recommendation = generateRecommendation(type);
-    const typeDisplay = {
-      hot: "hot numbers",
-      cold: "cold numbers", 
-      balanced: "balanced numbers",
-      pattern: "pattern numbers",
-      history: "personalized numbers"
-    }[type];
     
-    addMessage("recommendation", `Here are some ${typeDisplay} for you:`, recommendation);
+    // Use fun, encouraging messages that match Phase 7 tone
+    const messages = {
+      hot: "Here are the hot numbers right now! These have been showing up a lot:",
+      cold: "These numbers are totally due! They haven't appeared in ages:",
+      balanced: "Here's a perfectly balanced set for you:",
+      pattern: "Check out these pattern numbers - they have a nice flow:",
+      history: "Something completely different for you to try:"
+    };
+    
+    addMessage("recommendation", messages[type], recommendation);
   };
 
   const handleConfirmRecommendation = (numbers: number[]) => {
@@ -219,12 +222,12 @@ export default function Phase8PlayAssistant() {
       if (recommendationType) {
         handleRecommendationRequest(recommendationType);
       } else {
-        // Regular chat response
+        // Regular chat response - fun and encouraging like Phase 7
         const responses = [
-          "I can help you pick numbers! Try asking for 'hot numbers', 'cold numbers', or just 'help me pick 6 numbers'.",
-          "Would you like me to recommend some numbers for your next ticket?",
-          "I'm here to help with number selection. Just ask for recommendations and I'll suggest some numbers!",
-          "Feel free to ask for number suggestions - I can provide hot numbers, cold numbers, or balanced selections."
+          "I'm here to help you pick some winning numbers! What kind of numbers are you feeling today?",
+          "Want some hot numbers that have been showing up lately? Or maybe some cold numbers that are due?",
+          "Let's find you some lucky numbers! Just ask for hot, cold, or balanced numbers.",
+          "Ready to pick some winners? I can suggest numbers based on recent patterns!"
         ];
         const randomResponse = responses[Math.floor(Math.random() * responses.length)];
         addMessage("assistant", randomResponse);
