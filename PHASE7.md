@@ -102,9 +102,9 @@ The LLM needs access to:
 - **IR10:** Handle real-time data updates
 
 ### Performance & Security
-- **IR11:** Respond to queries within 10 seconds (includes Edge Function latency)
+- **IR11:** Respond to queries within 2 seconds (includes Edge Function latency) or show "responding..." but respond within 5 seconds
 - **IR12:** Maintain chat history within session only
-- **IR13:** Clear history on page refresh
+- **IR13:** Clear history on session refresh or for a new user
 - **IR14:** API keys never exposed to frontend
 - **IR15:** All LLM calls proxied through secure Edge Function
 
@@ -116,7 +116,7 @@ The LLM needs access to:
 - [ ] LLM receives complete user and draw data context
 - [ ] LLM follows system prompt behavior (encouraging, no predictions)
 - [ ] Chat maintains conversation history within session
-- [ ] Responses appear within 10 seconds
+- [ ] Responses appear within 2 seconds or show loading state within 5 seconds
 - [ ] No usage restrictions or warnings implemented
 
 ---

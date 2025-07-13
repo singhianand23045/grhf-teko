@@ -20,12 +20,18 @@ export default function AssistantChat() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [showSlowResponse, setShowSlowResponse] = useState(false);
   const [error, setError] = useState("");
   const [showSetup, setShowSetup] = useState(false);
   
   const chatRef = useRef<HTMLDivElement>(null);
   const { balance, history } = useWallet();
   const { picked, isConfirmed } = useNumberSelection();
+
+  // Clear history on component mount (session refresh/new user)
+  useEffect(() => {
+    setMessages([]);
+  }, []);
 
   // Auto-scroll to bottom
   useEffect(() => {
@@ -40,6 +46,7 @@ export default function AssistantChat() {
     const userMessage = input.trim();
     setInput("");
     setIsLoading(true);
+    setShowSlowResponse(false);
     setError("");
 
     // Add user message
@@ -49,6 +56,11 @@ export default function AssistantChat() {
       timestamp: new Date()
     };
     setMessages(prev => [...prev, newUserMessage]);
+
+    // Show "responding..." if taking longer than 2 seconds
+    const slowResponseTimer = setTimeout(() => {
+      setShowSlowResponse(true);
+    }, 2000);
 
     try {
       // Gather session data
@@ -86,7 +98,9 @@ export default function AssistantChat() {
       }
       console.error("Assistant error:", err);
     } finally {
+      clearTimeout(slowResponseTimer);
       setIsLoading(false);
+      setShowSlowResponse(false);
     }
   };
 
@@ -150,7 +164,7 @@ export default function AssistantChat() {
             <div className="inline-block bg-white border px-3 py-2 rounded-xl">
               <div className="flex items-center gap-2">
                 <div className="animate-spin w-4 h-4 border-2 border-gray-300 border-t-gray-600 rounded-full"></div>
-                Thinking...
+                {showSlowResponse ? "Responding..." : "Thinking..."}
               </div>
             </div>
           </div>
