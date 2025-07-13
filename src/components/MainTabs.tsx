@@ -10,8 +10,8 @@ const TABS = [
     icon: Home,
   },
   {
-    value: "ask-agent",
-    label: "Ask Agent",
+    value: "assistant",
+    label: "Assistant",
     path: "/analytics",
     icon: Activity,
   },
