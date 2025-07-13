@@ -161,8 +161,16 @@ export default function Phase8PlayAssistant() {
   };
 
   const getConfirmButtonText = () => {
-    // Simple button text - user doesn't need to see technical details
-    return "Confirm Numbers";
+    switch (timerState) {
+      case "OPEN":
+        return "Confirm for This Draw";
+      case "CUT_OFF":
+      case "REVEAL":
+      case "COMPLETE":
+        return "Queue for Next Draw";
+      default:
+        return "Confirm Numbers";
+    }
   };
 
   const getTimerStateIcon = () => {
