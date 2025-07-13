@@ -160,17 +160,8 @@ export default function Phase8PlayAssistant() {
   };
 
   const getConfirmButtonText = () => {
-    switch (timerState) {
-      case "OPEN":
-        return "Confirm for This Draw";
-      case "CUT_OFF":
-      case "REVEAL":
-        return "Queue for Next Draw";
-      case "COMPLETE":
-        return "Queue for Next Draw";
-      default:
-        return "Confirm Selection";
-    }
+    // Simple button text - user doesn't need to see technical details
+    return "Confirm Numbers";
   };
 
   const getTimerStateIcon = () => {
@@ -201,12 +192,12 @@ export default function Phase8PlayAssistant() {
       setPicked(() => numbers);
       setTimeout(() => {
         confirm();
-        addMessage("assistant", "🎯 Numbers confirmed for this draw! Good luck!");
+        addMessage("assistant", "🎯 Perfect! Your numbers are confirmed. Good luck!");
       }, 100);
     } else {
-      // Queue for next draw
+      // Queue for next draw (user doesn't need to know this technical detail)
       setQueuedNumbers(numbers);
-      addMessage("assistant", "📋 Numbers queued for the next draw. I'll apply them automatically when the next draw opens!");
+      addMessage("assistant", "✨ Great choice! Your numbers are all set for the next draw!");
     }
   };
 
@@ -250,52 +241,8 @@ export default function Phase8PlayAssistant() {
   };
 
   return (
-    <div className="w-full max-w-2xl mx-auto p-4 space-y-4">
-      {/* Status Bar */}
-      <Card>
-        <CardContent className="p-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              {getTimerStateIcon()}
-              <span className="font-medium">
-                Draw Status: {timerState} ({countdown})
-              </span>
-            </div>
-            <div className="text-sm text-muted-foreground">
-              Cycle {cycleIndex + 1}/6
-            </div>
-          </div>
-          
-          {picked.length > 0 && (
-            <div className="mt-2 pt-2 border-t">
-              <div className="text-sm text-muted-foreground mb-1">Current Selection:</div>
-              <div className="flex gap-1">
-                {picked.map((num, idx) => (
-                  <span key={idx} className="w-6 h-6 rounded bg-primary/10 text-xs flex items-center justify-center">
-                    {num}
-                  </span>
-                ))}
-                {isConfirmed && <span className="text-green-600 text-sm ml-2">✓ Confirmed</span>}
-              </div>
-            </div>
-          )}
-          
-          {queuedNumbers.length > 0 && (
-            <div className="mt-2 pt-2 border-t">
-              <div className="text-sm text-muted-foreground mb-1">Queued for Next Draw:</div>
-              <div className="flex gap-1">
-                {queuedNumbers.map((num, idx) => (
-                  <span key={idx} className="w-6 h-6 rounded bg-yellow-100 text-xs flex items-center justify-center">
-                    {num}
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* Chat Interface */}
+    <div className="w-full max-w-2xl mx-auto p-4">
+      {/* Clean Chat Interface - No Status Distractions */}
       <Card>
         <CardHeader>
           <CardTitle>Play Assistant</CardTitle>

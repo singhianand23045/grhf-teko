@@ -117,26 +117,24 @@ The Play Assistant is an interactive extension of the Number Assistant that enab
 
 ### Interaction Flows
 
-**UX1: Natural Language Recommendation Flow**
+**UX1: Clean Chat Experience**
+- **No Visual Distractions**: Users don't see timer states, cycle information, or technical status
+- **Pure Chat Interface**: Focus entirely on natural conversation and number recommendations
+- **Hidden Complexity**: All draw status management happens seamlessly in the background
+- **Fun-First Design**: Interface emphasizes the enjoyment and excitement of getting recommendations
+
+**UX2: Natural Language Recommendation Flow**
 1. User asks for recommendations in natural language: "Show me some hot numbers" or "What should I pick?"
 2. Assistant interprets the request and determines appropriate recommendation type
-3. Display 6 numbers with "Confirm for This Draw" button (or appropriate timer-based text)
-4. User confirms → numbers are immediately confirmed for the draw
-5. System proceeds directly to ticket confirmation and credit deduction
+3. Display 6 numbers with simple "Confirm" button
+4. User confirms → numbers are immediately processed for current/next draw automatically
+5. System handles timing logic transparently without user awareness
 
-**UX2: Queued Recommendation Flow**
-1. User requests recommendations during locked period
-2. Assistant shows numbers with automatic queue messaging: "This draw is locked. I'll queue these for the next draw."
-3. User confirms queuing through same confirmation button
-4. System shows "Queued for next draw" status in chat
-5. When new draw opens, auto-populate queued numbers with notification
-
-**UX3: Existing Selection Replacement**
-1. User has existing selections and asks assistant for help
-2. Assistant shows recommended numbers with confirmation option
-3. User confirms → system automatically replaces existing selections
-4. Numbers are immediately confirmed for the draw
-5. System proceeds to ticket confirmation
+**UX3: Seamless Background Processing**
+- Timer state awareness happens behind the scenes
+- Automatic queuing when draws are locked (user doesn't need to know)
+- Silent state management for optimal user experience
+- Recommendations flow naturally without technical interruptions
 
 ### Error Handling
 
