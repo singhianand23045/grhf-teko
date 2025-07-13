@@ -14,24 +14,31 @@ The Play Assistant is an interactive extension of the Number Assistant that enab
 - Each number appears as a clickable/selectable element
 
 **FR2: Interactive Confirmation**
-- "Confirm These Numbers" button below recommended number set
+- "Confirm for This Draw" button below recommended number set
 - Button state changes based on timer status and game availability
 - Visual feedback when user hovers/interacts with the confirmation option
 
-**FR3: Timer-Aware Functionality**
+**FR3: Natural Language Interface**
+- Users interact through normal chat conversation
+- No explicit UI controls for recommendation types
+- Assistant interprets natural language requests:
+  - "Show me hot numbers" → Hot number recommendations
+  - "Give me cold numbers" → Cold number recommendations
+  - "I need lucky numbers" → Balanced set recommendations
+  - "What numbers should I pick?" → Best available recommendation
 
-**FR4: Real-Time Timer Integration**
-- Assistant checks current timer state before displaying confirmation options
+**FR4: Timer-Aware Functionality**
+- Assistant automatically checks current timer state before displaying confirmation options
 - Dynamic button text and availability based on draw status:
   - OPEN: "Confirm for This Draw"
   - CUT_OFF/REVEAL: "Queue for Next Draw"
   - COMPLETE: "Confirm for Next Draw"
 
 **FR5: Smart Queuing System**
-- When current draw is locked, offer to queue numbers for next draw
-- Show clear messaging: "Numbers locked for this draw. Queue these for next draw?"
+- When current draw is locked, automatically offer to queue numbers for next draw
+- Show clear messaging: "This draw is locked. I'll queue these for the next draw."
 - Persist queued selections across timer cycles
-- Auto-apply queued numbers when new draw opens
+- Auto-apply queued numbers when new draw opens with notification
 
 **FR6: Game State Integration**
 
@@ -53,14 +60,16 @@ The Play Assistant is an interactive extension of the Number Assistant that enab
 - Action buttons that trigger game state changes
 - Real-time status updates based on game state
 
-**FR11: Recommendation Intelligence**
+**FR11: Intelligent Recommendation Processing**
+- Parse natural language to determine recommendation type
 - Access to real-time draw data for analysis
-- Multiple recommendation strategies:
-  - Hot numbers (most frequent)
-  - Cold numbers (least frequent)
-  - Balanced sets (mix of hot/cold)
+- Multiple recommendation strategies available:
+  - Hot numbers (most frequent in recent draws)
+  - Cold numbers (least frequent, "due" numbers)
+  - Balanced sets (mix of high/low, even/odd)
   - Pattern-based recommendations
   - User history-based suggestions
+- Default to best available strategy when request is ambiguous
 
 ## Technical Requirements
 
@@ -108,34 +117,32 @@ The Play Assistant is an interactive extension of the Number Assistant that enab
 
 ### Interaction Flows
 
-**UX1: Standard Recommendation Flow**
-1. User asks for number recommendations
-2. Assistant analyzes available data
-3. Display 6 numbers with confirmation button
-4. Show appropriate confirmation option based on timer
-5. User confirms → numbers are immediately confirmed for the draw
-6. System proceeds directly to ticket confirmation and credit deduction
+**UX1: Natural Language Recommendation Flow**
+1. User asks for recommendations in natural language: "Show me some hot numbers" or "What should I pick?"
+2. Assistant interprets the request and determines appropriate recommendation type
+3. Display 6 numbers with "Confirm for This Draw" button (or appropriate timer-based text)
+4. User confirms → numbers are immediately confirmed for the draw
+5. System proceeds directly to ticket confirmation and credit deduction
 
 **UX2: Queued Recommendation Flow**
 1. User requests recommendations during locked period
-2. Assistant shows numbers with queue option
-3. User confirms queuing
-4. System shows "queued for next draw" status
-5. When new draw opens, auto-populate queued numbers
-6. Notify user that queued numbers are now active
+2. Assistant shows numbers with automatic queue messaging: "This draw is locked. I'll queue these for the next draw."
+3. User confirms queuing through same confirmation button
+4. System shows "Queued for next draw" status in chat
+5. When new draw opens, auto-populate queued numbers with notification
 
 **UX3: Existing Selection Replacement**
-1. User has existing selections and requests assistant help
+1. User has existing selections and asks assistant for help
 2. Assistant shows recommended numbers with confirmation option
-3. User confirms → system replaces existing selections automatically
+3. User confirms → system automatically replaces existing selections
 4. Numbers are immediately confirmed for the draw
 5. System proceeds to ticket confirmation
 
 ### Error Handling
 
 **UX4: Insufficient Data Scenarios**
-- When historical data is limited: suggest random selection with explanation
-- When user has no credits: show recommendations but disable confirmation
+- When historical data is limited: suggest balanced selection with explanation
+- When user has no credits: show recommendations but disable confirmation with clear message
 - When system errors occur: graceful fallback to text-only recommendations
 
 **UX5: Edge Case Management**
@@ -145,23 +152,23 @@ The Play Assistant is an interactive extension of the Number Assistant that enab
 
 ## Implementation Phases
 
-### Phase 8.1: Basic Interactive Recommendations
-- Implement visual number display in chat
-- Basic confirmation functionality for OPEN timer state
+### Phase 8.1: Natural Language Processing
+- Implement natural language interpretation for recommendation requests
+- Parse common phrases and map to recommendation types
+- Basic visual number display in chat with confirmation functionality
+
+### Phase 8.2: Interactive Chat Components
+- Add visual number grid component within chat interface
+- Implement confirmation button with timer state awareness
 - Integration with NumberSelectionContext
 
-### Phase 8.2: Timer-Aware Queuing
-- Add timer state awareness
+### Phase 8.3: Timer-Aware Queuing
+- Add automatic timer state detection
 - Implement queuing system for locked periods
 - Enhanced messaging for different timer states
 
-### Phase 8.3: Advanced Features
-- Conflict resolution for partial selections
-- Multiple recommendation strategies
-- Analytics and user preference tracking
-
 ### Phase 8.4: Polish and Optimization
-- Enhanced visual design
+- Enhanced visual design for chat components
 - Performance optimization for real-time updates
 - Comprehensive error handling and edge cases
 
