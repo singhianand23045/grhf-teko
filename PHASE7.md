@@ -41,8 +41,8 @@ System output: "These numbers have appeared in consecutive draws or frequently t
 
 User Query: "Give me numbers completely different from what I usually play. I want to try something new."
 Annotations: :avoid past losses
-Player history: previously played and lost with [5, 12, 23, 32, 45]
-System output: "Based on your past tickets, here is a new set that avoids any overlap and uses an even/odd balanced strategy: 6, 17, 28, 39, 50. These numbers have also not appeared in your recent picks."
+Player history: played this session [5, 12, 23, 32, 45]
+System output: "Based on your tickets today, here is a new set that avoids any overlap and uses an even/odd balanced strategy: 6, 17, 28, 39, 50. These numbers haven't appeared in your session picks."
 
 User Query: "Are there number pairs that often come up together?"
 Annotations: :co-occurring, :last 100 draws
@@ -50,8 +50,8 @@ System output: "Yes. The pairs (5, 23), (14, 33), and (8, 19) have appeared toge
 
 User Query: "Can you build me a lucky number profile based on my near misses?"
 Annotations: :lucky profile from near-misses
-Player history: nearly matched draws where player was 1 number off from winning
-System output: "Based on your near-miss history, you've consistently been close with numbers in the ranges 10–20 and 30–40. A profile based on those patterns could include: 12, 16, 18, 31, 35, 39."
+Player history: nearly matched draws this session where player was 1 number off from winning
+System output: "Based on your close calls today, you've been near wins with numbers in the ranges 10–20 and 30–40. A profile based on those session patterns could include: 12, 16, 18, 31, 35, 39."
 
 User Query: "Can you help me manage how often I play based on how I've been doing?"
 Annotations: :budget-aware play frequency
@@ -75,11 +75,13 @@ The LLM needs access to:
 - All past winning number combinations with timestamps
 - Number frequency counts across time windows
 
-### User Data
-- **Ticket History**: All numbers the user has previously chosen with timestamps
-- **Match Results**: How many numbers matched on each ticket (0-6)
-- **Wallet History**: Credits won/lost from each ticket
-- **Total Games Played**: Count of all tickets purchased
+### Current Session User Data
+- **Session Ticket History**: Numbers the user has chosen during current session
+- **Session Match Results**: How many numbers matched on tickets played this session (0-6)
+- **Session Wallet Activity**: Credits won/lost during current session
+- **Session Games Played**: Count of tickets purchased since page load
+
+**Note**: All user data is session-only. No persistent storage across browser sessions.
 
 ---
 
