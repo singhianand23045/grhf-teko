@@ -22,6 +22,7 @@ interface ChatMessage {
   content: string;
   recommendation?: NumberRecommendation;
   timestamp: Date;
+  isConfirmed?: boolean; // Track if recommendation has been acted upon
 }
 
 // Call the LLM edge function for intelligent responses
@@ -94,10 +95,11 @@ function parseRecommendationRequest(message: string): RecommendationType | null 
 }
 
 // Number grid component for displaying recommendations
-function NumberGrid({ numbers, onConfirm, buttonText }: { 
+function NumberGrid({ numbers, onConfirm, buttonText, isConfirmed }: { 
   numbers: number[], 
   onConfirm: () => void,
-  buttonText: string 
+  buttonText: string,
+  isConfirmed?: boolean
 }) {
   return (
     <div className="border rounded-lg p-4 bg-gradient-to-br from-blue-50 to-indigo-50">
@@ -113,10 +115,14 @@ function NumberGrid({ numbers, onConfirm, buttonText }: {
       </div>
       <Button 
         onClick={onConfirm}
-        className="w-full bg-green-600 hover:bg-green-700 text-white"
+        className={`w-full ${isConfirmed 
+          ? 'bg-gray-400 hover:bg-gray-400 cursor-not-allowed' 
+          : 'bg-green-600 hover:bg-green-700'
+        } text-white`}
         size="sm"
+        disabled={isConfirmed}
       >
-        {buttonText}
+        {isConfirmed ? '✓ Confirmed' : buttonText}
       </Button>
     </div>
   );
@@ -208,7 +214,12 @@ export default function Phase8PlayAssistant() {
     }
   };
 
-  const handleConfirmRecommendation = (numbers: number[]) => {
+  const handleConfirmRecommendation = (numbers: number[], messageId: string) => {
+    // Mark this recommendation as confirmed
+    setMessages(prev => prev.map(msg => 
+      msg.id === messageId ? { ...msg, isConfirmed: true } : msg
+    ));
+
     if (timerState === "OPEN") {
       // Replace current selection and confirm
       setPicked(() => numbers);
@@ -307,8 +318,9 @@ export default function Phase8PlayAssistant() {
                     <div className="mt-3">
                       <NumberGrid
                         numbers={message.recommendation.numbers}
-                        onConfirm={() => handleConfirmRecommendation(message.recommendation!.numbers)}
+                        onConfirm={() => handleConfirmRecommendation(message.recommendation!.numbers, message.id)}
                         buttonText={getConfirmButtonText()}
+                        isConfirmed={message.isConfirmed}
                       />
                     </div>
                   )}
