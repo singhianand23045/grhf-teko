@@ -159,6 +159,13 @@ export default function Phase8PlayAssistant() {
     }
   }, [messages]);
 
+  // Scroll to bottom on mount/tab switch
+  useEffect(() => {
+    if (chatRef.current) {
+      chatRef.current.scrollTop = chatRef.current.scrollHeight;
+    }
+  }, []);
+
   // Persist messages to localStorage whenever they change
   useEffect(() => {
     localStorage.setItem('playAssistantMessages', JSON.stringify(messages));
