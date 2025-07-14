@@ -1,6 +1,7 @@
 
 import { useEffect, useRef } from "react";
 import { calculateWinnings } from "./calculateWinnings";
+import { useDrawHistory } from "./DrawHistoryContext";
 
 /*
  * Handles awarding prizes and triggering result bar after reveal.
@@ -42,6 +43,7 @@ export function useDrawPrizes({
   revealStartedForCycle, // New parameter
 }: UseDrawPrizesArgs) {
   const resultAwardedForCycle = useRef<number | null>(null);
+  const { addDrawResult } = useDrawHistory();
 
   // Reset resultAwardedForCycle when cycle changes
   useEffect(() => {
@@ -95,6 +97,15 @@ export function useDrawPrizes({
       // Calculate winnings; never grant both types for same ticket
       const { jackpotWon, rowWinnings, totalWinnings, resultType } =
         calculateWinnings(userNumbers, activeSets, jackpotContext.jackpot);
+
+      // Record draw result in history
+      const winningNumbers = activeSets.flat();
+      addDrawResult({
+        cycle: cycleIndex,
+        winningNumbers,
+        jackpotWon,
+        totalWinnings: jackpotWon ? jackpotContext.jackpot : totalWinnings
+      });
 
       // PHASE 5 handle: only award EITHER jackpot OR credits
       if (jackpotWon) {

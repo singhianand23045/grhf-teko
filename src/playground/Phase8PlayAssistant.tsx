@@ -5,6 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Send } from "lucide-react";
 import { useTimer } from "@/features/timer/timer-context";
 import { useNumberSelection } from "@/features/number-select/NumberSelectionContext";
+import { useWallet } from "@/features/wallet/WalletContext";
+import { useDrawHistory } from "@/features/draw/DrawHistoryContext";
 
 type RecommendationType = "hot" | "cold" | "balanced" | "pattern" | "history";
 
@@ -151,6 +153,8 @@ export default function Phase8PlayAssistant() {
   const chatRef = useRef<HTMLDivElement>(null);
   const { state: timerState, countdown, cycleIndex } = useTimer();
   const { picked, setPicked, isConfirmed, confirm, canConfirm } = useNumberSelection();
+  const wallet = useWallet();
+  const { drawHistory, getHotNumbers, getColdNumbers, getRecentPatterns } = useDrawHistory();
 
   // Auto-scroll to bottom
   useEffect(() => {
@@ -222,12 +226,17 @@ export default function Phase8PlayAssistant() {
   };
 
   const handleRecommendationRequest = async (message: string) => {
-    // Prepare context for LLM
+    // Prepare enhanced context for LLM with real data
     const context = {
       timerState,
       selectedNumbers: picked,
-      credits: 100, // Mock credits
-      drawHistory: [] // Mock draw history
+      balance: wallet.balance,
+      userHistory: wallet.history.slice(0, 10), // Last 10 user tickets
+      drawHistory: drawHistory.slice(0, 10), // Last 10 actual draws
+      hotNumbers: getHotNumbers(10),
+      coldNumbers: getColdNumbers(10),
+      recentPatterns: getRecentPatterns(),
+      cycleIndex
     };
 
     try {
@@ -284,12 +293,17 @@ export default function Phase8PlayAssistant() {
       if (recommendationType || userMessage.toLowerCase().includes("number")) {
         await handleRecommendationRequest(userMessage);
       } else {
-        // Regular chat response via LLM
+        // Regular chat response via LLM with enhanced context
         const context = {
           timerState,
           selectedNumbers: picked,
-          credits: 100,
-          drawHistory: []
+          balance: wallet.balance,
+          userHistory: wallet.history.slice(0, 5),
+          drawHistory: drawHistory.slice(0, 5),
+          hotNumbers: getHotNumbers(6),
+          coldNumbers: getColdNumbers(6),
+          recentPatterns: getRecentPatterns(),
+          cycleIndex
         };
         
         try {

@@ -109,15 +109,44 @@ serve(async (req) => {
       throw new Error('OpenAI API key not configured');
     }
 
-    // Build context for LLM
+    // Build enhanced context for LLM
     let contextString = '';
     if (context) {
+      const { 
+        timerState, 
+        selectedNumbers, 
+        balance, 
+        userHistory = [], 
+        drawHistory = [], 
+        hotNumbers = [], 
+        coldNumbers = [], 
+        recentPatterns = "",
+        cycleIndex = 0 
+      } = context;
+
       contextString = `
 Current Game Context:
-- Timer State: ${context.timerState || 'unknown'}
-- User's Selected Numbers: ${context.selectedNumbers?.join(', ') || 'none'}
-- Credits Available: ${context.credits || 'unknown'}
-- Draw History: ${context.drawHistory ? JSON.stringify(context.drawHistory) : 'no data available'}
+- Timer State: ${timerState || 'unknown'}
+- Current Cycle: ${cycleIndex}
+- User's Selected Numbers: ${selectedNumbers?.join(', ') || 'none'}
+- Balance: ${balance || 'unknown'} credits
+
+Recent Draw Results:
+${drawHistory.length > 0 ? drawHistory.slice(0, 5).map((draw: any) => {
+  const numbers = draw.winningNumbers?.slice(0, 6)?.sort((a: number, b: number) => a - b)?.join(', ') || 'Unknown';
+  return `Cycle ${draw.cycle}: [${numbers}] (${draw.jackpotWon ? 'JACKPOT!' : `${draw.totalWinnings} credits`})`;
+}).join('\n') : 'No draws done yet!'}
+
+Hot Numbers (most frequent): ${hotNumbers.slice(0, 10).join(', ') || 'none yet'}
+Cold Numbers (overdue): ${coldNumbers.slice(0, 10).join(', ') || 'none yet'}
+
+User's Recent Tickets:
+${userHistory.length > 0 ? userHistory.slice(0, 3).map((ticket: any) => {
+  const nums = ticket.numbers?.sort((a: number, b: number) => a - b)?.join(', ') || 'Unknown';
+  return `[${nums}] - ${ticket.matches || 0} matches, ${ticket.winnings || 0} credits`;
+}).join('\n') : 'No tickets played yet'}
+
+${recentPatterns ? `Recent Patterns:\n${recentPatterns}` : ''}
 `;
     }
 
