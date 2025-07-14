@@ -250,10 +250,8 @@ export default function Phase8PlayAssistant() {
     if (timerState === "OPEN") {
       // Replace current selection and confirm
       setPicked(() => numbers);
-      setTimeout(() => {
-        confirm();
-        addMessage("assistant", "🎯 Perfect! Your numbers are confirmed. Good luck!");
-      }, 100);
+      confirm();
+      addMessage("assistant", "🎯 Perfect! Your numbers are confirmed. Good luck!");
     } else {
       // Queue for next draw (user doesn't need to know this technical detail)
       setQueuedNumbers(numbers);
