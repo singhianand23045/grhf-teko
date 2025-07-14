@@ -44,7 +44,18 @@ async function callPlayAssistantAPI(message: string, context: any) {
       throw new Error(`API error: ${response.status}`);
     }
 
-    return await response.json();
+    const data = await response.json();
+    
+    // Handle both string and object responses
+    if (typeof data === 'string') {
+      try {
+        return JSON.parse(data);
+      } catch {
+        return { message: data };
+      }
+    }
+    
+    return data;
   } catch (error) {
     console.error('Play Assistant API error:', error);
     return {
