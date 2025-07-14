@@ -24,25 +24,28 @@ export function useTicketCommitManager(
     entered: boolean;
   } | null>(null);
 
-  // *** FIX: Prevent phantom ticket deduction at new cycle by tracking prior confirmed state ***
-  const prevIsConfirmed = useRef<boolean>(false);
+  // Track the last ticket committed to prevent duplicates
+  const lastCommittedTicket = useRef<{ cycle: number; numbers: string } | null>(null);
 
   // Track whether we've committed a ticket for this cycle to avoid duplicates (extra defense).
   useEffect(() => {
     // Reset on new cycle
     ticketCommittedCycle.current = null;
     pendingTicketRef.current = null;
-    // FIX: Keep prevIsConfirmed in sync with actual confirmation state at cycle change
-    prevIsConfirmed.current = isConfirmed;
-  }, [cycleIndex]); // Only depend on cycleIndex, not isConfirmed
+    lastCommittedTicket.current = null;
+  }, [cycleIndex]);
 
   useEffect(() => {
-    // Only commit if transitioning from NOT confirmed to confirmed (user action)
+    // More robust logic: commit if we have 6 numbers confirmed for this cycle and haven't already committed
+    const numbersKey = picked.slice().sort((a, b) => a - b).join(',');
+    const hasAlreadyCommitted = lastCommittedTicket.current?.cycle === cycleIndex && 
+                               lastCommittedTicket.current?.numbers === numbersKey;
+
     if (
       picked.length === 6 &&
       isConfirmed &&
-      !prevIsConfirmed.current &&
-      ticketCommittedCycle.current !== cycleIndex
+      ticketCommittedCycle.current !== cycleIndex &&
+      !hasAlreadyCommitted
     ) {
       // Commit ticket and deduct credits - SET THE CYCLE PROPERTY
       wallet.addConfirmedTicket({
@@ -51,6 +54,7 @@ export function useTicketCommitManager(
         cycle: cycleIndex, // Ensure cycle is set for proper matching
       });
       ticketCommittedCycle.current = cycleIndex;
+      lastCommittedTicket.current = { cycle: cycleIndex, numbers: numbersKey };
 
       // Store pending ticket for prize awarding (as before)
       pendingTicketRef.current = {
@@ -63,8 +67,6 @@ export function useTicketCommitManager(
       };
       console.log("[useTicketCommitManager] Confirmed ticket and deducted credits for cycle", cycleIndex, picked);
     }
-
-    prevIsConfirmed.current = isConfirmed;
 
     // If not confirmed, reset pending ticket if present & not for the current cycle
     if (
