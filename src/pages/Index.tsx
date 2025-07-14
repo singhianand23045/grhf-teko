@@ -32,21 +32,20 @@ function AppContent() {
             overflow: activeTab === "home" ? "hidden" : "auto"
           }}
         >
-          {activeTab === "home" ? (
+          <div style={{ display: activeTab === "home" ? "block" : "none" }}>
             <FlexibleLayout />
-          ) : (
-            <>
-              <h1 className="text-3xl font-bold mt-4 mb-1 text-slate-700">
-                {isPhase8 ? "Play Assistant" : "Number Assistant"}
-              </h1>
-              {!isPhase8 && (
-                <span className="text-gray-500 mb-3 text-sm text-center px-4">
-                  Get help picking numbers, analyze hot/cold numbers, and get personalized suggestions.
-                </span>
-              )}
-              <AssistantRouter />
-            </>
-          )}
+          </div>
+          <div style={{ display: activeTab === "assistant" ? "block" : "none" }}>
+            <h1 className="text-3xl font-bold mt-4 mb-1 text-slate-700">
+              {isPhase8 ? "Play Assistant" : "Number Assistant"}
+            </h1>
+            {!isPhase8 && (
+              <span className="text-gray-500 mb-3 text-sm text-center px-4">
+                Get help picking numbers, analyze hot/cold numbers, and get personalized suggestions.
+              </span>
+            )}
+            <AssistantRouter />
+          </div>
         </main>
         {/* Bottom Tabs */}
         <MainTabs />
