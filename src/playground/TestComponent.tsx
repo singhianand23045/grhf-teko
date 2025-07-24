@@ -26,7 +26,7 @@ const TestComponent = () => {
     <div className="w-full max-w-6xl mx-auto p-4">
       <Tabs defaultValue="play-assistant" className="w-full">
         <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="play-assistant">Phase 8: Play Assistant</TabsTrigger>
+          <TabsTrigger value="play-assistant">Play Assistant</TabsTrigger>
           <TabsTrigger value="roulette-demo">Roulette Demo</TabsTrigger>
         </TabsList>
         

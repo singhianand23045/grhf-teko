@@ -140,7 +140,7 @@ function NumberGrid({ numbers, onConfirm, buttonText, isConfirmed }: {
   );
 }
 
-export default function Phase8PlayAssistant() {
+export default function PlayAssistant() {
   // Load messages from localStorage on component mount
   const [messages, setMessages] = useState<ChatMessage[]>(() => {
     const savedMessages = localStorage.getItem('playAssistantMessages');
