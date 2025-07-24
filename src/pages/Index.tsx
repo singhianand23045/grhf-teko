@@ -1,15 +1,13 @@
 
 import MainTabs, { TabProvider, useTab } from "@/components/MainTabs";
 import FlexibleLayout from "@/layout/FlexibleLayout";
-import AssistantRouter from "@/components/AssistantRouter";
-import { ASSISTANT_VERSION } from "@/config/assistantConfig";
+import PlayAssistant from "@/features/assistant/PlayAssistant";
 
 const LOGICAL_WIDTH = 402;  // iPhone 16 Pro logical width
 const LOGICAL_HEIGHT = 874; // iPhone 16 Pro logical height
 
 function AppContent() {
   const { activeTab } = useTab();
-  const isPhase8 = ASSISTANT_VERSION === "phase8";
 
   return (
     <div className="min-h-screen min-w-full flex flex-col items-center justify-center bg-gradient-to-tr from-blue-100 via-indigo-100 to-blue-50">
@@ -37,14 +35,9 @@ function AppContent() {
           </div>
           <div style={{ display: activeTab === "assistant" ? "block" : "none" }}>
             <h1 className="text-3xl font-bold mt-4 mb-1 text-slate-700">
-              {isPhase8 ? "Play Assistant" : "Number Assistant"}
+              Play Assistant
             </h1>
-            {!isPhase8 && (
-              <span className="text-gray-500 mb-3 text-sm text-center px-4">
-                Get help picking numbers, analyze hot/cold numbers, and get personalized suggestions.
-              </span>
-            )}
-            <AssistantRouter />
+            <PlayAssistant />
           </div>
         </main>
         {/* Bottom Tabs */}
