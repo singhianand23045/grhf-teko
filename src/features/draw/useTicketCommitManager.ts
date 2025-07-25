@@ -14,7 +14,7 @@ export function useTicketCommitManager(
   incrementTicketCountForCycle: (cycle: number, debugSource?: string) => void
 ) {
   const wallet = useWallet();
-  const { isConfirmed } = useNumberSelection();
+  const { isConfirmed, confirmedCycle } = useNumberSelection();
   const ticketCommittedCycle = useRef<number | null>(null);
 
   // pendingTicketRef: helper to track ticket to be entered post-reveal
@@ -44,6 +44,7 @@ export function useTicketCommitManager(
     if (
       picked.length === 6 &&
       isConfirmed &&
+      confirmedCycle === cycleIndex &&
       ticketCommittedCycle.current !== cycleIndex &&
       !hasAlreadyCommitted
     ) {

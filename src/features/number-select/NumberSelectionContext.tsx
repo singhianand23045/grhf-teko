@@ -6,6 +6,7 @@ type NumberSelectionContextType = {
   picked: number[];
   setPicked: (cb: (prev: number[]) => number[]) => void;
   isConfirmed: boolean;
+  confirmedCycle: number | null;
   confirm: () => void;
   reset: () => void;
   canPick: boolean;
@@ -18,6 +19,7 @@ export function NumberSelectionProvider({ children }: { children: React.ReactNod
   const { state: timerState, cycleIndex } = useTimer();
   const [picked, setPickedState] = useState<number[]>([]);
   const [isConfirmed, setIsConfirmed] = useState(false);
+  const [confirmedCycle, setConfirmedCycle] = useState<number | null>(null);
   const prevCycleRef = React.useRef(cycleIndex);
 
   // Reset selection on new timer cycle
@@ -25,6 +27,7 @@ export function NumberSelectionProvider({ children }: { children: React.ReactNod
     if (prevCycleRef.current !== cycleIndex) {
       setPickedState([]);
       setIsConfirmed(false);
+      setConfirmedCycle(null);
       prevCycleRef.current = cycleIndex;
     }
   }, [cycleIndex]);
@@ -39,12 +42,14 @@ export function NumberSelectionProvider({ children }: { children: React.ReactNod
   function confirm() {
     if (picked.length === 6 && timerState === "OPEN" && !isConfirmed) {
       setIsConfirmed(true);
+      setConfirmedCycle(cycleIndex);
     }
   }
 
   function reset() {
     setPickedState([]);
     setIsConfirmed(false);
+    setConfirmedCycle(null);
   }
 
   const canPick = timerState === "OPEN" && !isConfirmed;
@@ -57,7 +62,7 @@ export function NumberSelectionProvider({ children }: { children: React.ReactNod
 
   return (
     <NumberSelectionContext.Provider
-      value={{ picked, setPicked, isConfirmed, confirm, reset, canPick, canConfirm }}
+      value={{ picked, setPicked, isConfirmed, confirmedCycle, confirm, reset, canPick, canConfirm }}
     >
       {children}
     </NumberSelectionContext.Provider>
