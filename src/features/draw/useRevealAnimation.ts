@@ -124,20 +124,19 @@ export function useRevealAnimation(
     }
 
     // --- Schedule messages and highlight overlays ---
-    const currentDrawnNumbers = activeSets.flat(); // All 18 numbers for prize calculation
-
-    // Helper to calculate winnings for a specific ticket
-    const getTicketWinnings = (ticketNumbers: number[]) => {
+    // Helper to calculate winnings for a specific ticket for message display
+    const getTicketMessageWinnings = (ticketNumbers: number[]) => {
       if (!ticketNumbers || ticketNumbers.length !== 6) return 0;
-      const { totalWinnings } = calculateWinnings(ticketNumbers, activeSets, jackpotContext.jackpot);
-      return totalWinnings;
+      const { totalWinnings, resultType } = calculateWinnings(ticketNumbers, activeSets, jackpotContext.jackpot);
+      // For intermediate messages, if it's a jackpot win, report 0 credits, as jackpot is a separate prize.
+      return resultType === "jackpot" ? 0 : totalWinnings;
     };
 
     // Ticket 1 Message
     if (confirmedTickets.length > 0) {
       messageTimeouts.current.push(
         setTimeout(() => {
-          const t1Winnings = getTicketWinnings(confirmedTickets[0]);
+          const t1Winnings = getTicketMessageWinnings(confirmedTickets[0]);
           const t1Message = t1Winnings > 0 ? `Congrats! You won ${t1Winnings} credits!` : "No matches. Wait for next set!";
           showResultBar(null, t1Message, TICKET1_MESSAGE_DURATION_MS);
         }, TICKET1_MESSAGE_START_MS)
@@ -170,7 +169,7 @@ export function useRevealAnimation(
       );
       messageTimeouts.current.push(
         setTimeout(() => {
-          const t2Winnings = getTicketWinnings(confirmedTickets[1]);
+          const t2Winnings = getTicketMessageWinnings(confirmedTickets[1]);
           const t2Message = t2Winnings > 0 ? `Congrats! You won ${t2Winnings} credits!` : "No matches. Wait for next set!";
           showResultBar(null, t2Message, TICKET2_MESSAGE_DURATION_MS);
         }, TICKET2_MESSAGE_START_MS)
@@ -203,7 +202,7 @@ export function useRevealAnimation(
       );
       messageTimeouts.current.push(
         setTimeout(() => {
-          const t3Winnings = getTicketWinnings(confirmedTickets[2]);
+          const t3Winnings = getTicketMessageWinnings(confirmedTickets[2]);
           const t3Message = t3Winnings > 0 ? `Congrats! You won ${t3Winnings} credits!` : "No matches. Wait for final result!";
           showResultBar(null, t3Message, TICKET3_MESSAGE_DURATION_MS);
         }, TICKET3_MESSAGE_START_MS)
