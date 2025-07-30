@@ -1,13 +1,17 @@
 import { useTimer } from "../timer/timer-context";
-import LotteryTicket from "./LotteryTicket";
 import NumberSelectionPanel from "./NumberSelectionPanel";
 import { Button } from "@/components/ui/button";
 import { Repeat } from "lucide-react";
+import { useNumberSelection } from "./NumberSelectionContext"; // Import useNumberSelection
 
 const LOGICAL_HEIGHT = 874;
 
 export default function ConfirmedNumbersSection() {
   const { state, resetDemo, cycleIndex } = useTimer();
+  const { confirmedTickets } = useNumberSelection(); // Get confirmedTickets
+
+  // Determine if the "Demo Complete" overlay should be shown
+  const showDemoComplete = state === "COMPLETE";
 
   return (
     <div
@@ -18,26 +22,25 @@ export default function ConfirmedNumbersSection() {
         maxHeight: Math.ceil(LOGICAL_HEIGHT * 0.4),
       }}
     >
-      {/* During selection phases */}
-      {state !== "COMPLETE" && state !== "REVEAL" && (
-        <section className="w-full flex flex-col items-center justify-center my-0 h-full">
-          <NumberSelectionPanel />
-        </section>
-      )}
-      {/* During REVEAL and COMPLETE: always show full ticket, not compact */}
-      {(state === "REVEAL" || state === "COMPLETE") && (
+      {showDemoComplete ? (
         <section className="w-full h-full flex flex-col items-center justify-center">
           <div className="flex flex-col items-center justify-center w-full max-w-md mx-auto">
-            {state === "COMPLETE" && (
-              <p className="text-base font-semibold text-center mb-2">Demo Complete — {cycleIndex} cycles finished.</p>
+            <p className="text-base font-semibold text-center mb-2">Demo Complete — {cycleIndex} cycles finished.</p>
+            {confirmedTickets.length > 0 && (
+              <div className="mb-4">
+                {/* Display the last confirmed ticket for the demo complete screen */}
+                <LotteryTicket picked={confirmedTickets[confirmedTickets.length - 1]} compact={false} />
+              </div>
             )}
-            <LotteryTicket />
-            {state === "COMPLETE" && (
-              <Button variant="secondary" size="lg" className="mt-2" onClick={resetDemo}>
-                <Repeat className="mr-1 h-4 w-4" /> Restart Demo
-              </Button>
-            )}
+            <Button variant="secondary" size="lg" className="mt-2" onClick={resetDemo}>
+              <Repeat className="mr-1 h-4 w-4" /> Restart Demo
+            </Button>
           </div>
+        </section>
+      ) : (
+        // Always render NumberSelectionPanel, which now handles its own internal state and rendering
+        <section className="w-full flex flex-col items-center justify-center my-0 h-full">
+          <NumberSelectionPanel />
         </section>
       )}
     </div>

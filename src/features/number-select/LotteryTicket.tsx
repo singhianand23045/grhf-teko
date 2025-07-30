@@ -1,13 +1,17 @@
-
 import React from "react";
-import { useNumberSelection } from "./NumberSelectionContext";
 
 // Global circle/font constants
 const CIRCLE_NUM_FONT_SIZE = "1rem";
 const CIRCLE_NUM_DIAM = "2.2rem"; // 35px
 const CIRCLE_DIAM_NUM = 35;
-export default function LotteryTicket({ compact = false }: { compact?: boolean }) {
-  const { picked } = useNumberSelection();
+
+type LotteryTicketProps = {
+  picked: number[]; // Now explicitly passed as a prop
+  compact?: boolean;
+  ticketIndex?: number; // New prop for displaying ticket number
+};
+
+export default function LotteryTicket({ picked, compact = false, ticketIndex }: LotteryTicketProps) {
   const sorted = [...picked].sort((a, b) => a - b);
 
   return (
@@ -21,7 +25,7 @@ export default function LotteryTicket({ compact = false }: { compact?: boolean }
       }}
     >
       <div className={`mb-2 font-bold text-lg tracking-wide text-[#217d37] ${compact ? "mt-0" : ""} text-center w-full`}>
-        Your Numbers
+        {ticketIndex ? `Ticket ${ticketIndex}` : "Your Numbers"}
       </div>
       <div
         className="flex flex-nowrap justify-center items-center gap-3 bg-gradient-to-r from-green-100/70 via-white to-green-100/70 rounded-2xl shadow-inner px-1 py-2 w-full"
@@ -50,9 +54,12 @@ export default function LotteryTicket({ compact = false }: { compact?: boolean }
           </span>
         ))}
       </div>
-      <div className={`mt-2 text-sm text-muted-foreground text-center px-2 ${compact ? "mt-1" : ""} w-full`}>
-        Numbers locked in until next round!
-      </div>
+      {/* Only show this message if not compact, or if it's the last ticket and not in OPEN state */}
+      {!compact && (
+        <div className={`mt-2 text-sm text-muted-foreground text-center px-2 ${compact ? "mt-1" : ""} w-full`}>
+          Numbers locked in until next round!
+        </div>
+      )}
     </div>
   );
 }
