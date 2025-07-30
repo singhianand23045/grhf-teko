@@ -38,8 +38,13 @@ export function useRevealAnimation(
   // REVEAL_DURATION_SEC and REVEAL_PER_NUMBER_SEC are now imported from drawConstants.ts
 
   // PHASE 9: Highlight overlay timings (relative to REVEAL start at 0:45)
-  const TICKET2_HIGHLIGHT_START_SEC = 10; // 0:35 on timer (0:45 - 10s)
-  const TICKET3_HIGHLIGHT_START_SEC = 13; // 0:32 on timer (0:45 - 13s)
+  // Timer: 0:45 (reveal start)
+  // Ticket 2 highlight: 0:32 - 0:26 (6 seconds) -> 13s from 0:45 start, ends 19s from 0:45 start
+  // Ticket 3 highlight: 0:22 - 0:16 (6 seconds) -> 23s from 0:45 start, ends 29s from 0:45 start
+  const TICKET2_HIGHLIGHT_START_MS = 13 * 1000;
+  const TICKET2_HIGHLIGHT_END_MS = 19 * 1000;
+  const TICKET3_HIGHLIGHT_START_MS = 23 * 1000;
+  const TICKET3_HIGHLIGHT_END_MS = 29 * 1000;
 
   // Reset reveal state when cycle changes to prevent premature prize awarding
   useEffect(() => {
@@ -109,7 +114,19 @@ export function useRevealAnimation(
               ticket2: confirmedTickets[1].includes(dn.number)
             }
           })));
-        }, TICKET2_HIGHLIGHT_START_SEC * 1000)
+        }, TICKET2_HIGHLIGHT_START_MS)
+      );
+      // Schedule removal of Ticket 2 highlight
+      highlightTimeouts.current.push(
+        setTimeout(() => {
+          setDrawnNumbers(prev => prev.map(dn => ({
+            ...dn,
+            highlightMatches: {
+              ...dn.highlightMatches,
+              ticket2: false // Remove highlight
+            }
+          })));
+        }, TICKET2_HIGHLIGHT_END_MS)
       );
     }
 
@@ -123,7 +140,19 @@ export function useRevealAnimation(
               ticket3: confirmedTickets[2].includes(dn.number)
             }
           })));
-        }, TICKET3_HIGHLIGHT_START_SEC * 1000)
+        }, TICKET3_HIGHLIGHT_START_MS)
+      );
+      // Schedule removal of Ticket 3 highlight
+      highlightTimeouts.current.push(
+        setTimeout(() => {
+          setDrawnNumbers(prev => prev.map(dn => ({
+            ...dn,
+            highlightMatches: {
+              ...dn.highlightMatches,
+              ticket3: false // Remove highlight
+            }
+          })));
+        }, TICKET3_HIGHLIGHT_END_MS)
       );
     }
   }

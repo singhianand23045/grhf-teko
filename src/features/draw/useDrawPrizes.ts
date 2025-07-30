@@ -17,7 +17,7 @@ type UseDrawPrizesArgs = {
   picked: number[];
   wallet: any;
   jackpotContext: any;
-  showResultBar: (credits: number | null) => void;
+  showResultBar: (credits: number | null, message?: string) => void; // Updated signature
   cleanupResultBarTimeout: () => void;
   pendingTicketRef: React.MutableRefObject<{
     cycle: number;
@@ -45,10 +45,13 @@ export function useDrawPrizes({
 }: UseDrawPrizesArgs) {
   const resultAwardedForCycle = useRef<number | null>(null);
   const { addDrawResult } = useDrawHistory();
+  const messageTimeouts = useRef<NodeJS.Timeout[]>([]); // New for message scheduling
 
-  // Reset resultAwardedForCycle when cycle changes
+  // Reset resultAwardedForCycle and clear message timeouts when cycle changes
   useEffect(() => {
     resultAwardedForCycle.current = null;
+    messageTimeouts.current.forEach(clearTimeout);
+    messageTimeouts.current = [];
   }, [cycleIndex]);
 
   useEffect(() => {
@@ -65,6 +68,9 @@ export function useDrawPrizes({
 
       let totalWinningsAcrossAllTickets = 0;
       let anyJackpotWon = false;
+
+      // Store individual ticket winnings for messages
+      const individualTicketResults: { ticketIndex: number; winnings: number; jackpotWon: boolean }[] = [];
 
       // Iterate through all confirmed tickets for this cycle
       confirmedTickets.forEach((userNumbers, ticketIndex) => {
@@ -87,6 +93,8 @@ export function useDrawPrizes({
         const { jackpotWon, totalWinnings } =
           calculateWinnings(userNumbers, activeSets, jackpotContext.jackpot);
 
+        individualTicketResults.push({ ticketIndex: ticketIndex + 1, winnings: totalWinnings, jackpotWon });
+
         if (jackpotWon) {
           anyJackpotWon = true;
           totalWinningsAcrossAllTickets += jackpotContext.jackpot; // Add jackpot amount
@@ -104,22 +112,68 @@ export function useDrawPrizes({
         totalWinnings: totalWinningsAcrossAllTickets
       });
 
-      // PHASE 5 handle: only award EITHER jackpot OR credits (consolidated for all tickets)
-      if (anyJackpotWon) {
-        // Award jackpot ONLY, then reset pool - NO regular credits
-        wallet.awardTicketWinnings(activeSets, totalWinningsAcrossAllTickets, cycleIndex, true); // Pass true for jackpotWon
-        jackpotContext.resetJackpot();
-        showResultBar(totalWinningsAcrossAllTickets);
-        console.log("[Prize] JACKPOT WIN (across tickets), awarded", totalWinningsAcrossAllTickets);
-      } else if (totalWinningsAcrossAllTickets > 0) {
-        wallet.awardTicketWinnings(activeSets, totalWinningsAcrossAllTickets, cycleIndex, false); // Pass false for jackpotWon
-        showResultBar(totalWinningsAcrossAllTickets);
-        console.log("[Prize] CREDIT WIN (across tickets), awarded", totalWinningsAcrossAllTickets);
-      } else {
-        wallet.awardTicketWinnings(activeSets, 0, cycleIndex, false); // Pass 0 winnings, false for jackpotWon
-        showResultBar(0);
-        console.log("[Prize] NO WIN (across tickets), awarded nothing.");
+      // --- Schedule messages based on new timing requirements ---
+      // Timer: 0:45 (reveal start)
+      // Ticket 1 Message: 0:35 - 0:33 (2 seconds) -> 10s from 0:45 start
+      // Ticket 2 Message: 0:25 - 0:23 (2 seconds) -> 20s from 0:45 start
+      // Ticket 3 Message: 0:15 - 0:13 (2 seconds) -> 30s from 0:45 start
+      // Final Result Message: 0:12 - 0:02 (10 seconds) -> 33s from 0:45 start
+
+      const scheduleMessage = (delayMs: number, durationMs: number, message: string) => {
+        messageTimeouts.current.push(
+          setTimeout(() => {
+            showResultBar(null, message); // Show message
+            messageTimeouts.current.push(
+              setTimeout(() => {
+                hideResultBar(); // Hide message after duration
+              }, durationMs)
+            );
+          }, delayMs)
+        );
+      };
+
+      // Calculate individual ticket winnings for messages
+      const getTicketWinnings = (ticketIdx: number) => {
+        const result = individualTicketResults.find(r => r.ticketIndex === ticketIdx);
+        return result ? result.winnings : 0;
+      };
+
+      // Message for Ticket 1 (0:35 - 0:33)
+      if (confirmedTickets.length > 0) {
+        const t1Winnings = getTicketWinnings(1);
+        const t1Message = t1Winnings > 0 ? `Congrats! You won ${t1Winnings} credits!` : "No matches. Wait for next set!";
+        scheduleMessage(10 * 1000, 2 * 1000, t1Message);
       }
+
+      // Message for Ticket 2 (0:25 - 0:23)
+      if (confirmedTickets.length > 1) {
+        const t2Winnings = getTicketWinnings(2);
+        const t2Message = t2Winnings > 0 ? `Congrats! You won ${t2Winnings} credits!` : "No matches. Wait for next set!";
+        scheduleMessage(20 * 1000, 2 * 1000, t2Message);
+      }
+
+      // Message for Ticket 3 (0:15 - 0:13)
+      if (confirmedTickets.length > 2) {
+        const t3Winnings = getTicketWinnings(3);
+        const t3Message = t3Winnings > 0 ? `Congrats! You won ${t3Winnings} credits!` : "No matches. Wait for final result!";
+        scheduleMessage(30 * 1000, 2 * 1000, t3Message);
+      }
+
+      // Final Result Message (0:12 - 0:02)
+      messageTimeouts.current.push(
+        setTimeout(() => {
+          if (anyJackpotWon) {
+            showResultBar(totalWinningsAcrossAllTickets, `Congrats! You won the jackpot of $${totalWinningsAcrossAllTickets}!`);
+            jackpotContext.resetJackpot(); // Reset jackpot only on final message if won
+          } else if (totalWinningsAcrossAllTickets > 0) {
+            showResultBar(totalWinningsAcrossAllTickets, `Congrats! You won total of ${totalWinningsAcrossAllTickets} credits!`);
+          } else {
+            showResultBar(0, "Try again. Win next time!");
+          }
+          // Award winnings to wallet after final message is shown
+          wallet.awardTicketWinnings(activeSets, totalWinningsAcrossAllTickets, cycleIndex, anyJackpotWon);
+        }, 33 * 1000) // 33 seconds from reveal start (0:45 - 0:12)
+      );
     }
     // eslint-disable-next-line
   }, [
