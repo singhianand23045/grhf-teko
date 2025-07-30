@@ -1,4 +1,5 @@
 import { useRef, useState, useEffect } from "react";
+import { REVEAL_PER_NUMBER_SEC, SETS_PER_CYCLE, SET_SIZE } from "./drawConstants";
 
 // Define the structure for a revealed number with its highlight status
 type RevealedNumber = {
@@ -34,8 +35,7 @@ export function useRevealAnimation(
   const revealStartedForCycle = useRef<number | null>(null);
 
   const REVEAL_TOTAL_NUMBERS = SETS_PER_CYCLE * SET_SIZE; // e.g. 18
-  const REVEAL_DURATION_SEC = 18; // 1s per number
-  const REVEAL_PER_NUMBER_SEC = REVEAL_DURATION_SEC / REVEAL_TOTAL_NUMBERS; // 1s per number
+  // REVEAL_DURATION_SEC and REVEAL_PER_NUMBER_SEC are now imported from drawConstants.ts
 
   // PHASE 9: Highlight overlay timings (relative to REVEAL start at 0:45)
   const TICKET2_HIGHLIGHT_START_SEC = 10; // 0:35 on timer (0:45 - 10s)
