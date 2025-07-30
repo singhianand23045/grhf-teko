@@ -1,24 +1,28 @@
 import React from "react";
 import NumberGrid from "./NumberGrid";
-import LotteryTicket from "./LotteryTicket"; // This will now be used by ConfirmedTicketsList
 import { Button } from "@/components/ui/button";
 import { useNumberSelection } from "./NumberSelectionContext";
 import { useTimer } from "../timer/timer-context";
 import { CheckCircle } from "lucide-react";
-import ConfirmedTicketsList from "./ConfirmedTicketsList"; // Import the new component
+import ConfirmedTicketsList from "./ConfirmedTicketsList";
 
 export default function NumberSelectionPanel() {
-  const { picked, canConfirm, isConfirmed, confirm, confirmedTickets } = useNumberSelection();
+  const { picked, canConfirm, confirm, confirmedTickets, isAddingNewTicket } = useNumberSelection();
   const { state: timerState } = useTimer();
 
-  // Determine if the number grid should be shown
-  const showNumberGrid = !isConfirmed || (isConfirmed && picked.length === 0 && confirmedTickets.length < 3 && timerState === "OPEN");
-  const showConfirmedTicketsList = confirmedTickets.length > 0;
+  // Show the initial number grid if no tickets have been confirmed yet AND we are in OPEN state
+  const showInitialNumberGrid = confirmedTickets.length === 0 && timerState === "OPEN";
+
+  // Show the confirmed tickets list if any tickets have been confirmed
+  const showConfirmedTicketsSection = confirmedTickets.length > 0;
+
+  // Determine if the number grid should be shown for a new selection (after initial or 'Add next ticket')
+  const showGridForNewSelection = isAddingNewTicket && timerState === "OPEN";
 
   return (
     <div className="flex flex-col items-center w-full h-full">
-      {/* Display the number grid if a new selection is needed */}
-      {showNumberGrid && (
+      {/* Initial state: show grid to pick first ticket */}
+      {showInitialNumberGrid && !showGridForNewSelection && (
         <>
           <div className="mb-2 font-semibold text-[#16477d] text-lg select-none">
             Pick 6 numbers
@@ -43,8 +47,8 @@ export default function NumberSelectionPanel() {
         </>
       )}
 
-      {/* Display confirmed tickets list and "Add next ticket" button */}
-      {showConfirmedTicketsList && (
+      {/* After first ticket is confirmed, or if multiple tickets are being managed */}
+      {showConfirmedTicketsSection && (
         <ConfirmedTicketsList />
       )}
 

@@ -22,10 +22,10 @@ This phase introduces the ability for players to submit multiple tickets (up to 
     *   Upon clicking "Confirm Numbers":
         *   The selected 6 numbers are recorded as a confirmed ticket.
         *   **30 credits** are immediately deducted from the user's wallet for each confirmed ticket.
-        *   The `picked` numbers in the selection grid are cleared, and the grid is hidden.
+        *   The `picked` numbers in the selection grid are cleared, and the grid is **hidden**.
         *   The newly confirmed ticket is displayed as a **row of circular chips**.
     *   If fewer than 3 tickets are confirmed and the timer is still in the "OPEN" phase, an "Add next ticket" button appears below the displayed tickets.
-    *   Clicking "Add next ticket" makes the number selection grid reappear (empty), allowing the user to select a new set of 6 numbers for a subsequent ticket.
+    *   Clicking "Add next ticket" makes the number selection grid reappear (empty), allowing the user to select a new set of 6 numbers for a subsequent ticket. The previously confirmed tickets remain visible above the grid.
     *   Once 3 tickets are confirmed, the "Add next ticket" button disappears.
 *   **Invalid Entries:** If the user selects fewer than 6 numbers or does not confirm their selection before the "CUT_OFF" phase, the entry is discarded, and no credits are deducted.
 *   **Reset on New Cycle:** At the start of each new draw cycle (when `cycleIndex` changes), all confirmed tickets for the previous cycle are cleared, and the number selection state resets to allow new entries.
@@ -61,7 +61,7 @@ This phase introduces the ability for players to submit multiple tickets (up to 
     *   Initially displays the 1-27 number grid and "Confirm Numbers" button.
     *   After a ticket is confirmed, the grid hides, and the confirmed ticket (**row of circular chips**) appears.
     *   The "Add next ticket" button appears below confirmed tickets if fewer than 3 are submitted and the timer is "OPEN".
-    *   Clicking "Add next ticket" reveals an empty grid for new selection.
+    *   Clicking "Add next ticket" reveals an empty grid for new selection. The previously confirmed tickets remain visible above the grid.
     *   Confirmed tickets are displayed in a vertical stack, each as a compact `LotteryTicket` row.
     *   The entire confirmed tickets section (including the grid when visible) should be wrapped in a vertical scroll container if its content exceeds its allotted height, ensuring no horizontal scrolling and fixed UI elements (draw grid, credits bar) remain in place.
 *   **`Ball3D` Component:**
