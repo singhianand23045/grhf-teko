@@ -7,17 +7,18 @@ import { useRef, useState } from "react";
  */
 export function useResultBar(
   initial: { show: boolean; credits: number | null; message?: string } = { show: false, credits: null, message: "" },
-  timeoutMs: number = 10000 // Updated: result message persists for 10 seconds (0:30–0:20)
+  defaultTimeoutMs: number = 10000 // Renamed to defaultTimeoutMs
 ) {
   const [resultBar, setResultBar] = useState<{ show: boolean; credits: number | null; message?: string }>(initial);
   const resultTimeout = useRef<NodeJS.Timeout | null>(null);
 
-  const showResultBar = (credits: number | null, message?: string) => {
+  // Added optional 'duration' parameter
+  const showResultBar = (credits: number | null, message?: string, duration?: number) => {
     setResultBar({ show: true, credits, message });
     if (resultTimeout.current) clearTimeout(resultTimeout.current);
     resultTimeout.current = setTimeout(() => {
       setResultBar({ show: false, credits: null, message: "" });
-    }, timeoutMs);
+    }, duration !== undefined ? duration : defaultTimeoutMs); // Use provided duration or default
   };
 
   const hideResultBar = () => {
@@ -30,7 +31,7 @@ export function useResultBar(
     if (resultTimeout.current) clearTimeout(resultTimeout.current);
     resultTimeout.current = setTimeout(() => {
       setResultBar({ show: false, credits: null, message: "" });
-    }, timeoutMs);
+    }, defaultTimeoutMs);
   };
 
   // Clean up timeout on unmount

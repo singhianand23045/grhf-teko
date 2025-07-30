@@ -17,7 +17,7 @@ type UseDrawPrizesArgs = {
   picked: number[];
   wallet: any;
   jackpotContext: any;
-  showResultBar: (credits: number | null, message?: string) => void; // Updated signature
+  showResultBar: (credits: number | null, message?: string, duration?: number) => void; // Updated signature
   cleanupResultBarTimeout: () => void;
   pendingTicketRef: React.MutableRefObject<{
     cycle: number;
@@ -122,12 +122,7 @@ export function useDrawPrizes({
       const scheduleMessage = (delayMs: number, durationMs: number, message: string) => {
         messageTimeouts.current.push(
           setTimeout(() => {
-            showResultBar(null, message); // Show message
-            messageTimeouts.current.push(
-              setTimeout(() => {
-                hideResultBar(); // Hide message after duration
-              }, durationMs)
-            );
+            showResultBar(null, message, durationMs); // Pass durationMs here
           }, delayMs)
         );
       };
@@ -163,12 +158,12 @@ export function useDrawPrizes({
       messageTimeouts.current.push(
         setTimeout(() => {
           if (anyJackpotWon) {
-            showResultBar(totalWinningsAcrossAllTickets, `Congrats! You won the jackpot of $${totalWinningsAcrossAllTickets}!`);
+            showResultBar(totalWinningsAcrossAllTickets, `Congrats! You won the jackpot of $${totalWinningsAcrossAllTickets}!`, 10 * 1000);
             jackpotContext.resetJackpot(); // Reset jackpot only on final message if won
           } else if (totalWinningsAcrossAllTickets > 0) {
-            showResultBar(totalWinningsAcrossAllTickets, `Congrats! You won total of ${totalWinningsAcrossAllTickets} credits!`);
+            showResultBar(totalWinningsAcrossAllTickets, `Congrats! You won total of ${totalWinningsAcrossAllTickets} credits!`, 10 * 1000);
           } else {
-            showResultBar(0, "Try again. Win next time!");
+            showResultBar(0, "Try again. Win next time!", 10 * 1000);
           }
           // Award winnings to wallet after final message is shown
           wallet.awardTicketWinnings(activeSets, totalWinningsAcrossAllTickets, cycleIndex, anyJackpotWon);
