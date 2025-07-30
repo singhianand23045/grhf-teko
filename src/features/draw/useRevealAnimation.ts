@@ -124,12 +124,15 @@ export function useRevealAnimation(
     }
 
     // --- Schedule messages and highlight overlays ---
-    // Helper to calculate winnings for a specific ticket for message display
+    // Helper to calculate ONLY regular credit winnings for a specific ticket for message display
     const getTicketMessageWinnings = (ticketNumbers: number[]) => {
       if (!ticketNumbers || ticketNumbers.length !== 6) return 0;
-      const { totalWinnings, resultType } = calculateWinnings(ticketNumbers, activeSets, jackpotContext.jackpot);
-      // For intermediate messages, if it's a jackpot win, report 0 credits, as jackpot is a separate prize.
-      return resultType === "jackpot" ? 0 : totalWinnings;
+      let totalRegularWinnings = 0;
+      for (const drawnRow of activeSets) {
+        const matches = drawnRow.filter((n) => ticketNumbers.includes(n)).length;
+        totalRegularWinnings += getCreditsForMatches(matches);
+      }
+      return totalRegularWinnings;
     };
 
     // Ticket 1 Message
