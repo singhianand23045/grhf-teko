@@ -24,9 +24,12 @@ export default function LotteryTicket({ picked, compact = false, ticketIndex }: 
         paddingBottom: 0,
       }}
     >
-      <div className={`mb-2 font-bold text-lg tracking-wide text-[#217d37] ${compact ? "mt-0" : ""} text-center w-full`}>
-        {ticketIndex ? `Ticket ${ticketIndex}` : "Your Numbers"}
-      </div>
+      {/* Conditionally render the "Your Numbers" or "Ticket X" label */}
+      {!compact && (
+        <div className={`mb-2 font-bold text-lg tracking-wide text-[#217d37] text-center w-full`}>
+          {ticketIndex ? `Ticket ${ticketIndex}` : "Your Numbers"}
+        </div>
+      )}
       <div
         className="flex flex-nowrap justify-center items-center gap-3 bg-gradient-to-r from-green-100/70 via-white to-green-100/70 rounded-2xl shadow-inner px-1 py-2 w-full"
         style={{
