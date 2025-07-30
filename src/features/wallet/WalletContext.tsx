@@ -21,7 +21,7 @@ type WalletContextType = {
   balance: number;
   history: TicketType[];
   addConfirmedTicket: (ticket: Omit<TicketType, "id" | "creditChange" | "matches" | "winnings" | "processed">) => void;
-  awardTicketWinnings: (cycleRows: number[][], totalWinnings: number, currentCycle: number, jackpotWon: boolean) => void; // Simplified signature
+  awardTicketWinnings: (cycleRows: number[][], totalWinningsForCycle: number, currentCycle: number, jackpotWon: boolean) => void; // Updated signature
   resetWallet: () => void;
 };
 
@@ -93,14 +93,13 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
 
   /**
    * Awards winnings for ALL unprocessed tickets from the specified cycle, and marks them as processed.
-   * totalWinnings here is the SUM of winnings across all tickets for the cycle.
+   * totalWinningsForCycle here is the SUM of winnings across all tickets for the cycle.
    */
-  function awardTicketWinnings(cycleRows: number[][], totalWinnings: number, currentCycle: number, jackpotWon: boolean) {
-    let totalAwarded = 0;
+  function awardTicketWinnings(cycleRows: number[][], totalWinningsForCycle: number, currentCycle: number, jackpotWon: boolean) {
     setHistory(prevHistory => {
       const updatedHistory = prevHistory.map(ticket => {
         if (!ticket.processed && ticket.creditChange === -30 && ticket.cycle === currentCycle) {
-          // Re-calculate matches for this specific ticket against drawn rows
+          // Calculate matches for this specific ticket against each drawn row
           let ticketMatches = 0;
           if (cycleRows.length === 3) {
             for (let i = 0; i < 3; i++) {
@@ -108,32 +107,35 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
             }
           }
           
-          // If jackpot was won by ANY ticket in this cycle, this ticket gets 0 regular winnings
-          const ticketWinnings = jackpotWon ? 0 : getCreditsForMatches(ticketMatches);
-          totalAwarded += ticketWinnings; // Sum up for logging/balance update
+          // If jackpot was won by ANY ticket in this cycle, this specific ticket gets 0 regular winnings
+          // The totalWinningsForCycle passed from useDrawPrizes already accounts for jackpot vs regular.
+          // Here, we just need to store the individual ticket's winnings for history.
+          // For simplicity, if jackpotWon is true, this ticket's individual winnings are 0 (as per spec, only jackpot is awarded).
+          // If not jackpot, then calculate based on matches.
+          const individualTicketWinnings = jackpotWon ? 0 : getCreditsForMatches(ticketMatches);
 
           return {
             ...ticket,
             matches: ticketMatches,
-            winnings: ticketWinnings, // Store individual ticket winnings for history
+            winnings: individualTicketWinnings, // Store individual ticket winnings for history
             processed: true, // Mark as processed
           };
         }
         return ticket;
       });
 
-      // Award the total winnings to balance (only once per cycle)
-      if (totalWinnings > 0) {
+      // Award the total winnings to balance (only once per cycle, as calculated in useDrawPrizes)
+      if (totalWinningsForCycle > 0) {
         setBalance((prevBal) => {
-          const newBal = prevBal + totalWinnings;
-          console.log("[WalletContext] Awarding total winnings for cycle:", totalWinnings, "Old balance:", prevBal, "New balance:", newBal);
+          const newBal = prevBal + totalWinningsForCycle;
+          console.log("[WalletContext] Awarding total winnings for cycle:", totalWinningsForCycle, "Old balance:", prevBal, "New balance:", newBal);
           return newBal;
         });
       } else {
         console.log("[WalletContext] No total winnings to add for cycle. Balance remains unchanged.");
       }
 
-      console.log("[WalletContext] Processed all tickets for cycle", currentCycle, ". Total awarded:", totalAwarded, "Updated history:", updatedHistory);
+      console.log("[WalletContext] Processed all tickets for cycle", currentCycle, ". Total awarded:", totalWinningsForCycle, "Updated history:", updatedHistory);
       return updatedHistory;
     });
   }

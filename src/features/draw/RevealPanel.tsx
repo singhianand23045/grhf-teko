@@ -1,11 +1,9 @@
-
 import React from "react";
 import { useDrawEngine } from "./DrawEngineContext";
 import { useNumberSelection } from "../number-select/NumberSelectionContext";
 import { useTimer } from "../timer/timer-context";
-import RevealRoulettePanel from "./RevealRoulettePanel";
 import ResultBar from "./ResultBar";
-import RouletteBallGrid from "./RouletteBallGrid"; // <-- moved component
+import RouletteBallGrid from "./RouletteBallGrid";
 
 // Use a single global font/circle size in this file
 const BASE_FONT_SIZE = "1rem";
@@ -15,40 +13,17 @@ const BASE_DIAM = "2.2rem"; // same as used elsewhere (LotteryTicket)
 const ENABLE_ROULETTE_ANIMATION = true;
 
 export default function RevealPanel() {
-  // DEBUG: Give a visible runtime warning
   let ctx;
   try {
     ctx = useDrawEngine();
   } catch (e) {
-    // Console error and throw
     console.error("[RevealPanel] useDrawEngine context error! Is RevealPanel rendered outside DrawEngineProvider?");
     throw e;
   }
 
-  const { drawnNumbers, revealResult } = ctx;
-  const { picked: userNumbers } = useNumberSelection();
+  const { drawnNumbers, revealResult } = ctx; // drawnNumbers now includes highlight info
+  const { confirmedTickets } = useNumberSelection(); // Get all confirmed tickets
   const { state } = useTimer();
-
-  // Always maintain 18 slots (3 rows × 6 columns)
-  // PHASE LOGIC: only fill with numbers if state is "REVEAL", otherwise all slots undefined for black circles
-  const slots: (number | undefined)[] =
-    state === "REVEAL"
-      ? Array.from({ length: 18 }, (_, idx) =>
-          drawnNumbers[idx] !== undefined ? drawnNumbers[idx] : undefined
-        )
-      : Array(18).fill(undefined);
-
-  // Break into 3 sets of 6 numbers each for display
-  const drawnSets: (number | undefined)[][] = [[], [], []];
-  for (let row = 0; row < 3; row++) {
-    drawnSets[row] = [];
-    for (let col = 0; col < 6; col++) {
-      drawnSets[row][col] = slots[row * 6 + col];
-    }
-  }
-
-  // Used to highlight slots matching user ticket
-  const userSet = new Set(userNumbers);
 
   // Define the ResultBar's height (adjust as needed for nice appearance)
   const RESULT_BAR_HEIGHT = 44; // px, fits 1-line ResultBar text + spacing
@@ -58,16 +33,7 @@ export default function RevealPanel() {
 
   // --- FEATURE FLAG CONDITIONAL ---
   if (ENABLE_ROULETTE_ANIMATION) {
-    // Always pass an array of 18 elements to RouletteBallGrid:
-    // - During REVEAL: drawnNumbers is at most 18, rest undefined.
-    // - Before REVEAL: pass 18 undefineds (so balls spin)
-    // - After REVEAL: drawnNumbers is fully 18, all balls stopped
-    const numbersToReveal =
-      state === "REVEAL"
-        ? Array.from({ length: 18 }, (_, i) =>
-            drawnNumbers[i] !== undefined ? drawnNumbers[i] : undefined
-          )
-        : Array(18).fill(undefined);
+    // Pass the full drawnNumbers array (which now contains highlightMatches)
     return (
       <div className="flex flex-col items-center w-full h-full overflow-y-hidden">
         <div
@@ -92,9 +58,9 @@ export default function RevealPanel() {
         >
           <div className="w-full space-y-1 flex flex-col items-center justify-center">
             <RouletteBallGrid
-              numbersToReveal={numbersToReveal}
+              drawnNumbersWithHighlights={drawnNumbers} // Pass the new structure
               reveal={state === "REVEAL"}
-              userPicks={userNumbers}
+              confirmedTickets={confirmedTickets} // Pass confirmedTickets for internal logic if needed
             />
           </div>
         </div>
@@ -103,9 +69,10 @@ export default function RevealPanel() {
   }
 
   // ---- Legacy (non-roulette) display remains below ----
+  // This part will not be used if ENABLE_ROULETTE_ANIMATION is true, but keeping it for completeness.
+  // It would also need to be updated to handle multi-highlights if it were to be used.
   return (
     <div className="flex flex-col items-center w-full h-full overflow-y-hidden">
-      {/* Reserve vertical space for ResultBar always, to anchor the ball grid */}
       <div
         className="w-full flex justify-center items-center"
         style={{
@@ -120,7 +87,6 @@ export default function RevealPanel() {
           jackpot={Boolean(revealResult.credits && revealResult.credits > 0 && revealResult.credits >= 1000)}
         />
       </div>
-      {/* Grid wrapper -- ensure full height & center grid, now grid never jumps */}
       <div
         className="flex-1 w-full flex items-center justify-center py-0"
         style={{
@@ -128,12 +94,17 @@ export default function RevealPanel() {
         }}
       >
         <div className="w-full space-y-1 flex flex-col items-center justify-center">
-          {drawnSets.map((set, rowIdx) => (
+          {/* This part needs to be updated if legacy grid is to support multi-highlights */}
+          {/* For now, it will just show numbers without multi-highlights */}
+          {Array.from({ length: 3 }).map((_, rowIdx) => (
             <div
               key={rowIdx}
               className="flex flex-nowrap justify-center items-center gap-2 w-full max-w-full min-h-[30px]"
             >
-              {set.map((n, colIdx) => {
+              {Array.from({ length: 6 }).map((_, colIdx) => {
+                const index = rowIdx * 6 + colIdx;
+                const drawnNum = drawnNumbers[index]?.number; // Access the number
+                const isHighlighted = drawnNumbers[index]?.highlightMatches?.ticket1; // Only checks ticket1 for legacy
                 const baseCircleStyle = {
                   width: BASE_DIAM,
                   minWidth: 28,
@@ -146,7 +117,7 @@ export default function RevealPanel() {
                   alignItems: "center",
                   justifyContent: "center",
                 };
-                if (n === undefined) {
+                if (drawnNum === undefined) {
                   return (
                     <span
                       key={colIdx}
@@ -156,14 +127,14 @@ export default function RevealPanel() {
                     ></span>
                   );
                 }
-                if (userSet.has(n)) {
+                if (isHighlighted) {
                   return (
                     <span
                       key={colIdx}
                       className="flex items-center justify-center rounded-full bg-robinhood-green text-white font-black shadow-robinhood-green/30 shadow-lg border-2 border-robinhood-green select-none transition-all aspect-square animate-scale-in"
                       style={baseCircleStyle}
                     >
-                      {n}
+                      {drawnNum}
                     </span>
                   );
                 }
@@ -173,7 +144,7 @@ export default function RevealPanel() {
                     className="flex items-center justify-center rounded-full bg-white text-robinhood-black font-black border-2.5 border-robinhood-black shadow-md select-none aspect-square animate-scale-in transition-all"
                     style={baseCircleStyle}
                   >
-                    {n}
+                    {drawnNum}
                   </span>
                 );
               })}

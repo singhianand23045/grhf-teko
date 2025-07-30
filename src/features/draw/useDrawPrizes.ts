@@ -1,4 +1,3 @@
-
 import { useEffect, useRef } from "react";
 import { calculateWinnings } from "./calculateWinnings";
 import { useDrawHistory } from "./DrawHistoryContext";
@@ -26,6 +25,7 @@ type UseDrawPrizesArgs = {
     entered: boolean;
   } | null>;
   revealStartedForCycle: React.MutableRefObject<number | null>; // New parameter
+  confirmedTickets: number[][]; // New parameter
 };
 
 export function useDrawPrizes({
@@ -41,6 +41,7 @@ export function useDrawPrizes({
   cleanupResultBarTimeout,
   pendingTicketRef,
   revealStartedForCycle, // New parameter
+  confirmedTickets // New parameter
 }: UseDrawPrizesArgs) {
   const resultAwardedForCycle = useRef<number | null>(null);
   const { addDrawResult } = useDrawHistory();
@@ -62,67 +63,62 @@ export function useDrawPrizes({
       const startSet = cycleIndex * SETS_PER_CYCLE;
       const activeSets = sets.slice(startSet, startSet + SETS_PER_CYCLE);
 
-      // Always strictly require 6 numbers and verify an actual ticket exists
-      let userNumbers: number[] = [];
-      let hasValidTicket = false;
-      
-      // Check if there's a valid ticket for this cycle in wallet history
-      const hasUnprocessedTicket = wallet.history.some(
-        (ticket: any) => !ticket.processed && ticket.cycle === cycleIndex && ticket.creditChange === -30
-      );
+      let totalWinningsAcrossAllTickets = 0;
+      let anyJackpotWon = false;
 
-      if (
-        lastPickedPerCycle[cycleIndex] &&
-        lastPickedPerCycle[cycleIndex].length === 6 &&
-        hasUnprocessedTicket
-      ) {
-        userNumbers = lastPickedPerCycle[cycleIndex];
-        hasValidTicket = true;
-      } else if (
-        pendingTicketRef.current &&
-        pendingTicketRef.current.cycle === cycleIndex &&
-        pendingTicketRef.current.ticket.numbers.length === 6 &&
-        hasUnprocessedTicket
-      ) {
-        userNumbers = pendingTicketRef.current.ticket.numbers;
-        hasValidTicket = true;
-      }
+      // Iterate through all confirmed tickets for this cycle
+      confirmedTickets.forEach((userNumbers, ticketIndex) => {
+        // Ensure the ticket is valid (6 numbers)
+        if (userNumbers.length !== 6) {
+          console.warn(`[Prize] Ticket ${ticketIndex + 1} is invalid (not 6 numbers). Skipping.`);
+          return;
+        }
 
-      // Only proceed if we have both valid numbers AND a confirmed ticket
-      if (userNumbers.length !== 6 || !hasValidTicket) {
-        showResultBar(0);
-        return;
-      }
+        // Check if this specific ticket has been processed for this cycle
+        const hasUnprocessedTicket = wallet.history.some(
+          (ticket: any) => !ticket.processed && ticket.cycle === cycleIndex && ticket.numbers.join(',') === userNumbers.join(',')
+        );
 
-      // Calculate winnings; never grant both types for same ticket
-      const { jackpotWon, rowWinnings, totalWinnings, resultType } =
-        calculateWinnings(userNumbers, activeSets, jackpotContext.jackpot);
+        if (!hasUnprocessedTicket) {
+          console.log(`[Prize] Ticket ${ticketIndex + 1} already processed or not found in wallet history for cycle ${cycleIndex}. Skipping.`);
+          return;
+        }
 
-      // Record draw result in history
+        const { jackpotWon, totalWinnings } =
+          calculateWinnings(userNumbers, activeSets, jackpotContext.jackpot);
+
+        if (jackpotWon) {
+          anyJackpotWon = true;
+          totalWinningsAcrossAllTickets += jackpotContext.jackpot; // Add jackpot amount
+        } else {
+          totalWinningsAcrossAllTickets += totalWinnings; // Add regular winnings
+        }
+      });
+
+      // Record draw result in history (consolidated for the cycle)
       const winningNumbers = activeSets.flat();
       addDrawResult({
         cycle: cycleIndex,
         winningNumbers,
-        jackpotWon,
-        totalWinnings: jackpotWon ? jackpotContext.jackpot : totalWinnings
+        jackpotWon: anyJackpotWon,
+        totalWinnings: totalWinningsAcrossAllTickets
       });
 
-      // PHASE 5 handle: only award EITHER jackpot OR credits
-      if (jackpotWon) {
+      // PHASE 5 handle: only award EITHER jackpot OR credits (consolidated for all tickets)
+      if (anyJackpotWon) {
         // Award jackpot ONLY, then reset pool - NO regular credits
-        wallet.awardTicketWinnings(activeSets, [0, 0, 0], jackpotContext.jackpot, cycleIndex);
-        // Don't forget to reset jackpot
+        wallet.awardTicketWinnings(activeSets, totalWinningsAcrossAllTickets, cycleIndex, true); // Pass true for jackpotWon
         jackpotContext.resetJackpot();
-        showResultBar(jackpotContext.jackpot);
-        console.log("[Prize] JACKPOT WIN, awarded", jackpotContext.jackpot);
-      } else if (totalWinnings > 0) {
-        wallet.awardTicketWinnings(activeSets, rowWinnings, totalWinnings, cycleIndex);
-        showResultBar(totalWinnings);
-        console.log("[Prize] CREDIT WIN, awarded", totalWinnings, rowWinnings);
+        showResultBar(totalWinningsAcrossAllTickets);
+        console.log("[Prize] JACKPOT WIN (across tickets), awarded", totalWinningsAcrossAllTickets);
+      } else if (totalWinningsAcrossAllTickets > 0) {
+        wallet.awardTicketWinnings(activeSets, totalWinningsAcrossAllTickets, cycleIndex, false); // Pass false for jackpotWon
+        showResultBar(totalWinningsAcrossAllTickets);
+        console.log("[Prize] CREDIT WIN (across tickets), awarded", totalWinningsAcrossAllTickets);
       } else {
-        wallet.awardTicketWinnings(activeSets, [0,0,0], 0, cycleIndex);
+        wallet.awardTicketWinnings(activeSets, 0, cycleIndex, false); // Pass 0 winnings, false for jackpotWon
         showResultBar(0);
-        console.log("[Prize] NO WIN, awarded nothing.");
+        console.log("[Prize] NO WIN (across tickets), awarded nothing.");
       }
     }
     // eslint-disable-next-line
@@ -137,6 +133,7 @@ export function useDrawPrizes({
     SETS_PER_CYCLE,
     showResultBar,
     cleanupResultBarTimeout,
-    revealStartedForCycle
+    revealStartedForCycle,
+    confirmedTickets // Add confirmedTickets to dependencies
   ]);
 }

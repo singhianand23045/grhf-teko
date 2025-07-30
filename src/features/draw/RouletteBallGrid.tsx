@@ -1,13 +1,21 @@
-
 import React, { useRef } from "react";
 import Ball3D from "./Ball3D";
 import { useSpinSetting } from "./useSpinSetting";
 
-// Ball state per slot: spinning or stopped with a number
+// Define the structure for a revealed number with its highlight status
+type RevealedNumber = {
+  number: number;
+  highlightMatches: {
+    ticket1?: boolean;
+    ticket2?: boolean;
+    ticket3?: boolean;
+  };
+};
+
 type Props = {
-  numbersToReveal?: (number | undefined)[];
+  drawnNumbersWithHighlights?: RevealedNumber[]; // Changed prop name
   reveal: boolean;
-  userPicks?: number[];
+  confirmedTickets?: number[][]; // Not directly used here, but passed from parent
   onDone?: () => void;
 };
 
@@ -24,18 +32,17 @@ const SPIN_SETTINGS = [
 ];
 
 function getSpinConfig(spinLevel: number) {
-  if (spinLevel < 0) return SPIN_SETTINGS[spinLevel + 3]; // -3→0, -2→1, -1→2
+  if (spinLevel < 0) return SPIN_SETTINGS[spinLevel + 3];
   if (spinLevel > 0) return SPIN_SETTINGS[spinLevel + 2];
   return SPIN_SETTINGS[3];
 }
 
 export default function RouletteBallGrid({
-  numbersToReveal = [],
+  drawnNumbersWithHighlights = [], // Use new prop name
   reveal,
-  userPicks = [],
+  confirmedTickets = [], // Use confirmedTickets from context
   onDone,
 }: Props) {
-  // Single spin config (from swipe, not important for bug)
   const [spinSetting, setSpinSetting] = React.useState(1);
   const { attachSwipeHandlers } = useSpinSetting(reveal, setSpinSetting);
   const gridRef = useRef<HTMLDivElement | null>(null);
@@ -57,14 +64,13 @@ export default function RouletteBallGrid({
           ref={gridRef}
         >
           {Array.from({ length: ROWS * COLS }).map((_, i) => {
-            const number = numbersToReveal[i];
-            if (typeof number === "number") {
-              const isUserPick = userPicks.includes(number);
+            const revealedData = drawnNumbersWithHighlights[i]; // Get the object with number and highlights
+            if (revealedData && typeof revealedData.number === "number") {
               return (
                 <Ball3D
                   key={"stop" + i}
-                  number={number}
-                  highlight={isUserPick}
+                  number={revealedData.number}
+                  highlightMatches={revealedData.highlightMatches} // Pass the highlightMatches object
                 />
               );
             } else {

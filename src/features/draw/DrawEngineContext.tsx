@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useEffect } from "react";
 import { useTimer } from "../timer/timer-context";
 import { useWallet } from "../wallet/WalletContext";
@@ -17,9 +16,10 @@ import {
 // New hooks for separate logic
 import { useDrawPrizes } from "./useDrawPrizes";
 import { useResultBarVisibility } from "./useResultBarVisibility";
+import { useNumberSelection } from "../number-select/NumberSelectionContext"; // Import useNumberSelection
 
 interface DrawEngineContextType {
-  drawnNumbers: number[];
+  drawnNumbers: any[]; // Changed to any[] to accommodate RevealedNumber type
   isRevealDone: boolean;
   startReveal: (cycleIndex: number, revealDurationSec?: number) => void;
   instantlyFinishReveal: () => void;
@@ -36,6 +36,7 @@ export function DrawEngineProvider({ children }: { children: React.ReactNode }) 
   const jackpotContext = useJackpot();
   const sets = useDrawSets();
   const { lastPickedPerCycle, picked } = useTicketSelectionManager(cycleIndex);
+  const { confirmedTickets } = useNumberSelection(); // Get confirmedTickets
 
   const resultBarTimeoutMs = 10000;
   const {
@@ -48,11 +49,6 @@ export function DrawEngineProvider({ children }: { children: React.ReactNode }) 
   } = useResultBar({ show: false, credits: null }, resultBarTimeoutMs);
 
   // Reveal animation
-  const confirmedUserNumbers =
-    lastPickedPerCycle[cycleIndex] && lastPickedPerCycle[cycleIndex].length === 6
-      ? lastPickedPerCycle[cycleIndex]
-      : picked;
-
   const {
     drawnNumbers,
     isRevealDone,
@@ -64,7 +60,7 @@ export function DrawEngineProvider({ children }: { children: React.ReactNode }) 
     sets,
     SETS_PER_CYCLE,
     SET_SIZE,
-    confirmedUserNumbers,
+    confirmedTickets, // Pass confirmedTickets here
     cycleIndex // Pass cycleIndex to reset state on cycle changes
   );
 
@@ -97,6 +93,7 @@ export function DrawEngineProvider({ children }: { children: React.ReactNode }) 
     cleanupResultBarTimeout,
     pendingTicketRef,
     revealStartedForCycle, // Pass the ref to ensure reveal started
+    confirmedTickets // Pass confirmedTickets to useDrawPrizes
   });
 
   // ResultBar phase visibility/cleanup
@@ -120,7 +117,7 @@ export function DrawEngineProvider({ children }: { children: React.ReactNode }) 
     _startReveal(cycleIdx);
   };
   const instantlyFinishReveal = () => {
-    _instantlyFinishReveal(cycleIndex);
+    _instantlyFinishReveal(cycleIdx);
   };
 
   return (
