@@ -24,7 +24,7 @@ interface DrawEngineContextType {
   startReveal: (cycleIndex: number, revealDurationSec?: number) => void;
   instantlyFinishReveal: () => void;
   sets: number[][];
-  revealResult: { show: boolean; credits: number | null };
+  revealResult: { show: boolean; credits: number | null; message?: string }; // Updated type
   triggerResultBar: () => void;
 }
 
@@ -46,7 +46,7 @@ export function DrawEngineProvider({ children }: { children: React.ReactNode }) 
     cleanup: cleanupResultBarTimeout,
     setResultBar,
     hideResultBar,
-  } = useResultBar({ show: false, credits: null }, resultBarTimeoutMs);
+  } = useResultBar({ show: false, credits: null, message: "" }, resultBarTimeoutMs); // Initialize message
 
   // Reveal animation
   const {
@@ -61,7 +61,11 @@ export function DrawEngineProvider({ children }: { children: React.ReactNode }) 
     SETS_PER_CYCLE,
     SET_SIZE,
     confirmedTickets, // Pass confirmedTickets here
-    cycleIndex // Pass cycleIndex to reset state on cycle changes
+    cycleIndex, // Pass cycleIndex to reset state on cycle changes
+    showResultBar, // Pass showResultBar
+    hideResultBar, // Pass hideResultBar
+    wallet, // Pass wallet for winnings calculation
+    jackpotContext // Pass jackpotContext for winnings calculation
   );
 
   const { ticketCommittedCycle, pendingTicketRef } = useTicketCommitManager(
@@ -89,7 +93,6 @@ export function DrawEngineProvider({ children }: { children: React.ReactNode }) 
     picked,
     wallet,
     jackpotContext,
-    showResultBar,
     cleanupResultBarTimeout,
     pendingTicketRef,
     revealStartedForCycle, // Pass the ref to ensure reveal started
