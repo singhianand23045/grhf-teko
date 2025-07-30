@@ -5,7 +5,7 @@ import { useWallet } from "../wallet/WalletContext"; // Import useWallet
 type NumberSelectionContextType = {
   picked: number[];
   setPicked: (cb: (prev: number[]) => number[]) => void;
-  isConfirmed: boolean; // Refers to the *current* selection being confirmed
+  isCurrentSelectionLocked: boolean; // Renamed from isConfirmed
   confirmedTickets: number[][]; // New: Stores all confirmed tickets for the current cycle
   confirmedCycle: number | null;
   confirm: () => void;
@@ -13,6 +13,7 @@ type NumberSelectionContextType = {
   canPick: boolean;
   canConfirm: boolean;
   startNewTicketSelection: () => void; // New: To clear current pick and allow new selection
+  isAddingNewTicket: boolean; // New: Tracks if user is actively adding a new ticket
 };
 
 const NumberSelectionContext = createContext<NumberSelectionContextType | undefined>(undefined);
@@ -21,36 +22,38 @@ export function NumberSelectionProvider({ children }: { children: React.ReactNod
   const { state: timerState, cycleIndex } = useTimer();
   const wallet = useWallet(); // Use wallet context
   const [picked, setPickedState] = useState<number[]>([]);
-  const [isConfirmed, setIsConfirmed] = useState(false); // Refers to the *current* selection
+  const [isCurrentSelectionLocked, setIsCurrentSelectionLocked] = useState(false); // Renamed
   const [confirmedTickets, setConfirmedTickets] = useState<number[][]>([]); // Stores all confirmed tickets
   const [confirmedCycle, setConfirmedCycle] = useState<number | null>(null);
+  const [isAddingNewTicket, setIsAddingNewTicket] = useState(false); // New state
   const prevCycleRef = React.useRef(cycleIndex);
 
   // Reset selection and confirmed tickets on new timer cycle
   useEffect(() => {
     if (prevCycleRef.current !== cycleIndex) {
       setPickedState([]);
-      setIsConfirmed(false);
-      setConfirmedTickets([]); // Clear all confirmed tickets for the new cycle
+      setIsCurrentSelectionLocked(false); // Reset lock
+      setConfirmedTickets([]);
       setConfirmedCycle(null);
+      setIsAddingNewTicket(false); // Reset on new cycle
       prevCycleRef.current = cycleIndex;
     }
   }, [cycleIndex]);
 
   function setPicked(fn: (prev: number[]) => number[]) {
     setPickedState(prev => {
-      if (isConfirmed) return prev; // Cannot change if current selection is confirmed
+      if (isCurrentSelectionLocked) return prev; // Cannot change if locked
       return fn(prev);
     });
   }
 
   function confirm() {
-    // Only allow confirmation if 6 numbers are picked, in OPEN state, and not already confirmed
+    // Only allow confirmation if 6 numbers are picked, in OPEN state, and not already locked
     // Also, ensure we haven't reached the max number of tickets
     if (
       picked.length === 6 &&
       timerState === "OPEN" &&
-      !isConfirmed &&
+      !isCurrentSelectionLocked && // Use new name
       confirmedTickets.length < 3 // Max 3 tickets
     ) {
       // Add the current picked numbers to the list of confirmed tickets
@@ -64,48 +67,51 @@ export function NumberSelectionProvider({ children }: { children: React.ReactNod
         cycle: cycleIndex,
       });
 
-      // Reset current selection state to allow for a new pick
-      setPickedState([]);
-      setIsConfirmed(true); // Mark current selection as confirmed (even though it's cleared)
+      setPickedState([]); // Clear picked numbers for the next selection
+      setIsCurrentSelectionLocked(false); // IMPORTANT: Unlock for next selection
       setConfirmedCycle(cycleIndex);
+      setIsAddingNewTicket(false); // Set to false after confirming a ticket
     }
   }
 
   function reset() {
     setPickedState([]);
-    setIsConfirmed(false);
+    setIsCurrentSelectionLocked(false);
     setConfirmedTickets([]);
     setConfirmedCycle(null);
+    setIsAddingNewTicket(false);
   }
 
   function startNewTicketSelection() {
     setPickedState([]); // Clear current picked numbers
-    setIsConfirmed(false); // Allow new selection
+    setIsCurrentSelectionLocked(false); // Ensure it's unlocked
+    setIsAddingNewTicket(true); // Set to true when user clicks "Add next ticket"
   }
 
-  // Can pick if in OPEN state, and current selection is not confirmed, and less than 3 tickets confirmed
-  const canPick = timerState === "OPEN" && !isConfirmed && confirmedTickets.length < 3;
-  // Can confirm if 6 numbers are picked, in OPEN state, current selection not confirmed, and less than 3 tickets confirmed
-  const canConfirm = timerState === "OPEN" && picked.length === 6 && !isConfirmed && confirmedTickets.length < 3;
+  // Can pick if in OPEN state, and current selection is not locked, and (user is adding new ticket OR no tickets confirmed yet)
+  const canPick = timerState === "OPEN" && !isCurrentSelectionLocked && (isAddingNewTicket || confirmedTickets.length === 0);
+  // Can confirm if 6 numbers are picked, in OPEN state, current selection not locked, and (user is adding new ticket OR no tickets confirmed yet)
+  const canConfirm = timerState === "OPEN" && picked.length === 6 && !isCurrentSelectionLocked && (isAddingNewTicket || confirmedTickets.length === 0);
 
   // Debugging: Log whenever relevant state changes
   React.useEffect(() => {
-    console.log("[NumberSelectionProvider] Picked:", picked, "isConfirmed (current):", isConfirmed, "Confirmed Tickets:", confirmedTickets, "timerState:", timerState, "cycleIndex:", cycleIndex);
-  }, [picked, isConfirmed, confirmedTickets, timerState, cycleIndex]);
+    console.log("[NumberSelectionProvider] Picked:", picked, "isCurrentSelectionLocked:", isCurrentSelectionLocked, "Confirmed Tickets:", confirmedTickets, "timerState:", timerState, "cycleIndex:", cycleIndex, "isAddingNewTicket:", isAddingNewTicket);
+  }, [picked, isCurrentSelectionLocked, confirmedTickets, timerState, cycleIndex, isAddingNewTicket]);
 
   return (
     <NumberSelectionContext.Provider
       value={{
         picked,
         setPicked,
-        isConfirmed,
-        confirmedTickets, // Provide confirmedTickets
+        isCurrentSelectionLocked, // Provide new name
+        confirmedTickets,
         confirmedCycle,
         confirm,
         reset,
         canPick,
         canConfirm,
-        startNewTicketSelection, // Provide new function
+        startNewTicketSelection,
+        isAddingNewTicket, // Provide new state
       }}
     >
       {children}
