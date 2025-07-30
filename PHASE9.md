@@ -18,12 +18,12 @@ This phase introduces the ability for players to submit multiple tickets (up to 
 
 *   **Maximum Tickets:** A user can confirm and submit a maximum of **three (3)** tickets per draw cycle.
 *   **Confirmation Flow:**
-    *   When the timer is in the "OPEN" phase (4:00 to 1:00), the user can select 6 numbers from the grid.
+    *   When the timer is in the "OPEN" phase (2:00 to 1:00), the user can select 6 numbers from the grid.
     *   Upon clicking "Confirm Numbers":
         *   The selected 6 numbers are recorded as a confirmed ticket.
         *   **30 credits** are immediately deducted from the user's wallet for each confirmed ticket.
         *   The `picked` numbers in the selection grid are cleared, and the grid is hidden.
-        *   The newly confirmed ticket is displayed as a row of circular chips.
+        *   The newly confirmed ticket is displayed as a **row of circular chips**.
     *   If fewer than 3 tickets are confirmed and the timer is still in the "OPEN" phase, an "Add next ticket" button appears below the displayed tickets.
     *   Clicking "Add next ticket" makes the number selection grid reappear (empty), allowing the user to select a new set of 6 numbers for a subsequent ticket.
     *   Once 3 tickets are confirmed, the "Add next ticket" button disappears.
@@ -53,14 +53,13 @@ This phase introduces the ability for players to submit multiple tickets (up to 
 *   **Winnings Calculation:** The existing `calculateWinnings()` logic (including jackpot rules from Phase 5) is applied to each ticket.
 *   **Result Message (0:30 – 0:20):**
     *   A feedback message appears above the drawn numbers for 10 seconds.
-    *   This message summarizes the outcome for **each confirmed ticket**, indicating total credits won or if no luck this time.
-    *   If a jackpot is won by any ticket, the message prioritizes the jackpot win, and no regular credit winnings are displayed for that specific ticket.
+    *   This message will be **one consolidated message which sums up all the winning amount and show as the final winning amount**. If a jackpot is won by any ticket, the message prioritizes the jackpot win, and no regular credit winnings are displayed for that specific ticket.
 
 ## UI/UX Requirements
 
 *   **Number Selection Panel:**
     *   Initially displays the 1-27 number grid and "Confirm Numbers" button.
-    *   After a ticket is confirmed, the grid hides, and the confirmed ticket (row of chips) appears.
+    *   After a ticket is confirmed, the grid hides, and the confirmed ticket (**row of circular chips**) appears.
     *   The "Add next ticket" button appears below confirmed tickets if fewer than 3 are submitted and the timer is "OPEN".
     *   Clicking "Add next ticket" reveals an empty grid for new selection.
     *   Confirmed tickets are displayed in a vertical stack, each as a compact `LotteryTicket` row.
@@ -69,7 +68,7 @@ This phase introduces the ability for players to submit multiple tickets (up to 
     *   Must support rendering with multiple highlight colors (green, blue, yellow) and combinations thereof (split circles, wedges).
     *   Maintain perfectly circular chip shape and centered numbers regardless of highlight state or resizing.
 *   **Result Bar:**
-    *   The `ResultBar` component will be updated to display a summary of winnings across all confirmed tickets for the current draw. This may involve displaying multiple lines or a consolidated message.
+    *   The `ResultBar` component will be updated to display **one consolidated message** summarizing the total winnings across all confirmed tickets for the current draw.
 
 ## Acceptance Criteria
 
