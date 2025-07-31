@@ -64,21 +64,11 @@ export function useDrawPrizes({
       let totalWinningsAcrossAllTickets = 0;
       let anyJackpotWon = false;
 
-      // Iterate through all confirmed tickets for this cycle
+      // Iterate through all confirmed tickets for this cycle to calculate overall winnings for history
       confirmedTickets.forEach((userNumbers, ticketIndex) => {
         // Ensure the ticket is valid (6 numbers)
         if (userNumbers.length !== 6) {
           console.warn(`[Prize] Ticket ${ticketIndex + 1} is invalid (not 6 numbers). Skipping.`);
-          return;
-        }
-
-        // Check if this specific ticket has been processed for this cycle
-        const hasUnprocessedTicket = wallet.history.some(
-          (ticket: any) => !ticket.processed && ticket.cycle === cycleIndex && ticket.numbers.join(',') === userNumbers.join(',')
-        );
-
-        if (!hasUnprocessedTicket) {
-          console.log(`[Prize] Ticket ${ticketIndex + 1} already processed or not found in wallet history for cycle ${cycleIndex}. Skipping.`);
           return;
         }
 
@@ -102,15 +92,15 @@ export function useDrawPrizes({
         totalWinnings: totalWinningsAcrossAllTickets
       });
 
-      // Award winnings to wallet after all messages are shown (handled by useRevealAnimation)
-      wallet.awardTicketWinnings(activeSets, totalWinningsAcrossAllTickets, cycleIndex, anyJackpotWon);
+      // Wallet crediting is now handled by useRevealAnimation for each ticket message.
+      // No need to call wallet.awardTicketWinnings here.
     }
     // eslint-disable-next-line
   }, [
     isRevealDone,
     cycleIndex,
     sets,
-    wallet,
+    wallet, // Still needed for history lookup in useRevealAnimation
     jackpotContext,
     lastPickedPerCycle,
     pendingTicketRef,

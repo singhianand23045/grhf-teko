@@ -124,32 +124,36 @@ export function useRevealAnimation(
     }
 
     // --- Schedule messages and highlight overlays ---
-    // Helper to calculate ONLY regular credit winnings for a specific ticket for message display
-    const getTicketMessageWinnings = (ticketNumbers: number[]) => {
+    // Helper to calculate winnings for a specific ticket
+    const getTicketWinnings = (ticketNumbers: number[]) => {
       if (!ticketNumbers || ticketNumbers.length !== 6) {
-        return 0;
+        return { matches: 0, totalWinnings: 0, jackpotWon: false };
       }
-      let totalRegularWinnings = 0;
+      let totalMatches = 0;
       for (const drawnRow of activeSets) {
-        const matches = drawnRow.filter((n) => ticketNumbers.includes(n)).length;
-        const credits = getCreditsForMatches(matches);
-        totalRegularWinnings += credits;
+        totalMatches += drawnRow.filter((n) => ticketNumbers.includes(n)).length;
       }
-      return totalRegularWinnings;
+      const { jackpotWon, totalWinnings } = calculateWinnings(ticketNumbers, activeSets, jackpotContext.jackpot);
+      return { matches: totalMatches, totalWinnings, jackpotWon };
     };
 
-    // Ticket 1 Message
+    // Ticket 1 Message & Crediting
     if (confirmedTickets.length > 0) {
       messageTimeouts.current.push(
         setTimeout(() => {
-          const t1Winnings = getTicketMessageWinnings(confirmedTickets[0]);
-          const t1Message = t1Winnings > 0 ? `Congrats! You won ${t1Winnings} credits!` : "No matches. Wait for next set!";
-          showResultBar(null, t1Message, TICKET1_MESSAGE_DURATION_MS);
+          const ticket = wallet.history.find((t: any) => t.cycle === cycle && t.numbers.join(',') === confirmedTickets[0].join(','));
+          if (ticket) {
+            const { matches, totalWinnings, jackpotWon } = getTicketWinnings(confirmedTickets[0]);
+            const t1Message = jackpotWon ? `Congrats! You won the jackpot of $${totalWinnings}!` : (totalWinnings > 0 ? `Congrats! You won ${totalWinnings} credits!` : "No matches. Wait for next set!");
+            showResultBar(null, t1Message, TICKET1_MESSAGE_DURATION_MS);
+            wallet.processTicketResult(ticket.id, matches, totalWinnings, jackpotWon);
+            if (jackpotWon) jackpotContext.resetJackpot();
+          }
         }, TICKET1_MESSAGE_START_MS)
       );
     }
 
-    // Ticket 2 Highlight & Message
+    // Ticket 2 Highlight & Message & Crediting
     if (confirmedTickets.length > 1) {
       messageTimeouts.current.push(
         setTimeout(() => {
@@ -175,14 +179,19 @@ export function useRevealAnimation(
       );
       messageTimeouts.current.push(
         setTimeout(() => {
-          const t2Winnings = getTicketMessageWinnings(confirmedTickets[1]);
-          const t2Message = t2Winnings > 0 ? `Congrats! You won ${t2Winnings} credits!` : "No matches. Wait for next set!";
-          showResultBar(null, t2Message, TICKET2_MESSAGE_DURATION_MS);
+          const ticket = wallet.history.find((t: any) => t.cycle === cycle && t.numbers.join(',') === confirmedTickets[1].join(','));
+          if (ticket) {
+            const { matches, totalWinnings, jackpotWon } = getTicketWinnings(confirmedTickets[1]);
+            const t2Message = jackpotWon ? `Congrats! You won the jackpot of $${totalWinnings}!` : (totalWinnings > 0 ? `Congrats! You won ${totalWinnings} credits!` : "No matches. Wait for next set!");
+            showResultBar(null, t2Message, TICKET2_MESSAGE_DURATION_MS);
+            wallet.processTicketResult(ticket.id, matches, totalWinnings, jackpotWon);
+            if (jackpotWon) jackpotContext.resetJackpot();
+          }
         }, TICKET2_MESSAGE_START_MS)
       );
     }
 
-    // Ticket 3 Highlight & Message
+    // Ticket 3 Highlight & Message & Crediting
     if (confirmedTickets.length > 2) {
       messageTimeouts.current.push(
         setTimeout(() => {
@@ -208,9 +217,14 @@ export function useRevealAnimation(
       );
       messageTimeouts.current.push(
         setTimeout(() => {
-          const t3Winnings = getTicketMessageWinnings(confirmedTickets[2]);
-          const t3Message = t3Winnings > 0 ? `Congrats! You won ${t3Winnings} credits!` : "No matches. Wait for final result!";
-          showResultBar(null, t3Message, TICKET3_MESSAGE_DURATION_MS);
+          const ticket = wallet.history.find((t: any) => t.cycle === cycle && t.numbers.join(',') === confirmedTickets[2].join(','));
+          if (ticket) {
+            const { matches, totalWinnings, jackpotWon } = getTicketWinnings(confirmedTickets[2]);
+            const t3Message = jackpotWon ? `Congrats! You won the jackpot of $${totalWinnings}!` : (totalWinnings > 0 ? `Congrats! You won ${totalWinnings} credits!` : "No matches. Wait for final result!");
+            showResultBar(null, t3Message, TICKET3_MESSAGE_DURATION_MS);
+            wallet.processTicketResult(ticket.id, matches, totalWinnings, jackpotWon);
+            if (jackpotWon) jackpotContext.resetJackpot();
+          }
         }, TICKET3_MESSAGE_START_MS)
       );
     }
@@ -235,7 +249,7 @@ export function useRevealAnimation(
 
         if (anyJackpotWon) {
           showResultBar(totalWinningsAcrossAllTickets, `Congrats! You won the jackpot of $${totalWinningsAcrossAllTickets}!`, FINAL_MESSAGE_DURATION_MS);
-          jackpotContext.resetJackpot();
+          jackpotContext.resetJackpot(); // Reset jackpot here if won by any ticket
         } else if (totalWinningsAcrossAllTickets > 0) {
           showResultBar(totalWinningsAcrossAllTickets, `Congrats! You won total of ${totalWinningsAcrossAllTickets} credits!`, FINAL_MESSAGE_DURATION_MS);
         } else {
@@ -266,13 +280,18 @@ export function useRevealAnimation(
     setIsRevealDone(true);
     revealStartedForCycle.current = cycle;
 
-    // Trigger final message immediately if instantly finishing
+    // Process all tickets and trigger final message immediately if instantly finishing
     let totalWinningsAcrossAllTickets = 0;
     let anyJackpotWon = false;
 
     confirmedTickets.forEach(userNumbers => {
       if (userNumbers.length === 6) {
         const { jackpotWon, totalWinnings } = calculateWinnings(userNumbers, activeSets, jackpotContext.jackpot);
+        const ticket = wallet.history.find((t: any) => t.cycle === cycle && t.numbers.join(',') === userNumbers.join(','));
+        if (ticket) {
+          wallet.processTicketResult(ticket.id, 0, totalWinnings, jackpotWon); // Matches not needed for instant finish
+        }
+
         if (jackpotWon) {
           anyJackpotWon = true;
           totalWinningsAcrossAllTickets += jackpotContext.jackpot;

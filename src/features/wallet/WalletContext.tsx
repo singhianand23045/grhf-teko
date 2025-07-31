@@ -21,7 +21,7 @@ type WalletContextType = {
   balance: number;
   history: TicketType[];
   addConfirmedTicket: (ticket: Omit<TicketType, "id" | "creditChange" | "matches" | "winnings" | "processed">) => void;
-  awardTicketWinnings: (cycleRows: number[][], totalWinningsForCycle: number, currentCycle: number, jackpotWon: boolean) => void; // Updated signature
+  processTicketResult: (ticketId: string, matches: number, winnings: number, jackpotWon: boolean) => void; // Updated signature
   resetWallet: () => void;
 };
 
@@ -63,12 +63,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
   // Save wallet state when either balance or history changes
   useEffect(() => {
     saveWalletToStorage({ balance, history });
-    console.log("[WalletContext] useEffect saveWalletToStorage called. balance:", balance, "history:", history);
   }, [balance, history]);
-
-  useEffect(() => {
-    console.log("[WalletContext] Provider rendered with balance:", balance, "history:", history);
-  });
 
   function addConfirmedTicket(ticketCore: Omit<TicketType, "id" | "creditChange" | "matches" | "winnings" | "processed">) {
     const newTicket: TicketType = {
@@ -79,63 +74,28 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
       winnings: 0,
       processed: false, // Mark as unprocessed initially
     };
-    setBalance(prev => {
-      const newBal = prev - 30;
-      console.log("[WalletContext] Deducting 30 credits. Old:", prev, "New:", newBal);
-      return newBal;
-    });
-    setHistory(prev => {
-      const updated = [newTicket, ...prev];
-      console.log("[WalletContext] Confirmed ticket & deducted:", newTicket, "Updated history:", updated);
-      return updated;
-    });
+    setBalance(prev => prev - 30);
+    setHistory(prev => [newTicket, ...prev]);
   }
 
   /**
-   * Awards winnings for ALL unprocessed tickets from the specified cycle, and marks them as processed.
-   * totalWinningsForCycle here is the SUM of winnings across all tickets for the cycle.
+   * Processes the result for a single ticket, updates its status, and awards winnings.
    */
-  function awardTicketWinnings(cycleRows: number[][], totalWinningsForCycle: number, currentCycle: number, jackpotWon: boolean) {
+  function processTicketResult(ticketId: string, matches: number, winnings: number, jackpotWon: boolean) {
     setHistory(prevHistory => {
       const updatedHistory = prevHistory.map(ticket => {
-        if (!ticket.processed && ticket.creditChange === -30 && ticket.cycle === currentCycle) {
-          // Calculate matches for this specific ticket against each drawn row
-          let ticketMatches = 0;
-          if (cycleRows.length === 3) {
-            for (let i = 0; i < 3; i++) {
-              ticketMatches += cycleRows[i].filter((n) => ticket.numbers.includes(n)).length;
-            }
-          }
-          
-          // If jackpot was won by ANY ticket in this cycle, this specific ticket gets 0 regular winnings
-          // The totalWinningsForCycle passed from useDrawPrizes already accounts for jackpot vs regular.
-          // Here, we just need to store the individual ticket's winnings for history.
-          // For simplicity, if jackpotWon is true, this ticket's individual winnings are 0 (as per spec, only jackpot is awarded).
-          // If not jackpot, then calculate based on matches.
-          const individualTicketWinnings = jackpotWon ? 0 : getCreditsForMatches(ticketMatches);
-
+        if (ticket.id === ticketId && !ticket.processed) {
+          const awardedAmount = jackpotWon ? winnings : winnings; // If jackpot, winnings is already jackpot amount
+          setBalance(prevBal => prevBal + awardedAmount);
           return {
             ...ticket,
-            matches: ticketMatches,
-            winnings: individualTicketWinnings, // Store individual ticket winnings for history
-            processed: true, // Mark as processed
+            matches: matches,
+            winnings: awardedAmount,
+            processed: true,
           };
         }
         return ticket;
       });
-
-      // Award the total winnings to balance (only once per cycle, as calculated in useDrawPrizes)
-      if (totalWinningsForCycle > 0) {
-        setBalance((prevBal) => {
-          const newBal = prevBal + totalWinningsForCycle;
-          console.log("[WalletContext] Awarding total winnings for cycle:", totalWinningsForCycle, "Old balance:", prevBal, "New balance:", newBal);
-          return newBal;
-        });
-      } else {
-        console.log("[WalletContext] No total winnings to add for cycle. Balance remains unchanged.");
-      }
-
-      console.log("[WalletContext] Processed all tickets for cycle", currentCycle, ". Total awarded:", totalWinningsForCycle, "Updated history:", updatedHistory);
       return updatedHistory;
     });
   }
@@ -144,11 +104,10 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
     setBalance(STARTING_BALANCE);
     setHistory([]);
     localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify({ balance: STARTING_BALANCE, history: [] }));
-    console.log("[WalletContext] resetWallet called, set balance/history to starting values.");
   }
 
   return (
-    <WalletContext.Provider value={{ balance, history, addConfirmedTicket, awardTicketWinnings, resetWallet }}>
+    <WalletContext.Provider value={{ balance, history, addConfirmedTicket, processTicketResult, resetWallet }}>
       {children}
     </WalletContext.Provider>
   );

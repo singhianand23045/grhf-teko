@@ -35,20 +35,23 @@ This phase introduces the ability for players to submit multiple tickets (up to 
 *   **Initial Reveal (0:45 – 0:36):**
     *   The draw begins at 0:45. All 18 drawn numbers are revealed sequentially (row by row, matches first, then non-matches within each row) over 9 seconds (0.5s per number).
     *   Numbers matching the **first confirmed ticket** are highlighted in **green** as they appear.
-*   **Ticket 1 Result Message (0:35 – 0:33):**
+*   **Ticket 1 Result Message & Crediting (0:35 – 0:33):**
     *   A message appears for 2 seconds: "Congrats! You won \[xyz] credits!" or "No matches. Wait for next set!".
+    *   **The wallet is credited with winnings for Ticket 1 immediately when this message is displayed.**
 *   **Second Ticket Overlay (0:32 – 0:26):**
     *   Numbers matching the **second confirmed ticket** are highlighted in **blue**.
     *   If a number matches both the first and second tickets, its visual representation splits into two semi-circles (left half green, right half blue).
-*   **Ticket 2 Result Message (0:25 – 0:23):**
+*   **Ticket 2 Result Message & Crediting (0:25 – 0:23):**
     *   A message appears for 2 seconds: "Congrats! You won \[xyz] credits!" or "No matches. Wait for next set!".
+    *   **The wallet is credited with winnings for Ticket 2 immediately when this message is displayed.**
 *   **Third Ticket Overlay (0:22 – 0:16):**
     *   If a third ticket exists, numbers matching the **third confirmed ticket** are highlighted in **yellow**.
     *   For overlaps:
         *   If a number matches all three tickets, its visual representation divides into three equal wedges (green/blue/yellow).
         *   If it matches the third ticket and one other (e.g., Ticket 1 & 3, or Ticket 2 & 3), its visual representation splits into two halves (e.g., left half green, right half yellow for Ticket 1 & 3).
-*   **Ticket 3 Result Message (0:15 – 0:13):**
+*   **Ticket 3 Result Message & Crediting (0:15 – 0:13):**
     *   A message appears for 2 seconds: "Congrats! You won \[xyz] credits!" or "No matches. Wait for final result!".
+    *   **The wallet is credited with winnings for Ticket 3 immediately when this message is displayed.**
 *   **Persistence:** All revealed numbers and their final highlight states remain visible until the next game round.
 
 ### 3. Prize Evaluation & Result Messaging
@@ -83,11 +86,11 @@ This phase introduces the ability for players to submit multiple tickets (up to 
 *   [ ] Confirmed tickets are displayed as compact rows of chips, stacked vertically.
 *   [ ] The confirmed tickets section handles vertical overflow gracefully with scrolling, without affecting other UI sections.
 *   [ ] During the reveal phase (0:45-0:36), numbers matching Ticket 1 are highlighted green.
-*   [ ] From 0:35-0:33, a message for Ticket 1 results is shown.
+*   [ ] From 0:35-0:33, a message for Ticket 1 results is shown, and **wallet is credited for Ticket 1's winnings**.
 *   [ ] From 0:32-0:26, numbers matching Ticket 2 are highlighted blue, with split circles for overlaps with Ticket 1.
-*   [ ] From 0:25-0:23, a message for Ticket 2 results is shown.
+*   [ ] From 0:25-0:23, a message for Ticket 2 results is shown, and **wallet is credited for Ticket 2's winnings**.
 *   [ ] From 0:22-0:16, numbers matching Ticket 3 are highlighted yellow, with split circles/wedges for overlaps with Ticket 1 and/or Ticket 2.
-*   [ ] From 0:15-0:13, a message for Ticket 3 results is shown.
+*   [ ] From 0:15-0:13, a message for Ticket 3 results is shown, and **wallet is credited for Ticket 3's winnings**.
 *   [ ] The final result message (0:12-0:02) accurately summarizes winnings for all confirmed tickets, prioritizing jackpot wins.
 *   [ ] All confirmed tickets are cleared at the start of a new draw cycle.
 
