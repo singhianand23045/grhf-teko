@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useJackpot } from "./JackpotContext";
 
@@ -13,7 +12,7 @@ export default function JackpotBar() {
       }}
       data-testid="jackpot-bar"
     >
-      <span className="font-bold text-6xl text-robinhood-green drop-shadow-sm">
+      <span className="font-bold text-6xl text-robinhood-green drop-shadow-sm bg-gradient-to-r from-robinhood-green/5 to-transparent rounded-lg px-2 py-1">
         ${jackpot}
       </span>
     </div>

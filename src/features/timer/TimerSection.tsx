@@ -1,4 +1,3 @@
-
 import { useTimer } from "./timer-context";
 
 const LOGICAL_HEIGHT = 874;
@@ -17,7 +16,7 @@ export default function TimerSection() {
       data-testid="timer-header"
     >
       <span
-        className="font-mono font-extrabold tracking-widest text-robinhood-green select-none animate-fade-in"
+        className="font-mono font-extrabold tracking-widest text-robinhood-green select-none animate-fade-in bg-gradient-to-l from-robinhood-green/5 to-transparent rounded-lg px-2 py-1"
         style={{ fontSize: "clamp(1.3rem, 4vw, 2rem)", lineHeight: 1.1 }}
         data-testid="timer"
       >

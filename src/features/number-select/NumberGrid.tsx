@@ -1,4 +1,3 @@
-
 import React, { useRef } from "react";
 import { useNumberSelection } from "./NumberSelectionContext";
 import { cn } from "@/lib/utils";
@@ -47,7 +46,7 @@ export default function NumberGrid({}: Props) {
             className={cn(
               "aspect-square rounded-full flex items-center justify-center font-semibold select-none transition-colors outline-none focus:z-10",
               selected
-                ? "bg-green-500 text-white shadow-md ring-2 ring-green-400"
+                ? "bg-robinhood-green text-white shadow-md ring-2 ring-robinhood-darkgreen"
                 : "bg-gray-100 hover:bg-blue-100 text-gray-800",
               !canPick && !selected && "opacity-40 pointer-events-none"
             )}
