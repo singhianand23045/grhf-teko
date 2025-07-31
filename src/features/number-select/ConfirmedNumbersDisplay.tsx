@@ -1,4 +1,5 @@
 import React from "react";
+import { cn } from "@/lib/utils";
 
 // Global circle/font constants
 const CIRCLE_NUM_FONT_SIZE = "1rem";
@@ -8,11 +9,43 @@ const CIRCLE_DIAM_NUM = 35;
 type ConfirmedNumbersDisplayProps = {
   picked: number[]; // Now explicitly passed as a prop
   compact?: boolean;
-  pickSetIndex?: number; // New prop for displaying pick set number
+  pickSetIndex?: number; // New prop for displaying pick set number (1-indexed)
 };
 
 export default function ConfirmedNumbersDisplay({ picked, compact = false, pickSetIndex }: ConfirmedNumbersDisplayProps) {
   const sorted = [...picked].sort((a, b) => a - b);
+
+  // Define color classes based on pickSetIndex
+  const getColorClasses = (index: number) => {
+    switch (index) {
+      case 1: // First set: Robinhood Green
+        return {
+          bg: "bg-robinhood-green",
+          border: "border-robinhood-darkgreen",
+          shadow: "shadow-green-300", // Using default Tailwind green-300 for shadow tint
+        };
+      case 2: // Second set: Robinhood Blue
+        return {
+          bg: "bg-robinhood-blue",
+          border: "border-blue-700", // Using default Tailwind blue-700 for border
+          shadow: "shadow-blue-300", // Using default Tailwind blue-300 for shadow tint
+        };
+      case 3: // Third set: Robinhood Yellow
+        return {
+          bg: "bg-robinhood-yellow",
+          border: "border-yellow-700", // Using default Tailwind yellow-700 for border
+          shadow: "shadow-yellow-300", // Using default Tailwind yellow-300 for shadow tint
+        };
+      default: // Fallback to first set colors
+        return {
+          bg: "bg-robinhood-green",
+          border: "border-robinhood-darkgreen",
+          shadow: "shadow-green-300",
+        };
+    }
+  };
+
+  const currentColors = getColorClasses(pickSetIndex || 1); // Default to 1 if not provided
 
   return (
     <div
@@ -41,11 +74,16 @@ export default function ConfirmedNumbersDisplay({ picked, compact = false, pickS
         {sorted.map((n) => (
           <span
             key={n}
-            className="flex items-center justify-center rounded-full bg-green-500 text-white font-black shadow-green-300 shadow-lg border-[2px] border-green-700 select-none lottery-num transition-all aspect-square"
+            className={cn(
+              "flex items-center justify-center rounded-full text-white font-black shadow-lg border-[2px] select-none lottery-num transition-all aspect-square",
+              currentColors.bg,
+              currentColors.border,
+              currentColors.shadow
+            )}
             style={{
               width: CIRCLE_NUM_DIAM,
               minWidth: CIRCLE_DIAM_NUM,
-              height: CIRCLE_NUM_DIAM,
+              height: CIRCLE_DIAM_NUM,
               minHeight: CIRCLE_DIAM_NUM,
               fontSize: CIRCLE_NUM_FONT_SIZE,
               lineHeight: 1.12,
