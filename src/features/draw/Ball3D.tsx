@@ -44,12 +44,12 @@ export default function Ball3D({
     textColor = "#eee"; // Spinning balls have lighter text
     textShadow = "0 1px 6px rgba(0,0,0,0.5)";
   } else if (numMatches === 0) {
-    // Stopped, no highlight
-    ballBackgroundStyle.background = "linear-gradient(to bottom right, #f5f7fa, #e9ebed, #c4c7cc)";
-    ballBorderColor = "border-slate-500/40";
-    ballBoxShadow = "0 3px 8px 2px rgba(80,90,120,0.20), 0 0.5px 2.8px 0px #eaf3fa";
-    textColor = "#222";
-    textShadow = "0 1px 6px #d4dfff88";
+    // Stopped, no highlight - clean look
+    ballBackgroundStyle.background = "transparent"; // No background
+    ballBorderColor = "border-transparent"; // No border
+    ballBoxShadow = "none"; // No shadow
+    textColor = "#222"; // Keep text visible
+    textShadow = "none"; // No text shadow
   } else if (numMatches === 1) {
     // Single highlight
     if (ps1) {
