@@ -74,7 +74,8 @@ export default function ConfirmedTicketsList() {
           Maximum 3 tickets confirmed for this draw.
         </div>
       )}
-      {timerState !== "OPEN" && confirmedTickets.length > 0 && (
+      {/* Updated condition: Only show this message during CUT_OFF phase */}
+      {timerState === "CUT_OFF" && confirmedTickets.length > 0 && (
         <div className="text-sm mt-4 text-yellow-700 font-medium text-center">
           Numbers locked. Waiting for draw...
         </div>
