@@ -7,6 +7,9 @@ interface ResultBarProps {
 }
 
 export default function ResultBar({ visible, creditsWon, message }: ResultBarProps) {
+  // Add debug log here
+  console.log("[ResultBar] Rendered. Visible:", visible, "CreditsWon:", creditsWon, "Message Prop:", message);
+
   if (!visible) return null;
 
   // Use the provided message if available, otherwise fallback to old logic
@@ -17,6 +20,8 @@ export default function ResultBar({ visible, creditsWon, message }: ResultBarPro
       ? `Congrats! You won ${creditsWon} credits!`
       : "Try again. Win next time!"
   );
+
+  console.log("[ResultBar] Display Message:", displayMessage);
 
   // Determine styling based on whether it's a winning message (contains "Congrats")
   const isWinningMessage = displayMessage.includes("Congrats!");
