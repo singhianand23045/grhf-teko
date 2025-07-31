@@ -268,7 +268,7 @@ export function useRevealAnimation(
           showResultBar(totalWinningsAcrossAllEntries, `Congrats! You won the jackpot of $${totalWinningsAcrossAllEntries}!`, FINAL_MESSAGE_DURATION_MS);
           jackpotContext.resetJackpot(); // Reset jackpot here if won by any pick set
         } else if (totalWinningsAcrossAllEntries > 0) {
-          showResultBar(totalWinningsAcrossAllEntries, `Congrats! Total won: ${totalWinningsAcrossAllEntries} credits!`, FINAL_MESSAGE_DURATION_MS);
+          showResultBar(totalWinningsAcrossAllEntries, `Congrats! You won total ${totalWinningsAcrossAllEntries} credits!`, FINAL_MESSAGE_DURATION_MS);
         } else {
           showResultBar(0, "Try again. Win next time!", FINAL_MESSAGE_DURATION_MS);
         }
@@ -322,7 +322,7 @@ export function useRevealAnimation(
       showResultBar(totalWinningsAcrossAllEntries, `Congrats! You won the jackpot of $${totalWinningsAcrossAllEntries}!`, FINAL_MESSAGE_DURATION_MS);
       jackpotContext.resetJackpot();
     } else if (totalWinningsAcrossAllEntries > 0) {
-      showResultBar(totalWinningsAcrossAllEntries, `Congrats! Total won: ${totalWinningsAcrossAllEntries} credits!`, FINAL_MESSAGE_DURATION_MS);
+      showResultBar(totalWinningsAcrossAllEntries, `Congrats! You won total ${totalWinningsAcrossAllEntries} credits!`, FINAL_MESSAGE_DURATION_MS);
     } else {
       showResultBar(0, "Try again. Win next time!", FINAL_MESSAGE_DURATION_MS);
     }
