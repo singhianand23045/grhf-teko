@@ -126,12 +126,21 @@ export function useRevealAnimation(
     // --- Schedule messages and highlight overlays ---
     // Helper to calculate ONLY regular credit winnings for a specific ticket for message display
     const getTicketMessageWinnings = (ticketNumbers: number[]) => {
-      if (!ticketNumbers || ticketNumbers.length !== 6) return 0;
+      console.log("--- getTicketMessageWinnings called ---");
+      console.log("Ticket Numbers:", ticketNumbers);
+      console.log("Active Sets (drawn rows):", activeSets);
+      if (!ticketNumbers || ticketNumbers.length !== 6) {
+        console.log("Invalid ticket numbers, returning 0.");
+        return 0;
+      }
       let totalRegularWinnings = 0;
       for (const drawnRow of activeSets) {
         const matches = drawnRow.filter((n) => ticketNumbers.includes(n)).length;
-        totalRegularWinnings += getCreditsForMatches(matches);
+        const credits = getCreditsForMatches(matches);
+        console.log(`  Row: [${drawnRow.join(', ')}], Matches: ${matches}, Credits: ${credits}`);
+        totalRegularWinnings += credits;
       }
+      console.log("Total Regular Winnings for this ticket:", totalRegularWinnings);
       return totalRegularWinnings;
     };
 
@@ -141,6 +150,7 @@ export function useRevealAnimation(
         setTimeout(() => {
           const t1Winnings = getTicketMessageWinnings(confirmedTickets[0]);
           const t1Message = t1Winnings > 0 ? `Congrats! You won ${t1Winnings} credits!` : "No matches. Wait for next set!";
+          console.log(`[useRevealAnimation] TICKET 1 MESSAGE: t1Winnings=${t1Winnings}, t1Message="${t1Message}"`);
           showResultBar(null, t1Message, TICKET1_MESSAGE_DURATION_MS);
         }, TICKET1_MESSAGE_START_MS)
       );
@@ -148,7 +158,7 @@ export function useRevealAnimation(
 
     // Ticket 2 Highlight & Message
     if (confirmedTickets.length > 1) {
-      highlightTimeouts.current.push(
+      messageTimeouts.current.push(
         setTimeout(() => {
           setDrawnNumbers(prev => prev.map(dn => ({
             ...dn,
@@ -159,7 +169,7 @@ export function useRevealAnimation(
           })));
         }, TICKET2_HIGHLIGHT_START_MS)
       );
-      highlightTimeouts.current.push(
+      messageTimeouts.current.push(
         setTimeout(() => {
           setDrawnNumbers(prev => prev.map(dn => ({
             ...dn,
@@ -174,6 +184,7 @@ export function useRevealAnimation(
         setTimeout(() => {
           const t2Winnings = getTicketMessageWinnings(confirmedTickets[1]);
           const t2Message = t2Winnings > 0 ? `Congrats! You won ${t2Winnings} credits!` : "No matches. Wait for next set!";
+          console.log(`[useRevealAnimation] TICKET 2 MESSAGE: t2Winnings=${t2Winnings}, t2Message="${t2Message}"`);
           showResultBar(null, t2Message, TICKET2_MESSAGE_DURATION_MS);
         }, TICKET2_MESSAGE_START_MS)
       );
@@ -181,7 +192,7 @@ export function useRevealAnimation(
 
     // Ticket 3 Highlight & Message
     if (confirmedTickets.length > 2) {
-      highlightTimeouts.current.push(
+      messageTimeouts.current.push(
         setTimeout(() => {
           setDrawnNumbers(prev => prev.map(dn => ({
             ...dn,
@@ -192,7 +203,7 @@ export function useRevealAnimation(
           })));
         }, TICKET3_HIGHLIGHT_START_MS)
       );
-      highlightTimeouts.current.push(
+      messageTimeouts.current.push(
         setTimeout(() => {
           setDrawnNumbers(prev => prev.map(dn => ({
             ...dn,
@@ -207,6 +218,7 @@ export function useRevealAnimation(
         setTimeout(() => {
           const t3Winnings = getTicketMessageWinnings(confirmedTickets[2]);
           const t3Message = t3Winnings > 0 ? `Congrats! You won ${t3Winnings} credits!` : "No matches. Wait for final result!";
+          console.log(`[useRevealAnimation] TICKET 3 MESSAGE: t3Winnings=${t3Winnings}, t3Message="${t3Message}"`);
           showResultBar(null, t3Message, TICKET3_MESSAGE_DURATION_MS);
         }, TICKET3_MESSAGE_START_MS)
       );

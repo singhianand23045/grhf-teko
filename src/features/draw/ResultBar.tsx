@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 
 interface ResultBarProps {
   visible: boolean;
@@ -9,6 +9,10 @@ interface ResultBarProps {
 export default function ResultBar({ visible, creditsWon, message }: ResultBarProps) {
   // Add debug log here
   console.log("[ResultBar] Rendered. Visible:", visible, "CreditsWon:", creditsWon, "Message Prop:", message);
+
+  useEffect(() => {
+    console.log("[ResultBar useEffect] message prop changed to:", message);
+  }, [message]);
 
   if (!visible) return null;
 
@@ -21,7 +25,7 @@ export default function ResultBar({ visible, creditsWon, message }: ResultBarPro
       : "Try again. Win next time!"
   );
 
-  console.log("[ResultBar] Display Message:", displayMessage);
+  console.log("[ResultBar] Display Message (after logic):", displayMessage);
 
   // Determine styling based on whether it's a winning message (contains "Congrats")
   const isWinningMessage = displayMessage.includes("Congrats!");
