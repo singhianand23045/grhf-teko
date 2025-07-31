@@ -39,14 +39,14 @@ This phase introduces the ability for players to submit multiple sets of numbers
     *   A message appears for 2 seconds: "Congrats! You won \[xyz] credits!" or "No matches. Wait for next set!".
     *   **The wallet is credited with winnings for Set 1 immediately when this message is displayed.**
 *   **Second Set Overlay (0:32 – 0:26):**
-    *   Numbers matching the **second confirmed set** are highlighted in **blue**.
+    *   Numbers matching the **second confirmed set** are highlighted in **blue**. The highlights for these numbers will appear sequentially for each drawn number over this 6-second period.
     *   If a number matches both the first and second sets, its visual representation splits into two semi-circles (left half green, right half blue).
     *   **These highlights persist until the next game round.**
 *   **Set 2 Result Message & Crediting (0:25 – 0:23):**
     *   A message appears for 2 seconds: "Congrats! You won \[xyz] credits!" or "No matches. Wait for next set!".
     *   **The wallet is credited with winnings for Set 2 immediately when this message is displayed.**
 *   **Third Set Overlay (0:22 – 0:16):**
-    *   If a third set exists, numbers matching the **third confirmed set** are highlighted in **orange**.
+    *   If a third set exists, numbers matching the **third confirmed set** are highlighted in **orange**. The highlights for these numbers will appear sequentially for each drawn number over this 6-second period.
     *   For overlaps:
         *   If a number matches all three sets, its visual representation divides into three equal wedges (green/blue/orange).
         *   If it matches the third set and one other (e.g., Set 1 & 3, or Set 2 & 3), its visual representation splits into two halves (e.g., left half green, right half orange for Set 1 & 3).
@@ -89,9 +89,9 @@ This phase introduces the ability for players to submit multiple sets of numbers
 *   [ ] The confirmed sets section handles vertical overflow gracefully with scrolling, without affecting other UI sections.
 *   [ ] During the reveal phase (0:45-0:36), numbers matching Set 1 are highlighted green.
 *   [ ] From 0:35-0:33, a message for Set 1 results is shown, and **wallet is credited for Set 1's winnings**.
-*   [ ] From 0:32-0:26, numbers matching Set 2 are highlighted blue, with split circles for overlaps with Set 1. **These highlights persist.**
+*   [ ] From 0:32-0:26, numbers matching Set 2 are highlighted blue, with split circles for overlaps with Set 1. **These highlights appear sequentially over 6 seconds and persist.**
 *   [ ] From 0:25-0:23, a message for Set 2 results is shown, and **wallet is credited for Set 2's winnings**.
-*   [ ] From 0:22-0:16, numbers matching Set 3 are highlighted orange, with split circles/wedges for overlaps with Set 1 and/or Set 2. **These highlights persist.**
+*   [ ] From 0:22-0:16, numbers matching Set 3 are highlighted orange, with split circles/wedges for overlaps with Set 1 and/or Set 2. **These highlights appear sequentially over 6 seconds and persist.**
 *   [ ] From 0:15-0:13, a message for Set 3 results is shown, and **wallet is credited for Set 3's winnings**.
 *   [ ] The final result message (0:12-0:02) accurately summarizes winnings for all confirmed sets, prioritizing jackpot wins.
 *   [ ] All confirmed sets are cleared at the start of a new draw cycle.

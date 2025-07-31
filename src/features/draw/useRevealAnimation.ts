@@ -58,17 +58,18 @@ export function useRevealAnimation(
   const PICKSET1_MESSAGE_DURATION_MS = 2 * 1000;
 
   const PICKSET2_HIGHLIGHT_START_MS = 13 * 1000;
-  // const PICKSET2_HIGHLIGHT_END_MS = 19 * 1000; // Removed for persistence
   const PICKSET2_MESSAGE_START_MS = 20 * 1000;
   const PICKSET2_MESSAGE_DURATION_MS = 2 * 1000;
 
   const PICKSET3_HIGHLIGHT_START_MS = 23 * 1000;
-  // const PICKSET3_HIGHLIGHT_END_MS = 29 * 1000; // Removed for persistence
   const PICKSET3_MESSAGE_START_MS = 30 * 1000;
   const PICKSET3_MESSAGE_DURATION_MS = 2 * 1000;
 
   const FINAL_MESSAGE_START_MS = 33 * 1000;
   const FINAL_MESSAGE_DURATION_MS = 10 * 1000;
+
+  // Interval for sequential highlighting (6 seconds / 18 numbers)
+  const SEQUENTIAL_HIGHLIGHT_INTERVAL_MS = 6000 / REVEAL_TOTAL_NUMBERS;
 
   // Reset reveal state when cycle changes to prevent premature prize awarding
   useEffect(() => {
@@ -157,16 +158,34 @@ export function useRevealAnimation(
     if (confirmedPicksSets.length > 1) {
       messageTimeouts.current.push(
         setTimeout(() => {
-          setDrawnNumbers(prev => prev.map(dn => ({
-            ...dn,
-            highlightMatches: {
-              ...dn.highlightMatches,
-              pickSet2: confirmedPicksSets[1].includes(dn.number) // Renamed
-            }
-          })));
-        }, PICKSET2_HIGHLIGHT_START_MS) // Renamed
+          // Apply pickSet2 highlights sequentially
+          setDrawnNumbers(currentDrawn => {
+            const initialDrawnState = [...currentDrawn]; // Capture current state
+            currentDrawn.forEach((dn, index) => {
+              if (confirmedPicksSets[1].includes(dn.number)) {
+                highlightTimeouts.current.push(
+                  setTimeout(() => {
+                    setDrawnNumbers(prev => {
+                      const updated = [...prev];
+                      if (updated[index]) {
+                        updated[index] = {
+                          ...updated[index],
+                          highlightMatches: {
+                            ...updated[index].highlightMatches,
+                            pickSet2: true
+                          }
+                        };
+                      }
+                      return updated;
+                    });
+                  }, index * SEQUENTIAL_HIGHLIGHT_INTERVAL_MS)
+                );
+              }
+            });
+            return initialDrawnState; // Return the state as it was before scheduling updates
+          });
+        }, PICKSET2_HIGHLIGHT_START_MS)
       );
-      // Removed: messageTimeouts.current.push(setTimeout(() => { ... pickSet2: false ... }));
       messageTimeouts.current.push(
         setTimeout(() => {
           const entry = wallet.history.find((e: any) => e.cycle === cycle && e.numbers.join(',') === confirmedPicksSets[1].join(',')); // Renamed ticket to entry
@@ -185,16 +204,34 @@ export function useRevealAnimation(
     if (confirmedPicksSets.length > 2) {
       messageTimeouts.current.push(
         setTimeout(() => {
-          setDrawnNumbers(prev => prev.map(dn => ({
-            ...dn,
-            highlightMatches: {
-              ...dn.highlightMatches,
-              pickSet3: confirmedPicksSets[2].includes(dn.number) // Renamed
-            }
-          })));
-        }, PICKSET3_HIGHLIGHT_START_MS) // Renamed
+          // Apply pickSet3 highlights sequentially
+          setDrawnNumbers(currentDrawn => {
+            const initialDrawnState = [...currentDrawn]; // Capture current state
+            currentDrawn.forEach((dn, index) => {
+              if (confirmedPicksSets[2].includes(dn.number)) {
+                highlightTimeouts.current.push(
+                  setTimeout(() => {
+                    setDrawnNumbers(prev => {
+                      const updated = [...prev];
+                      if (updated[index]) {
+                        updated[index] = {
+                          ...updated[index],
+                          highlightMatches: {
+                            ...updated[index].highlightMatches,
+                            pickSet3: true
+                          }
+                        };
+                      }
+                      return updated;
+                    });
+                  }, index * SEQUENTIAL_HIGHLIGHT_INTERVAL_MS)
+                );
+              }
+            });
+            return initialDrawnState; // Return the state as it was before scheduling updates
+          });
+        }, PICKSET3_HIGHLIGHT_START_MS)
       );
-      // Removed: messageTimeouts.current.push(setTimeout(() => { ... pickSet3: false ... }));
       messageTimeouts.current.push(
         setTimeout(() => {
           const entry = wallet.history.find((e: any) => e.cycle === cycle && e.numbers.join(',') === confirmedPicksSets[2].join(',')); // Renamed ticket to entry
