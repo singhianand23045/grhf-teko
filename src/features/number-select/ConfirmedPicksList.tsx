@@ -69,8 +69,8 @@ export default function ConfirmedPicksList() {
           Add next set of numbers
         </Button>
       )}
-      {/* Only show "Maximum 3 sets confirmed" if not in CUT_OFF phase */}
-      {confirmedPicksSets.length === 3 && timerState !== "CUT_OFF" && (
+      {/* Only show "Maximum 3 sets confirmed" if in OPEN phase */}
+      {confirmedPicksSets.length === 3 && timerState === "OPEN" && (
         <div className="text-sm mt-4 text-muted-foreground text-center">
           Maximum 3 sets of numbers confirmed for this draw.
         </div>
