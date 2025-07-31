@@ -145,7 +145,7 @@ export function useRevealAnimation(
           const entry = wallet.history.find((e: any) => e.cycle === cycle && e.numbers.join(',') === confirmedPicksSets[0].join(',')); // Renamed ticket to entry
           if (entry) {
             const { matches, totalWinnings, jackpotWon } = getPickSetWinnings(confirmedPicksSets[0]); // Renamed
-            const ps1Message = jackpotWon ? `Congrats! You won the jackpot of $${totalWinnings}!` : (totalWinnings > 0 ? `Congrats! You won ${totalWinnings} credits!` : "No matches. Wait for next set!");
+            const ps1Message = jackpotWon ? `Congrats! You won the jackpot of $${totalWinnings}!` : (totalWinnings > 0 ? `Congrats! You won ${totalWinnings} credits!` : (matches > 0 ? "Wait for next set!" : "No matches. Wait for next set!"));
             showResultBar(null, ps1Message, PICKSET1_MESSAGE_DURATION_MS); // Renamed
             wallet.processEntryResult(entry.id, matches, totalWinnings, jackpotWon); // Renamed processTicketResult
             if (jackpotWon) jackpotContext.resetJackpot();
@@ -191,7 +191,7 @@ export function useRevealAnimation(
           const entry = wallet.history.find((e: any) => e.cycle === cycle && e.numbers.join(',') === confirmedPicksSets[1].join(',')); // Renamed ticket to entry
           if (entry) {
             const { matches, totalWinnings, jackpotWon } = getPickSetWinnings(confirmedPicksSets[1]); // Renamed
-            const ps2Message = jackpotWon ? `Congrats! You won the jackpot of $${totalWinnings}!` : (totalWinnings > 0 ? `Congrats! You won ${totalWinnings} credits!` : "No matches. Wait for next set!");
+            const ps2Message = jackpotWon ? `Congrats! You won the jackpot of $${totalWinnings}!` : (totalWinnings > 0 ? `Congrats! You won ${totalWinnings} credits!` : (matches > 0 ? "Wait for next set!" : "No matches. Wait for next set!"));
             showResultBar(null, ps2Message, PICKSET2_MESSAGE_DURATION_MS); // Renamed
             wallet.processEntryResult(entry.id, matches, totalWinnings, jackpotWon); // Renamed processTicketResult
             if (jackpotWon) jackpotContext.resetJackpot();
@@ -237,7 +237,7 @@ export function useRevealAnimation(
           const entry = wallet.history.find((e: any) => e.cycle === cycle && e.numbers.join(',') === confirmedPicksSets[2].join(',')); // Renamed ticket to entry
           if (entry) {
             const { matches, totalWinnings, jackpotWon } = getPickSetWinnings(confirmedPicksSets[2]); // Renamed
-            const ps3Message = jackpotWon ? `Congrats! You won the jackpot of $${totalWinnings}!` : (totalWinnings > 0 ? `Congrats! You won ${totalWinnings} credits!` : "No matches. Wait for final result!");
+            const ps3Message = jackpotWon ? `Congrats! You won the jackpot of $${totalWinnings}!` : (totalWinnings > 0 ? `Congrats! You won ${totalWinnings} credits!` : (matches > 0 ? "Wait for final result!" : "No matches. Wait for final result!"));
             showResultBar(null, ps3Message, PICKSET3_MESSAGE_DURATION_MS); // Renamed
             wallet.processEntryResult(entry.id, matches, totalWinnings, jackpotWon); // Renamed processTicketResult
             if (jackpotWon) jackpotContext.resetJackpot();
