@@ -1,5 +1,6 @@
 import React from "react";
 
+// Use a single global font/circle size in this file
 const CIRCLE_DIAM = 35; // px
 const NUMBER_FONT_SIZE = "1.05rem";
 
@@ -31,66 +32,23 @@ export default function Ball3D({
 
   const numMatches = (ps1 ? 1 : 0) + (ps2 ? 1 : 0) + (ps3 ? 1 : 0);
 
-  let ballBackgroundStyle: React.CSSProperties = {};
-  let ballBorderColor = "";
-  let ballBoxShadow = "";
-  let textColor = "#222";
-  let textShadow = "0 1px 6px #d4dfff88";
+  let ballBackground = highlightMatches?.pickSet1
+    ? "bg-green-500"
+    : isSpinning
+    ? "bg-gradient-to-br from-slate-900 via-slate-700 to-neutral-500"
+    : "bg-gradient-to-b from-white via-slate-100 to-slate-300";
 
-  if (isSpinning) {
-    ballBackgroundStyle.background = "linear-gradient(to bottom right, #19181a, #333, #19181a)";
-    ballBorderColor = "border-black";
-    ballBoxShadow = "0 3px 14px 2px rgba(50,50,60,0.36), 0 0.5px 2.8px 0px #222a";
-    textColor = "#eee"; // Spinning balls have lighter text
-    textShadow = "0 1px 6px rgba(0,0,0,0.5)";
-  } else if (numMatches === 0) {
-    // Stopped, no highlight - neutral look
-    ballBackgroundStyle.backgroundColor = "#e9ebed"; // Robinhood muted gray
-    ballBorderColor = "border-gray-300"; // A slightly darker gray border
-    ballBoxShadow = "0 1px 4px rgba(0,0,0,0.1), 0 0.5px 1.5px rgba(0,0,0,0.08)"; // Subtle shadow
-    textColor = "#72807a"; // Robinhood muted foreground
-    textShadow = "none";
-  } else if (numMatches === 1) {
-    // Single highlight
-    if (ps1) {
-      ballBackgroundStyle.backgroundColor = "#00c805"; // Robinhood green
-      ballBorderColor = "border-green-700";
-      ballBoxShadow = "0 3px 16px 2px rgba(34,197,94,0.28), 0 0.5px 2.8px 0px #eaf3fa";
-      textColor = "#111";
-      textShadow = "0 2px 7px #99f6e0ee";
-    } else if (ps2) {
-      ballBackgroundStyle.backgroundColor = "#00afff"; // Robinhood blue
-      ballBorderColor = "border-blue-700";
-      ballBoxShadow = "0 3px 16px 2px rgba(0,175,255,0.28), 0 0.5px 2.8px 0px #eaf3fa";
-      textColor = "#111";
-      textShadow = "0 2px 7px rgba(0,175,255,0.5)";
-    } else if (ps3) {
-      ballBackgroundStyle.backgroundColor = "#FFA500"; // Robinhood orange
-      ballBorderColor = "border-orange-700";
-      ballBoxShadow = "0 3px 16px 2px rgba(255,165,0,0.28), 0 0.5px 2.8px 0px #eaf3fa";
-      textColor = "#111";
-      textShadow = "0 2px 7px rgba(255,165,0,0.5)";
-    }
-  } else if (numMatches === 2) {
-    // Two highlights - split circle
-    let gradientColors = "";
-    if (ps1 && ps2) gradientColors = "#00c805 50%, #00afff 50%"; // Green-Blue
-    else if (ps1 && ps3) gradientColors = "#00c805 50%, #FFA500 50%"; // Green-Orange
-    else if (ps2 && ps3) gradientColors = "#00afff 50%, #FFA500 50%"; // Blue-Orange
-    
-    ballBackgroundStyle.background = `linear-gradient(to right, ${gradientColors})`;
-    ballBorderColor = "border-gray-400"; // Neutral border for mixed colors
-    ballBoxShadow = "0 3px 16px 2px rgba(0,0,0,0.15), 0 0.5px 2.8px 0px #eaf3fa";
-    textColor = "#111";
-    textShadow = "0 2px 7px rgba(0,0,0,0.2)";
-  } else if (numMatches === 3) {
-    // Three highlights - wedge
-    ballBackgroundStyle.background = `conic-gradient(from 90deg, #00c805 0 33.3%, #00afff 33.3% 66.6%, #FFA500 66.6% 100%)`;
-    ballBorderColor = "border-gray-400"; // Neutral border for mixed colors
-    ballBoxShadow = "0 3px 16px 2px rgba(0,0,0,0.15), 0 0.5px 2.8px 0px #eaf3fa";
-    textColor = "#111";
-    textShadow = "0 2px 7px rgba(0,0,0,0.2)";
-  }
+  const borderColor = highlightMatches?.pickSet1
+    ? "border-green-600/60"
+    : isSpinning
+    ? "border-black"
+    : "border-slate-500/40";
+
+  const ballBoxShadow = highlightMatches?.pickSet1
+    ? "0 3px 16px 2px rgba(34,197,94,0.28), 0 0.5px 2.8px 0px #eaf3fa"
+    : isSpinning
+    ? "0 3px 14px 2px rgba(50,50,60,0.36), 0 0.5px 2.8px 0px #222a"
+    : "0 3px 8px 2px rgba(80,90,120,0.20), 0 0.5px 2.8px 0px #eaf3fa";
 
   let glossAnimation = undefined;
   let glossDuration = undefined;
@@ -112,21 +70,19 @@ export default function Ball3D({
         minHeight: 28,
       }}
     >
-      {/* Main ball surface */}
       <span
         className={`
           absolute inset-0 rounded-full
-          shadow-lg border-[2.5px] ${ballBorderColor}
+          ${ballBackground}
+          shadow-lg border-[2.5px] ${borderColor}
         `}
         style={{
-          ...ballBackgroundStyle,
           boxShadow: ballBoxShadow,
-          transition: "background 0.3s, border-color 0.3s, box-shadow 0.3s",
+          transition: "background 0.3s",
         }}
         aria-hidden
       />
 
-      {/* Gloss/shine layer */}
       <span
         className="absolute left-0 top-0 w-full h-full rounded-full pointer-events-none overflow-hidden"
         aria-hidden
@@ -146,7 +102,7 @@ export default function Ball3D({
                 : undefined,
             }}
           />
-        ) : numMatches > 0 ? (
+        ) : highlightMatches?.pickSet1 ? (
           <span
             className="block absolute left-[18%] top-1/4 w-2/3 h-2/5"
             style={{
@@ -172,13 +128,31 @@ export default function Ball3D({
           />
         )}
       </span>
+      {!highlightMatches?.pickSet1 && !isSpinning && (
+        <span
+          className="absolute"
+          style={{
+            top: "18%",
+            left: "38%",
+            width: 8,
+            height: 8,
+            borderRadius: "50%",
+            background: "radial-gradient(circle at 40% 40%, #fff 85%, #e0ebfc11 100%)",
+            opacity: 0.82,
+            filter: "blur(1px)",
+          }}
+          aria-hidden
+        />
+      )}
       {typeof number === "number" && (
         <span
           className={`relative font-extrabold select-none`}
           style={{
             zIndex: 10,
-            color: textColor,
-            textShadow: textShadow,
+            color: highlightMatches?.pickSet1 ? "#111" : "#222",
+            textShadow: highlightMatches?.pickSet1
+              ? "0 2px 7px #99f6e0ee"
+              : "0 1px 6px #d4dfff88",
             fontFamily: "Poppins, Inter, sans-serif",
             letterSpacing: "-0.02em",
             userSelect: "none",

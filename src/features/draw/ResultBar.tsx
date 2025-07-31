@@ -31,7 +31,7 @@ export default function ResultBar({ visible, creditsWon, message, jackpot }: Res
             isJackpotMessage
               ? "bg-yellow-100 border-yellow-500 text-yellow-800 animate-scale-in"
               : isWinningMessage
-              ? "bg-gradient-to-r from-robinhood-green/10 to-transparent border-robinhood-green text-robinhood-darkgreen animate-scale-in"
+              ? "bg-green-100 border-green-500 text-green-800 animate-scale-in"
               : "bg-yellow-50 border-yellow-300 text-yellow-700 animate-fade-in"
           }
         `}

@@ -12,7 +12,7 @@ export default function JackpotBar() {
       }}
       data-testid="jackpot-bar"
     >
-      <span className="font-bold text-6xl text-robinhood-green drop-shadow-sm bg-gradient-to-r from-robinhood-green/5 to-transparent rounded-lg px-2 py-1">
+      <span className="font-bold text-6xl text-yellow-700 drop-shadow-sm">
         ${jackpot}
       </span>
     </div>
