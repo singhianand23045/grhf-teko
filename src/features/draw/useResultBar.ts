@@ -14,8 +14,6 @@ export function useResultBar(
 
   // Added optional 'duration' parameter
   const showResultBar = (credits: number | null, message?: string, duration?: number) => {
-    // NEW LOG: Check what message is received here
-    console.log("[useResultBar] showResultBar called with: credits=", credits, "message=", message, "duration=", duration);
     setResultBar({ show: true, credits, message });
     if (resultTimeout.current) clearTimeout(resultTimeout.current);
     resultTimeout.current = setTimeout(() => {

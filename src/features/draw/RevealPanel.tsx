@@ -47,6 +47,7 @@ export default function RevealPanel() {
           <ResultBar
             visible={!!revealResult.show}
             creditsWon={revealResult.credits}
+            message={revealResult.message} {/* ADDED THIS LINE */}
             jackpot={Boolean(revealResult.credits && revealResult.credits > 0 && revealResult.credits >= 1000)}
           />
         </div>
@@ -84,6 +85,7 @@ export default function RevealPanel() {
         <ResultBar
           visible={!!revealResult.show}
           creditsWon={revealResult.credits}
+          message={revealResult.message} {/* ADDED THIS LINE */}
           jackpot={Boolean(revealResult.credits && revealResult.credits > 0 && revealResult.credits >= 1000)}
         />
       </div>
