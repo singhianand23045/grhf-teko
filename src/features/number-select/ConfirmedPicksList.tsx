@@ -36,9 +36,7 @@ export default function ConfirmedPicksList() {
           {/* Show the number grid if user is picking a new pick set */}
           {isPickingNewPickSet && canAddMorePickSets && (
             <div className="w-full flex flex-col items-center gap-4 mt-4">
-              <div className="mb-2 font-semibold text-[#16477d] text-lg select-none">
-                Pick next 6 numbers
-              </div>
+              {/* Removed: "Pick next 6 numbers" label */}
               <NumberGrid />
               <Button
                 onClick={confirm}
