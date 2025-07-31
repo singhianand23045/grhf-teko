@@ -1,6 +1,8 @@
+
 import { useTimer } from "./timer-context";
 
-// Removed LOGICAL_HEIGHT and JACKPOT_TIMER_HEIGHT constants
+const LOGICAL_HEIGHT = 874;
+const JACKPOT_TIMER_HEIGHT = 0.15;
 
 export default function TimerSection() {
   const { countdown } = useTimer();
@@ -8,8 +10,9 @@ export default function TimerSection() {
     <div
       className="w-full flex flex-row items-center justify-end px-0 pt-4 pb-0"
       style={{
-        // Removed minHeight and maxHeight, parent will control height
-        height: "100%" // Take full height of parent container
+        minHeight: Math.floor(LOGICAL_HEIGHT * JACKPOT_TIMER_HEIGHT),
+        maxHeight: Math.ceil(LOGICAL_HEIGHT * JACKPOT_TIMER_HEIGHT),
+        height: `${JACKPOT_TIMER_HEIGHT * 100}%`
       }}
       data-testid="timer-header"
     >

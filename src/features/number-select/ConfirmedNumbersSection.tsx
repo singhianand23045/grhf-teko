@@ -5,7 +5,7 @@ import { Repeat } from "lucide-react";
 import { useNumberSelection } from "./NumberSelectionContext"; // Import useNumberSelection
 import ConfirmedNumbersDisplay from "./ConfirmedNumbersDisplay"; // Import the renamed component
 
-// Removed LOGICAL_HEIGHT constant
+const LOGICAL_HEIGHT = 874;
 
 export default function ConfirmedNumbersSection() {
   const { state, resetDemo, cycleIndex } = useTimer();
@@ -16,9 +16,11 @@ export default function ConfirmedNumbersSection() {
 
   return (
     <div
-      className="flex flex-col items-center justify-center w-full flex-1 overflow-y-auto" // flex-1 to take remaining space, overflow-y-auto for scrolling
+      className="flex flex-col items-center justify-center w-full flex-shrink-0 flex-grow-0 overflow-y-hidden"
       style={{
-        // Removed fixed height, minHeight, maxHeight
+        height: "40%",
+        minHeight: Math.floor(LOGICAL_HEIGHT * 0.4),
+        maxHeight: Math.ceil(LOGICAL_HEIGHT * 0.4),
       }}
     >
       {showDemoComplete ? (
