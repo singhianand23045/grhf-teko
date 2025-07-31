@@ -41,14 +41,16 @@ This phase introduces the ability for players to submit multiple sets of numbers
 *   **Second Set Overlay (0:32 – 0:26):**
     *   Numbers matching the **second confirmed set** are highlighted in **blue**.
     *   If a number matches both the first and second sets, its visual representation splits into two semi-circles (left half green, right half blue).
+    *   **These highlights persist until the next game round.**
 *   **Set 2 Result Message & Crediting (0:25 – 0:23):**
     *   A message appears for 2 seconds: "Congrats! You won \[xyz] credits!" or "No matches. Wait for next set!".
     *   **The wallet is credited with winnings for Set 2 immediately when this message is displayed.**
 *   **Third Set Overlay (0:22 – 0:16):**
-    *   If a third set exists, numbers matching the **third confirmed set** are highlighted in **yellow**.
+    *   If a third set exists, numbers matching the **third confirmed set** are highlighted in **orange**.
     *   For overlaps:
-        *   If a number matches all three sets, its visual representation divides into three equal wedges (green/blue/yellow).
-        *   If it matches the third set and one other (e.g., Set 1 & 3, or Set 2 & 3), its visual representation splits into two halves (e.g., left half green, right half yellow for Set 1 & 3).
+        *   If a number matches all three sets, its visual representation divides into three equal wedges (green/blue/orange).
+        *   If it matches the third set and one other (e.g., Set 1 & 3, or Set 2 & 3), its visual representation splits into two halves (e.g., left half green, right half orange for Set 1 & 3).
+    *   **These highlights persist until the next game round.**
 *   **Set 3 Result Message & Crediting (0:15 – 0:13):**
     *   A message appears for 2 seconds: "Congrats! You won \[xyz] credits!" or "No matches. Wait for final result!".
     *   **The wallet is credited with winnings for Set 3 immediately when this message is displayed.**
@@ -72,7 +74,7 @@ This phase introduces the ability for players to submit multiple sets of numbers
     *   Confirmed sets are displayed in a vertical stack, each as a compact `ConfirmedNumbersDisplay` row.
     *   The entire confirmed sets section (including the grid when visible) should be wrapped in a vertical scroll container if its content exceeds its allotted height, ensuring no horizontal scrolling and fixed UI elements (draw grid, credits bar) remain in place.
 *   **`Ball3D` Component:**
-    *   Must support rendering with multiple highlight colors (green, blue, yellow) and combinations thereof (split circles, wedges).
+    *   Must support rendering with multiple highlight colors (green, blue, orange) and combinations thereof (split circles, wedges).
     *   Maintain perfectly circular chip shape and centered numbers regardless of highlight state or resizing.
 *   **Result Bar:**
     *   The `ResultBar` component will be updated to display **one consolidated message** summarizing the total winnings across all confirmed sets for the current draw.
@@ -87,9 +89,9 @@ This phase introduces the ability for players to submit multiple sets of numbers
 *   [ ] The confirmed sets section handles vertical overflow gracefully with scrolling, without affecting other UI sections.
 *   [ ] During the reveal phase (0:45-0:36), numbers matching Set 1 are highlighted green.
 *   [ ] From 0:35-0:33, a message for Set 1 results is shown, and **wallet is credited for Set 1's winnings**.
-*   [ ] From 0:32-0:26, numbers matching Set 2 are highlighted blue, with split circles for overlaps with Set 1.
+*   [ ] From 0:32-0:26, numbers matching Set 2 are highlighted blue, with split circles for overlaps with Set 1. **These highlights persist.**
 *   [ ] From 0:25-0:23, a message for Set 2 results is shown, and **wallet is credited for Set 2's winnings**.
-*   [ ] From 0:22-0:16, numbers matching Set 3 are highlighted yellow, with split circles/wedges for overlaps with Set 1 and/or Set 2.
+*   [ ] From 0:22-0:16, numbers matching Set 3 are highlighted orange, with split circles/wedges for overlaps with Set 1 and/or Set 2. **These highlights persist.**
 *   [ ] From 0:15-0:13, a message for Set 3 results is shown, and **wallet is credited for Set 3's winnings**.
 *   [ ] The final result message (0:12-0:02) accurately summarizes winnings for all confirmed sets, prioritizing jackpot wins.
 *   [ ] All confirmed sets are cleared at the start of a new draw cycle.

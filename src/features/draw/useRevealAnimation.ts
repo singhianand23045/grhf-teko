@@ -58,12 +58,12 @@ export function useRevealAnimation(
   const PICKSET1_MESSAGE_DURATION_MS = 2 * 1000;
 
   const PICKSET2_HIGHLIGHT_START_MS = 13 * 1000;
-  const PICKSET2_HIGHLIGHT_END_MS = 19 * 1000;
+  // const PICKSET2_HIGHLIGHT_END_MS = 19 * 1000; // Removed for persistence
   const PICKSET2_MESSAGE_START_MS = 20 * 1000;
   const PICKSET2_MESSAGE_DURATION_MS = 2 * 1000;
 
   const PICKSET3_HIGHLIGHT_START_MS = 23 * 1000;
-  const PICKSET3_HIGHLIGHT_END_MS = 29 * 1000;
+  // const PICKSET3_HIGHLIGHT_END_MS = 29 * 1000; // Removed for persistence
   const PICKSET3_MESSAGE_START_MS = 30 * 1000;
   const PICKSET3_MESSAGE_DURATION_MS = 2 * 1000;
 
@@ -166,17 +166,7 @@ export function useRevealAnimation(
           })));
         }, PICKSET2_HIGHLIGHT_START_MS) // Renamed
       );
-      messageTimeouts.current.push(
-        setTimeout(() => {
-          setDrawnNumbers(prev => prev.map(dn => ({
-            ...dn,
-            highlightMatches: {
-              ...dn.highlightMatches,
-              pickSet2: false // Remove highlight // Renamed
-            }
-          })));
-        }, PICKSET2_HIGHLIGHT_END_MS) // Renamed
-      );
+      // Removed: messageTimeouts.current.push(setTimeout(() => { ... pickSet2: false ... }));
       messageTimeouts.current.push(
         setTimeout(() => {
           const entry = wallet.history.find((e: any) => e.cycle === cycle && e.numbers.join(',') === confirmedPicksSets[1].join(',')); // Renamed ticket to entry
@@ -204,17 +194,7 @@ export function useRevealAnimation(
           })));
         }, PICKSET3_HIGHLIGHT_START_MS) // Renamed
       );
-      messageTimeouts.current.push(
-        setTimeout(() => {
-          setDrawnNumbers(prev => prev.map(dn => ({
-            ...dn,
-            highlightMatches: {
-              ...dn.highlightMatches,
-              pickSet3: false // Remove highlight // Renamed
-            }
-          })));
-        }, PICKSET3_HIGHLIGHT_END_MS) // Renamed
-      );
+      // Removed: messageTimeouts.current.push(setTimeout(() => { ... pickSet3: false ... }));
       messageTimeouts.current.push(
         setTimeout(() => {
           const entry = wallet.history.find((e: any) => e.cycle === cycle && e.numbers.join(',') === confirmedPicksSets[2].join(',')); // Renamed ticket to entry
