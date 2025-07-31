@@ -1,4 +1,3 @@
-
 import React from "react";
 import { layoutConfig } from "./layoutConfig";
 import JackpotSection from "../features/jackpot/JackpotSection";
@@ -7,8 +6,7 @@ import CreditsSection from "../features/wallet/CreditsSection";
 import DrawNumbersSection from "../features/draw/DrawNumbersSection";
 import ConfirmedNumbersSection from "../features/number-select/ConfirmedNumbersSection";
 
-const LOGICAL_WIDTH = 402;
-const LOGICAL_HEIGHT = 874;
+// Removed LOGICAL_WIDTH and LOGICAL_HEIGHT as we are moving to a more flexible layout
 
 export default function FlexibleLayout() {
   // For easy reference, map keys to components
@@ -36,7 +34,7 @@ export default function FlexibleLayout() {
       className="flex-shrink-0"
       style={{
         height: "0.5%",
-        minHeight: 0,
+        minHeight: 0, // Ensure it can shrink
         width: "100%",
       }}
       aria-hidden="true"
@@ -47,10 +45,10 @@ export default function FlexibleLayout() {
     <div className="w-full h-full flex flex-col">
       {/* Header (Lucky Dip, 5%) */}
       <div
-        className={`w-full flex-shrink-0 flex-grow-0 flex items-center justify-center ${headerCfg?.bg ?? ""} ${headerCfg?.font ?? ""}`}
+        className={`w-full flex-shrink-0 flex items-center justify-center ${headerCfg?.bg ?? ""} ${headerCfg?.font ?? ""}`}
         style={{
           height: headerCfg?.height,
-          minHeight: 0,
+          // Removed minHeight calculation
         }}
       >
         {sectionMap["header"]}
@@ -59,10 +57,10 @@ export default function FlexibleLayout() {
       <SectionGap />
       {/* Jackpot and Timer side by side (15% total height) */}
       <div
-        className="w-full flex flex-row flex-shrink-0 flex-grow-0"
+        className="w-full flex flex-row flex-shrink-0"
         style={{
           height: jackpotCfg?.height,
-          minHeight: 0,
+          // Removed minHeight calculation
         }}
       >
         {/* Jackpot: left, 50% */}
@@ -84,10 +82,10 @@ export default function FlexibleLayout() {
       <SectionGap />
       {/* Draw Numbers (30%) */}
       <div
-        className={`w-full flex-shrink-0 flex-grow-0 flex items-center justify-center bg-gradient-to-r ${layoutConfig[3].bg} ${layoutConfig[3].font}`}
+        className={`w-full flex-shrink-0 flex items-center justify-center bg-gradient-to-r ${layoutConfig[3].bg} ${layoutConfig[3].font}`}
         style={{
           height: layoutConfig[3].height,
-          minHeight: 0,
+          // Removed minHeight calculation
         }}
       >
         {sectionMap["drawNumbers"]}
@@ -96,22 +94,22 @@ export default function FlexibleLayout() {
       <SectionGap />
       {/* Wallet / Credits (5%) */}
       <div
-        className={`w-full flex-shrink-0 flex-grow-0 flex items-center justify-center bg-gradient-to-r ${layoutConfig[4].bg} ${layoutConfig[4].font}`}
+        className={`w-full flex-shrink-0 flex items-center justify-center bg-gradient-to-r ${layoutConfig[4].bg} ${layoutConfig[4].font}`}
         style={{
           height: layoutConfig[4].height,
-          minHeight: 0,
+          // Removed minHeight calculation
         }}
       >
         {sectionMap["wallet"]}
       </div>
       {/* Gap */}
       <SectionGap />
-      {/* Number Select (45%) */}
+      {/* Number Select (45%) - now flex-1 to take remaining space */}
       <div
-        className={`w-full flex-shrink-0 flex-grow-0 flex items-center justify-center bg-gradient-to-r ${layoutConfig[5].bg} ${layoutConfig[5].font}`}
+        className={`w-full flex-1 flex flex-col items-center justify-center bg-gradient-to-r ${layoutConfig[5].bg} ${layoutConfig[5].font}`}
         style={{
-          height: layoutConfig[5].height,
-          minHeight: 0,
+          // Removed fixed height, now flex-1
+          minHeight: 0, // Allow it to shrink if needed, but flex-1 will make it grow
         }}
       >
         {sectionMap["numberSelect"]}
