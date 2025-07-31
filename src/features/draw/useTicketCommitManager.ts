@@ -1,4 +1,3 @@
-
 import { useRef, useEffect } from "react";
 import { useWallet } from "../wallet/WalletContext";
 import { useNumberSelection } from "../number-select/NumberSelectionContext";
@@ -11,75 +10,75 @@ export function useTicketCommitManager(
   state: string,
   lastPickedPerCycle: { [cycle: number]: number[] },
   picked: number[],
-  incrementTicketCountForCycle: (cycle: number, debugSource?: string) => void
+  incrementEntryCountForCycle: (cycle: number, debugSource?: string) => void
 ) {
   const wallet = useWallet();
-  const { isConfirmed, confirmedCycle } = useNumberSelection();
-  const ticketCommittedCycle = useRef<number | null>(null);
+  const { isCurrentSelectionLocked, confirmedCycle } = useNumberSelection(); // Updated from isConfirmed
+  const entryCommittedCycle = useRef<number | null>(null); // Renamed from ticketCommittedCycle
 
-  // pendingTicketRef: helper to track ticket to be entered post-reveal
-  const pendingTicketRef = useRef<{
+  // pendingEntryRef: helper to track entry to be entered post-reveal
+  const pendingEntryRef = useRef<{
     cycle: number;
-    ticket: { date: string; numbers: number[] };
+    entry: { date: string; numbers: number[] };
     entered: boolean;
-  } | null>(null);
+  } | null>(null); // Renamed from pendingTicketRef
 
-  // Track the last ticket committed to prevent duplicates
-  const lastCommittedTicket = useRef<{ cycle: number; numbers: string } | null>(null);
+  // Track the last entry committed to prevent duplicates
+  const lastCommittedEntry = useRef<{ cycle: number; numbers: string } | null>(null); // Renamed from lastCommittedTicket
 
-  // Track whether we've committed a ticket for this cycle to avoid duplicates (extra defense).
+  // Track whether we've committed an entry for this cycle to avoid duplicates (extra defense).
   useEffect(() => {
     // Reset on new cycle
-    ticketCommittedCycle.current = null;
-    pendingTicketRef.current = null;
-    lastCommittedTicket.current = null;
+    entryCommittedCycle.current = null;
+    pendingEntryRef.current = null;
+    lastCommittedEntry.current = null;
   }, [cycleIndex]);
 
   useEffect(() => {
     // More robust logic: commit if we have 6 numbers confirmed for this cycle and haven't already committed
     const numbersKey = picked.slice().sort((a, b) => a - b).join(',');
-    const hasAlreadyCommitted = lastCommittedTicket.current?.cycle === cycleIndex && 
-                               lastCommittedTicket.current?.numbers === numbersKey;
+    const hasAlreadyCommitted = lastCommittedEntry.current?.cycle === cycleIndex && 
+                               lastCommittedEntry.current?.numbers === numbersKey;
 
     if (
       picked.length === 6 &&
-      isConfirmed &&
+      isCurrentSelectionLocked && // Updated from isConfirmed
       confirmedCycle === cycleIndex &&
-      ticketCommittedCycle.current !== cycleIndex &&
+      entryCommittedCycle.current !== cycleIndex &&
       !hasAlreadyCommitted
     ) {
-      // Commit ticket and deduct credits - SET THE CYCLE PROPERTY
-      wallet.addConfirmedTicket({
+      // Commit entry and deduct credits - SET THE CYCLE PROPERTY
+      wallet.addConfirmedEntry({ // Updated from addConfirmedTicket
         date: new Date().toISOString(),
         numbers: picked.slice(),
         cycle: cycleIndex, // Ensure cycle is set for proper matching
       });
-      ticketCommittedCycle.current = cycleIndex;
-      lastCommittedTicket.current = { cycle: cycleIndex, numbers: numbersKey };
+      entryCommittedCycle.current = cycleIndex;
+      lastCommittedEntry.current = { cycle: cycleIndex, numbers: numbersKey };
 
-      // Store pending ticket for prize awarding (as before)
-      pendingTicketRef.current = {
+      // Store pending entry for prize awarding (as before)
+      pendingEntryRef.current = {
         cycle: cycleIndex,
-        ticket: {
+        entry: { // Updated from ticket
           date: new Date().toISOString(),
           numbers: picked.slice(),
         },
-        entered: true, // ticket was entered for this cycle
+        entered: true, // entry was entered for this cycle
       };
-      console.log("[useTicketCommitManager] Confirmed ticket and deducted credits for cycle", cycleIndex, picked);
+      console.log("[useTicketCommitManager] Confirmed entry and deducted credits for cycle", cycleIndex, picked);
     }
 
-    // If not confirmed, reset pending ticket if present & not for the current cycle
+    // If not confirmed, reset pending entry if present & not for the current cycle
     if (
-      (!isConfirmed || picked.length !== 6) &&
-      pendingTicketRef.current && pendingTicketRef.current.cycle !== cycleIndex
+      (!isCurrentSelectionLocked || picked.length !== 6) && // Updated from !isConfirmed
+      pendingEntryRef.current && pendingEntryRef.current.cycle !== cycleIndex
     ) {
-      pendingTicketRef.current = null;
+      pendingEntryRef.current = null;
     }
-  }, [picked, isConfirmed, cycleIndex, wallet]);
+  }, [picked, isCurrentSelectionLocked, confirmedCycle, cycleIndex, wallet]); // Updated dependencies
 
   return {
-    ticketCommittedCycle,
-    pendingTicketRef,
+    entryCommittedCycle, // Renamed
+    pendingEntryRef, // Renamed
   };
 }

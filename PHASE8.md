@@ -50,7 +50,7 @@ The Play Assistant is an interactive extension of the Number Assistant that enab
 
 **FR8: Confirmation Flow Integration**
 - Assistant confirmation immediately confirms numbers for the current draw
-- Bypass manual selection grid and proceed directly to ticket confirmation
+- Bypass manual selection grid and proceed directly to entry confirmation
 - Maintain existing credit deduction and game mechanics
 
 **FR9: Enhanced Assistant Capabilities**

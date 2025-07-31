@@ -1,4 +1,3 @@
-
 # Phase 6: Roulette Ball Draw Animation (Prototype)
 
 ## Feature Spec: Roulette Ball Draw Animation (Prototype)
@@ -43,4 +42,3 @@
   - [ ] Result message appears for **10 seconds** (from 0:25 to 0:15), then disappears.
 - **Regression**
   - [ ] Removing or editing this feature doesn’t break existing reveal/grid drawing features.
-

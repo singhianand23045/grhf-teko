@@ -4,9 +4,9 @@ const CIRCLE_DIAM = 35; // px
 const NUMBER_FONT_SIZE = "1.05rem";
 
 type HighlightMatches = {
-  ticket1?: boolean; // Green
-  ticket2?: boolean; // Blue
-  ticket3?: boolean; // Yellow
+  pickSet1?: boolean; // Green
+  pickSet2?: boolean; // Blue
+  pickSet3?: boolean; // Yellow
 };
 
 type Ball3DProps = {
@@ -25,11 +25,11 @@ export default function Ball3D({
   const isSpinning = !!spinning;
 
   // Determine highlight state
-  const t1 = highlightMatches?.ticket1;
-  const t2 = highlightMatches?.ticket2;
-  const t3 = highlightMatches?.ticket3;
+  const ps1 = highlightMatches?.pickSet1;
+  const ps2 = highlightMatches?.pickSet2;
+  const ps3 = highlightMatches?.pickSet3;
 
-  const numMatches = (t1 ? 1 : 0) + (t2 ? 1 : 0) + (t3 ? 1 : 0);
+  const numMatches = (ps1 ? 1 : 0) + (ps2 ? 1 : 0) + (ps3 ? 1 : 0);
 
   let ballBackgroundStyle: React.CSSProperties = {};
   let ballBorderColor = "";
@@ -52,19 +52,19 @@ export default function Ball3D({
     textShadow = "0 1px 6px #d4dfff88";
   } else if (numMatches === 1) {
     // Single highlight
-    if (t1) {
+    if (ps1) {
       ballBackgroundStyle.backgroundColor = "#00c805"; // Robinhood green
       ballBorderColor = "border-green-700";
       ballBoxShadow = "0 3px 16px 2px rgba(34,197,94,0.28), 0 0.5px 2.8px 0px #eaf3fa";
       textColor = "#111";
       textShadow = "0 2px 7px #99f6e0ee";
-    } else if (t2) {
+    } else if (ps2) {
       ballBackgroundStyle.backgroundColor = "#00afff"; // Robinhood blue
       ballBorderColor = "border-blue-700";
       ballBoxShadow = "0 3px 16px 2px rgba(0,175,255,0.28), 0 0.5px 2.8px 0px #eaf3fa";
       textColor = "#111";
       textShadow = "0 2px 7px rgba(0,175,255,0.5)";
-    } else if (t3) {
+    } else if (ps3) {
       ballBackgroundStyle.backgroundColor = "#ffd300"; // Robinhood yellow
       ballBorderColor = "border-yellow-700";
       ballBoxShadow = "0 3px 16px 2px rgba(255,211,0,0.28), 0 0.5px 2.8px 0px #eaf3fa";
@@ -74,9 +74,9 @@ export default function Ball3D({
   } else if (numMatches === 2) {
     // Two highlights - split circle
     let gradientColors = "";
-    if (t1 && t2) gradientColors = "#00c805 50%, #00afff 50%"; // Green-Blue
-    else if (t1 && t3) gradientColors = "#00c805 50%, #ffd300 50%"; // Green-Yellow
-    else if (t2 && t3) gradientColors = "#00afff 50%, #ffd300 50%"; // Blue-Yellow
+    if (ps1 && ps2) gradientColors = "#00c805 50%, #00afff 50%"; // Green-Blue
+    else if (ps1 && ps3) gradientColors = "#00c805 50%, #ffd300 50%"; // Green-Yellow
+    else if (ps2 && ps3) gradientColors = "#00afff 50%, #ffd300 50%"; // Blue-Yellow
     
     ballBackgroundStyle.background = `linear-gradient(to right, ${gradientColors})`;
     ballBorderColor = "border-gray-400"; // Neutral border for mixed colors

@@ -1,11 +1,10 @@
-
 # Phase 2 Spec: Number Selection UI
 
 ## User Stories
 
 - As a user, I want to pick exactly 6 numbers from a grid of 27, so I can participate in the lottery round.
 - As a user, I want to confirm my chosen numbers so I know they are locked in for the draw and can’t change them accidentally.
-- As a user, once my numbers are confirmed, I want to see them clearly displayed in a visually appealing ticket, formatted in a way that is readable on any device.
+- As a user, once my numbers are confirmed, I want to see them clearly displayed in a visually appealing set of confirmed numbers, formatted in a way that is readable on any device.
 - As a user, I don’t want to have to scroll or zoom to see all of my numbers, even on a mobile screen.
 
 ## Functional Requirements
@@ -14,11 +13,11 @@
 - User can select/deselect numbers while the timer state is "OPEN."
 - User may only select up to 6 numbers; the "Confirm Numbers" button activates only when all 6 are selected.
 - Confirming locks the selection until the next round or cycle.
-- After confirmation (or when timer is "CUT_OFF"), display the selected numbers in a lottery ticket.
+- After confirmation (or when timer is "CUT_OFF"), display the selected numbers in a confirmed set of numbers.
 
 ## Acceptance Criteria
 
-### Lottery Ticket Display
+### Confirmed Numbers Display
 
 - After confirming, the chosen numbers appear in a single horizontal line—no number is hidden, truncated, or scrollable on any device.
 - Numbers are immediately sorted in ascending order before display.

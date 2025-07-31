@@ -23,7 +23,7 @@ interface ChatMessage {
   content: string;
   recommendation?: NumberRecommendation;
   timestamp: Date;
-  isConfirmed?: boolean; // Track if recommendation has been acted upon
+  isActedUpon?: boolean; // Track if recommendation has been acted upon (renamed from isConfirmed)
 }
 
 // Call the LLM edge function for intelligent responses
@@ -107,11 +107,11 @@ function parseRecommendationRequest(message: string): RecommendationType | null 
 }
 
 // Number grid component for displaying recommendations
-function NumberGrid({ numbers, onConfirm, buttonText, isConfirmed }: { 
+function NumberGrid({ numbers, onConfirm, buttonText, isActedUpon }: { // Renamed isConfirmed to isActedUpon
   numbers: number[], 
   onConfirm: () => void,
   buttonText: string,
-  isConfirmed?: boolean
+  isActedUpon?: boolean // Renamed
 }) {
   return (
     <div className="border rounded-lg p-4 bg-gradient-to-br from-blue-50 to-indigo-50">
@@ -127,14 +127,14 @@ function NumberGrid({ numbers, onConfirm, buttonText, isConfirmed }: {
       </div>
       <Button 
         onClick={onConfirm}
-        className={`w-full ${isConfirmed 
+        className={`w-full ${isActedUpon // Renamed
           ? 'bg-gray-400 hover:bg-gray-400 cursor-not-allowed' 
           : 'bg-green-600 hover:bg-green-700'
         } text-white`}
         size="sm"
-        disabled={isConfirmed}
+        disabled={isActedUpon} // Renamed
       >
-        {isConfirmed ? '✓ Confirmed' : buttonText}
+        {isActedUpon ? '✓ Confirmed' : buttonText} {/* Renamed */}
       </Button>
     </div>
   );
@@ -163,7 +163,7 @@ export default function PlayAssistant() {
   
   const chatRef = useRef<HTMLDivElement>(null);
   const { state: timerState, countdown, cycleIndex } = useTimer();
-  const { picked, setPicked, isConfirmed, confirm, canConfirm } = useNumberSelection();
+  const { picked, setPicked, isCurrentSelectionLocked, confirm, canConfirm } = useNumberSelection(); // Renamed isConfirmed
   const wallet = useWallet();
   const { drawHistory, getHotNumbers, getColdNumbers, getRecentPatterns } = useDrawHistory();
 
@@ -242,7 +242,7 @@ export default function PlayAssistant() {
       timerState,
       selectedNumbers: picked,
       balance: wallet.balance,
-      userHistory: wallet.history.slice(0, 10), // Last 10 user tickets
+      userHistory: wallet.history.slice(0, 10), // Last 10 user entries
       drawHistory: drawHistory.slice(0, 10), // Last 10 actual draws
       hotNumbers: getHotNumbers(10),
       coldNumbers: getColdNumbers(10),
@@ -269,9 +269,9 @@ export default function PlayAssistant() {
   };
 
   const handleConfirmRecommendation = (numbers: number[], messageId: string) => {
-    // Mark this recommendation as confirmed
+    // Mark this recommendation as acted upon
     setMessages(prev => prev.map(msg => 
-      msg.id === messageId ? { ...msg, isConfirmed: true } : msg
+      msg.id === messageId ? { ...msg, isActedUpon: true } : msg // Renamed isConfirmed to isActedUpon
     ));
 
     if (timerState === "OPEN") {
@@ -309,7 +309,7 @@ export default function PlayAssistant() {
           timerState,
           selectedNumbers: picked,
           balance: wallet.balance,
-          userHistory: wallet.history.slice(0, 5),
+          userHistory: wallet.history.slice(0, 5), // Renamed
           drawHistory: drawHistory.slice(0, 5),
           hotNumbers: getHotNumbers(6),
           coldNumbers: getColdNumbers(6),
@@ -373,7 +373,7 @@ export default function PlayAssistant() {
                       numbers={message.recommendation.numbers}
                       onConfirm={() => handleConfirmRecommendation(message.recommendation!.numbers, message.id)}
                       buttonText={getConfirmButtonText()}
-                      isConfirmed={message.isConfirmed}
+                      isActedUpon={message.isActedUpon} // Renamed
                     />
                   </div>
                 )}

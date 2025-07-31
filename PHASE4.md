@@ -2,10 +2,10 @@
 
 ### 1. User Stories
 
-- **As a player**, I want my ticket’s outcome (number of matches) to be evaluated after each draw, so I know if I won or lost.
+- **As a player**, I want my confirmed numbers’ outcome (number of matches) to be evaluated after each draw, so I know if I won or lost.
 - **As a player**, I want the app to automatically keep track of my balance, awarding credits according to how many numbers I match, and deducting a participation fee on entry, so my spending/winnings are always clear.
 - **As a player**, I want my balance to be preserved if I reload or reopen the app, so my progress is never lost.
-- **As a player**, I want my ticket selection to reset for the next draw cycle, so I can choose new numbers each round.
+- **As a player**, I want my number selection to reset for the next draw cycle, so I can choose new numbers each round.
 - **As a player**, I want my credits/balance to be visible in a dedicated section between the drawn numbers and my confirmed numbers, where I can always see and easily add to my balance.
 - **As a player**, I want a clear, timely message after each draw stating if I won and how much, or encouraging me to try again if I lost.
 
@@ -15,16 +15,16 @@
 
 - Define CoreData entities:
   - `Wallet(balance: Int)`
-  - `Ticket(date: string, numbers: [Int], matches: Int, creditChange: Int)`
+  - `Entry(date: string, numbers: [Int], matches: Int, creditChange: Int)`
 
 - **Entry Rules:**
-  - For a ticket to be valid in a draw, the user must select **and confirm** exactly 6 numbers before the cut-off.  
-  - If the user selects fewer than 6 numbers by the cut-off, the entry is **discarded**—no credits are deducted, no ticket is recorded.
-  - If the user selects 6 numbers but **does not confirm** before cut-off, the entry is **discarded**—no credits are deducted, no ticket is recorded.
+  - For a set of numbers to be valid in a draw, the user must select **and confirm** exactly 6 numbers before the cut-off.  
+  - If the user selects fewer than 6 numbers by the cut-off, the entry is **discarded**—no credits are deducted, no entry is recorded.
+  - If the user selects 6 numbers but **does not confirm** before cut-off, the entry is **discarded**—no credits are deducted, no entry is recorded.
 
 - **Balance Management:**
   - Start with `balance = 200` credits for every new player/session.
-  - For each draw in which the player participates (i.e., submits and confirms a 6-number ticket):
+  - For each draw in which the player participates (i.e., submits and confirms a 6-number set):
     - **Deduct 30 credits** from the balance upon confirmation, regardless of results.  
     - **Winnings Calculation:** 
       - For each row, count how many confirmed numbers match the 6 numbers from that row only.
@@ -37,13 +37,13 @@
       - **Sum the total winnings across all three rows for the cycle.**
     - No credits are deducted for non-valid entries (unconfirmed or <6 selections).
     - Balance is updated after each result.
-  - **Each confirmed, valid ticket entry now costs 30 credits (was 10 previously).**
+  - **Each confirmed, valid entry now costs 30 credits (was 10 previously).**
 
 - **Persistence:**
   - Wallet balance must persist between app reloads (e.g., use localStorage).
 
 - **Reset Behavior:**
-  - After each draw cycle, the user’s ticket selection and confirmation are reset (balance remains).
+  - After each draw cycle, the user’s number selection and confirmation are reset (balance remains).
 
 - **UI/UX:**
   - There must be a separate "Credits" section inserted between the drawn numbers and confirmed numbers, occupying 5% of the total screen height.
@@ -59,14 +59,14 @@
 
 ### 3. Acceptance Criteria
 
-- [ ] Submitting fewer than 6 numbers for a draw does **not** deduct credits or submit a ticket.
-- [ ] Submitting and **confirming 6 numbers** for a draw deducts **30 credits** regardless of outcome; ticket is recorded and eligible for winnings.
-- [ ] Submitting a ticket with 6 numbers but **not confirming** before cut-off results in **no deduction**, entry is discarded, and no ticket is recorded.
-- [ ] After each draw, the user's ticket is checked **independently against each of the 3 rows in the grid**.
+- [ ] Submitting fewer than 6 numbers for a draw does **not** deduct credits or submit an entry.
+- [ ] Submitting and **confirming 6 numbers** for a draw deducts **30 credits** regardless of outcome; entry is recorded and eligible for winnings.
+- [ ] Submitting a set of 6 numbers but **does not confirm** before cut-off results in **no deduction**, entry is discarded, and no entry is recorded.
+- [ ] After each draw, the user's confirmed numbers are checked **independently against each of the 3 rows in the grid**.
   - [ ] For each row, number of matches is used to determine the credits awarded (as above), and total winnings are summed.
 - [ ] Multiple wins in multiple draws are credited to balance additively.
 - [ ] The wallet balance is restored correctly on app reload.
-- [ ] Ticket selection resets automatically at the start of each new draw cycle; previous balance remains unchanged.
+- [ ] Number selection resets automatically at the start of each new draw cycle; previous balance remains unchanged.
 - [ ] The Credits section always appears, takes up 5% of the total logical height, and "Add credits", the balance are properly positioned.
 - [ ] The correct feedback message is displayed for **10 seconds, from timer 0:30 to 0:20**, with correct text and duration, and does not interfere with grid layout.
 - [ ] Feedback message and credited amount are correct for the sum of row winnings as appropriate.
@@ -77,14 +77,14 @@
 
 #### Unit/Logic Tests
 
-- [ ] Submitting a ticket with <6 numbers does not affect balance.
-- [ ] Submitting and confirming a ticket with exactly 6 numbers immediately subtracts **30 credits** from balance and records the ticket.
-- [ ] Submitting a ticket with no 6/6 matches:
+- [ ] Submitting a set of <6 numbers does not affect balance.
+- [ ] Submitting and confirming a set of exactly 6 numbers immediately subtracts **30 credits** from balance and records the entry.
+- [ ] Submitting an entry with no 6/6 matches:
     - [ ] Regular row credit winnings are computed and summed.
     - [ ] If the user matches in multiple rows, total regular winnings are credited.
-- [ ] The result message and credited amount reflect the summed regular winnings for the ticket.
+- [ ] The result message and credited amount reflect the summed regular winnings for the entry.
 - [ ] Balance is restored after app reload.
-- [ ] After the draw, ticket selection resets but balance does not.
+- [ ] After the draw, number selection resets but balance does not.
 
 #### UI/UX Tests
 

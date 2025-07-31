@@ -3,25 +3,25 @@ import { getCreditsForMatches } from "../draw/getCreditsForMatches";
 
 export type WalletType = {
   balance: number;
-  history: TicketType[];
+  history: EntryType[];
 };
 
-export type TicketType = {
+export type EntryType = {
   id: string;
   date: string;
   numbers: number[];
   matches: number;
   creditChange: number;
   winnings?: number; // <-- for display only
-  processed?: boolean; // <-- to track if ticket has been processed for winnings
-  cycle?: number; // <-- to track which cycle this ticket belongs to
+  processed?: boolean; // <-- to track if entry has been processed for winnings
+  cycle?: number; // <-- to track which cycle this entry belongs to
 };
 
 type WalletContextType = {
   balance: number;
-  history: TicketType[];
-  addConfirmedTicket: (ticket: Omit<TicketType, "id" | "creditChange" | "matches" | "winnings" | "processed">) => void;
-  processTicketResult: (ticketId: string, matches: number, winnings: number, jackpotWon: boolean) => void; // Updated signature
+  history: EntryType[];
+  addConfirmedEntry: (entry: Omit<EntryType, "id" | "creditChange" | "matches" | "winnings" | "processed">) => void;
+  processEntryResult: (entryId: string, matches: number, winnings: number, jackpotWon: boolean) => void; // Updated signature
   resetWallet: () => void;
 };
 
@@ -47,7 +47,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
     }
     return STARTING_BALANCE;
   });
-  const [history, setHistory] = useState<TicketType[]>(() => {
+  const [history, setHistory] = useState<EntryType[]>(() => {
     const data = localStorage.getItem(LOCAL_STORAGE_KEY);
     if (data) {
       try {
@@ -65,36 +65,36 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
     saveWalletToStorage({ balance, history });
   }, [balance, history]);
 
-  function addConfirmedTicket(ticketCore: Omit<TicketType, "id" | "creditChange" | "matches" | "winnings" | "processed">) {
-    const newTicket: TicketType = {
-      ...ticketCore,
+  function addConfirmedEntry(entryCore: Omit<EntryType, "id" | "creditChange" | "matches" | "winnings" | "processed">) {
+    const newEntry: EntryType = {
+      ...entryCore,
       id: Math.random().toString(36).slice(2) + Date.now(),
       matches: 0,
-      creditChange: -30, // Always -30 for ticket purchase
+      creditChange: -30, // Always -30 for entry purchase
       winnings: 0,
       processed: false, // Mark as unprocessed initially
     };
     setBalance(prev => prev - 30);
-    setHistory(prev => [newTicket, ...prev]);
+    setHistory(prev => [newEntry, ...prev]);
   }
 
   /**
-   * Processes the result for a single ticket, updates its status, and awards winnings.
+   * Processes the result for a single entry, updates its status, and awards winnings.
    */
-  function processTicketResult(ticketId: string, matches: number, winnings: number, jackpotWon: boolean) {
+  function processEntryResult(entryId: string, matches: number, winnings: number, jackpotWon: boolean) {
     setHistory(prevHistory => {
-      const updatedHistory = prevHistory.map(ticket => {
-        if (ticket.id === ticketId && !ticket.processed) {
+      const updatedHistory = prevHistory.map(entry => {
+        if (entry.id === entryId && !entry.processed) {
           const awardedAmount = jackpotWon ? winnings : winnings; // If jackpot, winnings is already jackpot amount
           setBalance(prevBal => prevBal + awardedAmount);
           return {
-            ...ticket,
+            ...entry,
             matches: matches,
             winnings: awardedAmount,
             processed: true,
           };
         }
-        return ticket;
+        return entry;
       });
       return updatedHistory;
     });
@@ -107,7 +107,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <WalletContext.Provider value={{ balance, history, addConfirmedTicket, processTicketResult, resetWallet }}>
+    <WalletContext.Provider value={{ balance, history, addConfirmedEntry, processEntryResult, resetWallet }}>
       {children}
     </WalletContext.Provider>
   );

@@ -18,13 +18,13 @@ type UseDrawPrizesArgs = {
   wallet: any;
   jackpotContext: any;
   cleanupResultBarTimeout: () => void;
-  pendingTicketRef: React.MutableRefObject<{
+  pendingEntryRef: React.MutableRefObject<{ // Renamed from pendingTicketRef
     cycle: number;
-    ticket: { date: string; numbers: number[] };
+    entry: { date: string; numbers: number[] }; // Renamed from ticket
     entered: boolean;
   } | null>;
   revealStartedForCycle: React.MutableRefObject<number | null>; // New parameter
-  confirmedTickets: number[][]; // New parameter
+  confirmedPicksSets: number[][]; // Renamed from confirmedTickets
 };
 
 export function useDrawPrizes({
@@ -37,9 +37,9 @@ export function useDrawPrizes({
   wallet,
   jackpotContext,
   cleanupResultBarTimeout,
-  pendingTicketRef,
+  pendingEntryRef, // Renamed
   revealStartedForCycle, // New parameter
-  confirmedTickets // New parameter
+  confirmedPicksSets // Renamed
 }: UseDrawPrizesArgs) {
   const resultAwardedForCycle = useRef<number | null>(null);
   const { addDrawResult } = useDrawHistory();
@@ -61,14 +61,14 @@ export function useDrawPrizes({
       const startSet = cycleIndex * SETS_PER_CYCLE;
       const activeSets = sets.slice(startSet, startSet + SETS_PER_CYCLE);
 
-      let totalWinningsAcrossAllTickets = 0;
+      let totalWinningsAcrossAllEntries = 0; // Renamed
       let anyJackpotWon = false;
 
-      // Iterate through all confirmed tickets for this cycle to calculate overall winnings for history
-      confirmedTickets.forEach((userNumbers, ticketIndex) => {
-        // Ensure the ticket is valid (6 numbers)
+      // Iterate through all confirmed pick sets for this cycle to calculate overall winnings for history
+      confirmedPicksSets.forEach((userNumbers, pickSetIndex) => { // Renamed
+        // Ensure the pick set is valid (6 numbers)
         if (userNumbers.length !== 6) {
-          console.warn(`[Prize] Ticket ${ticketIndex + 1} is invalid (not 6 numbers). Skipping.`);
+          console.warn(`[Prize] Pick Set ${pickSetIndex + 1} is invalid (not 6 numbers). Skipping.`); // Renamed
           return;
         }
 
@@ -77,9 +77,9 @@ export function useDrawPrizes({
 
         if (jackpotWon) {
           anyJackpotWon = true;
-          totalWinningsAcrossAllTickets += jackpotContext.jackpot; // Add jackpot amount
+          totalWinningsAcrossAllEntries += jackpotContext.jackpot; // Add jackpot amount
         } else {
-          totalWinningsAcrossAllTickets += totalWinnings; // Add regular winnings
+          totalWinningsAcrossAllEntries += totalWinnings; // Add regular winnings
         }
       });
 
@@ -89,11 +89,11 @@ export function useDrawPrizes({
         cycle: cycleIndex,
         winningNumbers,
         jackpotWon: anyJackpotWon,
-        totalWinnings: totalWinningsAcrossAllTickets
+        totalWinnings: totalWinningsAcrossAllEntries
       });
 
-      // Wallet crediting is now handled by useRevealAnimation for each ticket message.
-      // No need to call wallet.awardTicketWinnings here.
+      // Wallet crediting is now handled by useRevealAnimation for each pick set message.
+      // No need to call wallet.awardEntryWinnings here.
     }
     // eslint-disable-next-line
   }, [
@@ -103,10 +103,10 @@ export function useDrawPrizes({
     wallet, // Still needed for history lookup in useRevealAnimation
     jackpotContext,
     lastPickedPerCycle,
-    pendingTicketRef,
+    pendingEntryRef, // Renamed
     SETS_PER_CYCLE,
     cleanupResultBarTimeout,
     revealStartedForCycle,
-    confirmedTickets // Add confirmedTickets to dependencies
+    confirmedPicksSets // Renamed
   ]);
 }

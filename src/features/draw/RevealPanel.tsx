@@ -7,7 +7,7 @@ import RouletteBallGrid from "./RouletteBallGrid";
 
 // Use a single global font/circle size in this file
 const BASE_FONT_SIZE = "1rem";
-const BASE_DIAM = "2.2rem"; // same as used elsewhere (LotteryTicket)
+const BASE_DIAM = "2.2rem"; // same as used elsewhere (ConfirmedNumbersDisplay)
 
 // FEATURE FLAG: Set to true to activate roulette animation, false for legacy grid
 const ENABLE_ROULETTE_ANIMATION = true;
@@ -22,7 +22,7 @@ export default function RevealPanel() {
   }
 
   const { drawnNumbers, revealResult } = ctx; // drawnNumbers now includes highlight info
-  const { confirmedTickets } = useNumberSelection(); // Get all confirmed tickets
+  const { confirmedPicksSets } = useNumberSelection(); // Get all confirmed pick sets
   const { state } = useTimer();
 
   // Define the ResultBar's height (adjust as needed for nice appearance)
@@ -61,7 +61,7 @@ export default function RevealPanel() {
             <RouletteBallGrid
               drawnNumbersWithHighlights={drawnNumbers} // Pass the new structure
               reveal={state === "REVEAL"}
-              confirmedTickets={confirmedTickets} // Pass confirmedTickets for internal logic if needed
+              confirmedPicksSets={confirmedPicksSets} // Pass confirmedPicksSets for internal logic if needed
             />
           </div>
         </div>
@@ -106,7 +106,7 @@ export default function RevealPanel() {
               {Array.from({ length: 6 }).map((_, colIdx) => {
                 const index = rowIdx * 6 + colIdx;
                 const drawnNum = drawnNumbers[index]?.number; // Access the number
-                const isHighlighted = drawnNumbers[index]?.highlightMatches?.ticket1; // Only checks ticket1 for legacy
+                const isHighlighted = drawnNumbers[index]?.highlightMatches?.pickSet1; // Only checks pickSet1 for legacy
                 const baseCircleStyle = {
                   width: BASE_DIAM,
                   minWidth: 28,

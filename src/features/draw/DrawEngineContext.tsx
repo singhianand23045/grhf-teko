@@ -36,7 +36,7 @@ export function DrawEngineProvider({ children }: { children: React.ReactNode }) 
   const jackpotContext = useJackpot();
   const sets = useDrawSets();
   const { lastPickedPerCycle, picked } = useTicketSelectionManager(cycleIndex);
-  const { confirmedTickets } = useNumberSelection(); // Get confirmedTickets
+  const { confirmedPicksSets } = useNumberSelection(); // Get confirmedPicksSets
 
   const resultBarTimeoutMs = 10000;
   const {
@@ -60,7 +60,7 @@ export function DrawEngineProvider({ children }: { children: React.ReactNode }) 
     sets,
     SETS_PER_CYCLE,
     SET_SIZE,
-    confirmedTickets, // Pass confirmedTickets here
+    confirmedPicksSets, // Pass confirmedPicksSets here
     cycleIndex, // Pass cycleIndex to reset state on cycle changes
     showResultBar, // Pass showResultBar
     hideResultBar, // Pass hideResultBar
@@ -68,7 +68,7 @@ export function DrawEngineProvider({ children }: { children: React.ReactNode }) 
     jackpotContext // Pass jackpotContext for winnings calculation
   );
 
-  const { ticketCommittedCycle, pendingTicketRef } = useTicketCommitManager(
+  const { entryCommittedCycle, pendingEntryRef } = useTicketCommitManager( // Renamed
     cycleIndex,
     sets,
     SETS_PER_CYCLE,
@@ -79,7 +79,7 @@ export function DrawEngineProvider({ children }: { children: React.ReactNode }) 
     () => {}
   );
 
-  // Jackpot handlers - increment jackpot when cycle advances with valid tickets
+  // Jackpot handlers - increment jackpot when cycle advances with valid entries
   useJackpotHandlers(cycleIndex, lastPickedPerCycle);
 
   // Prize and awarding logic
@@ -94,9 +94,9 @@ export function DrawEngineProvider({ children }: { children: React.ReactNode }) 
     wallet,
     jackpotContext,
     cleanupResultBarTimeout,
-    pendingTicketRef,
+    pendingEntryRef, // Renamed
     revealStartedForCycle, // Pass the ref to ensure reveal started
-    confirmedTickets // Pass confirmedTickets to useDrawPrizes
+    confirmedPicksSets // Pass confirmedPicksSets to useDrawPrizes
   });
 
   // ResultBar phase visibility/cleanup

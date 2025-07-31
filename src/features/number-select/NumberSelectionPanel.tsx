@@ -4,24 +4,24 @@ import { Button } from "@/components/ui/button";
 import { useNumberSelection } from "./NumberSelectionContext";
 import { useTimer } from "../timer/timer-context";
 import { CheckCircle } from "lucide-react";
-import ConfirmedTicketsList from "./ConfirmedTicketsList";
+import ConfirmedPicksList from "./ConfirmedPicksList"; // Import the renamed component
 
 export default function NumberSelectionPanel() {
-  const { picked, canConfirm, confirm, confirmedTickets, isAddingNewTicket } = useNumberSelection();
+  const { picked, canConfirm, confirm, confirmedPicksSets, isAddingNewPickSet } = useNumberSelection();
   const { state: timerState } = useTimer();
 
-  // Show the initial number grid if no tickets have been confirmed yet AND we are in OPEN state
-  const showInitialNumberGrid = confirmedTickets.length === 0 && timerState === "OPEN";
+  // Show the initial number grid if no pick sets have been confirmed yet AND we are in OPEN state
+  const showInitialNumberGrid = confirmedPicksSets.length === 0 && timerState === "OPEN";
 
-  // Show the confirmed tickets list if any tickets have been confirmed
-  const showConfirmedTicketsSection = confirmedTickets.length > 0;
+  // Show the confirmed pick sets list if any pick sets have been confirmed
+  const showConfirmedPicksSetsSection = confirmedPicksSets.length > 0;
 
-  // Determine if the number grid should be shown for a new selection (after initial or 'Add next ticket')
-  const showGridForNewSelection = isAddingNewTicket && timerState === "OPEN";
+  // Determine if the number grid should be shown for a new selection (after initial or 'Add next set of numbers')
+  const showGridForNewSelection = isAddingNewPickSet && timerState === "OPEN";
 
   return (
     <div className="flex flex-col items-center w-full h-full">
-      {/* Initial state: show grid to pick first ticket */}
+      {/* Initial state: show grid to pick first set */}
       {showInitialNumberGrid && !showGridForNewSelection && (
         <>
           <div className="mb-2 font-semibold text-[#16477d] text-lg select-none">
@@ -47,15 +47,15 @@ export default function NumberSelectionPanel() {
         </>
       )}
 
-      {/* After first ticket is confirmed, or if multiple tickets are being managed */}
-      {showConfirmedTicketsSection && (
-        <ConfirmedTicketsList />
+      {/* After first set is confirmed, or if multiple sets are being managed */}
+      {showConfirmedPicksSetsSection && (
+        <ConfirmedPicksList />
       )}
 
-      {/* Message when in CUT_OFF and no tickets confirmed yet */}
-      {timerState === "CUT_OFF" && confirmedTickets.length === 0 && (
+      {/* Message when in CUT_OFF and no pick sets confirmed yet */}
+      {timerState === "CUT_OFF" && confirmedPicksSets.length === 0 && (
         <div className="text-sm mt-2 text-yellow-700 font-medium text-center">
-          Numbers locked. No tickets confirmed for this draw.
+          Numbers locked. No sets confirmed for this draw.
         </div>
       )}
     </div>

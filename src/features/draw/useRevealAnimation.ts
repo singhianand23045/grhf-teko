@@ -7,9 +7,9 @@ import { getCreditsForMatches } from "./getCreditsForMatches"; // Import getCred
 type RevealedNumber = {
   number: number;
   highlightMatches: {
-    ticket1?: boolean;
-    ticket2?: boolean;
-    ticket3?: boolean;
+    pickSet1?: boolean; // Renamed from ticket1
+    pickSet2?: boolean; // Renamed from ticket2
+    pickSet3?: boolean; // Renamed from ticket3
   };
 };
 
@@ -19,7 +19,7 @@ type RevealedNumber = {
  * @param sets - All 6x6 drawn numbers
  * @param SETS_PER_CYCLE - How many sets (rows) per draw
  * @param SET_SIZE - Size of each set (row)
- * @param confirmedTickets - All confirmed tickets by the user (array of number arrays)
+ * @param confirmedPicksSets - All confirmed pick sets by the user (array of number arrays)
  * @param cycleIndex - Current cycle index to reset state on cycle changes
  * @param showResultBar - Function to show the result bar message
  * @param hideResultBar - Function to hide the result bar message
@@ -30,7 +30,7 @@ export function useRevealAnimation(
   sets: number[][],
   SETS_PER_CYCLE: number,
   SET_SIZE: number,
-  confirmedTickets: number[][],
+  confirmedPicksSets: number[][], // Renamed from confirmedTickets
   cycleIndex: number,
   showResultBar: (credits: number | null, message?: string, duration?: number) => void,
   hideResultBar: () => void,
@@ -47,25 +47,25 @@ export function useRevealAnimation(
   const REVEAL_TOTAL_NUMBERS = SETS_PER_CYCLE * SET_SIZE;
 
   // PHASE 9: Highlight overlay timings (relative to REVEAL start at 0:45)
-  // Ticket 1 Message: 0:35 - 0:33 (2 seconds) -> 10s from 0:45 start
-  // Ticket 2 Highlight: 0:32 - 0:26 (6 seconds) -> 13s from 0:45 start, ends 19s from 0:45 start
-  // Ticket 2 Message: 0:25 - 0:23 (2 seconds) -> 20s from 0:45 start
-  // Ticket 3 Highlight: 0:22 - 0:16 (6 seconds) -> 23s from 0:45 start, ends 29s from 0:45 start
-  // Ticket 3 Message: 0:15 - 0:13 (2 seconds) -> 30s from 0:45 start
+  // Pick Set 1 Message: 0:35 - 0:33 (2 seconds) -> 10s from 0:45 start
+  // Pick Set 2 Highlight: 0:32 - 0:26 (6 seconds) -> 13s from 0:45 start, ends 19s from 0:45 start
+  // Pick Set 2 Message: 0:25 - 0:23 (2 seconds) -> 20s from 0:45 start
+  // Pick Set 3 Highlight: 0:22 - 0:16 (6 seconds) -> 23s from 0:45 start, ends 29s from 0:45 start
+  // Pick Set 3 Message: 0:15 - 0:13 (2 seconds) -> 30s from 0:45 start
   // Final Result Message: 0:12 - 0:02 (10 seconds) -> 33s from 0:45 start
 
-  const TICKET1_MESSAGE_START_MS = 10 * 1000;
-  const TICKET1_MESSAGE_DURATION_MS = 2 * 1000;
+  const PICKSET1_MESSAGE_START_MS = 10 * 1000;
+  const PICKSET1_MESSAGE_DURATION_MS = 2 * 1000;
 
-  const TICKET2_HIGHLIGHT_START_MS = 13 * 1000;
-  const TICKET2_HIGHLIGHT_END_MS = 19 * 1000;
-  const TICKET2_MESSAGE_START_MS = 20 * 1000;
-  const TICKET2_MESSAGE_DURATION_MS = 2 * 1000;
+  const PICKSET2_HIGHLIGHT_START_MS = 13 * 1000;
+  const PICKSET2_HIGHLIGHT_END_MS = 19 * 1000;
+  const PICKSET2_MESSAGE_START_MS = 20 * 1000;
+  const PICKSET2_MESSAGE_DURATION_MS = 2 * 1000;
 
-  const TICKET3_HIGHLIGHT_START_MS = 23 * 1000;
-  const TICKET3_HIGHLIGHT_END_MS = 29 * 1000;
-  const TICKET3_MESSAGE_START_MS = 30 * 1000;
-  const TICKET3_MESSAGE_DURATION_MS = 2 * 1000;
+  const PICKSET3_HIGHLIGHT_START_MS = 23 * 1000;
+  const PICKSET3_HIGHLIGHT_END_MS = 29 * 1000;
+  const PICKSET3_MESSAGE_START_MS = 30 * 1000;
+  const PICKSET3_MESSAGE_DURATION_MS = 2 * 1000;
 
   const FINAL_MESSAGE_START_MS = 33 * 1000;
   const FINAL_MESSAGE_DURATION_MS = 10 * 1000;
@@ -79,16 +79,16 @@ export function useRevealAnimation(
   }, [cycleIndex]);
 
   // Helper: return the correct reveal sequence per requirements
-  function buildRevealSequence(setsForDraw: number[][], ticket1Numbers: number[]): number[] {
-    if (!ticket1Numbers || ticket1Numbers.length !== 6) {
+  function buildRevealSequence(setsForDraw: number[][], firstPickSetNumbers: number[]): number[] { // Renamed ticket1Numbers
+    if (!firstPickSetNumbers || firstPickSetNumbers.length !== 6) {
       // fallback: flat in order
       return setsForDraw.flat();
     }
     const revealSeq: number[] = [];
     for (const row of setsForDraw) {
       // Matches first
-      const matches = row.filter((n) => ticket1Numbers.includes(n));
-      const rest = row.filter((n) => !ticket1Numbers.includes(n));
+      const matches = row.filter((n) => firstPickSetNumbers.includes(n));
+      const rest = row.filter((n) => !firstPickSetNumbers.includes(n));
       revealSeq.push(...matches, ...rest);
     }
     return revealSeq;
@@ -100,9 +100,9 @@ export function useRevealAnimation(
     const startSet = cycle * SETS_PER_CYCLE;
     const activeSets = sets.slice(startSet, startSet + SETS_PER_CYCLE);
 
-    // Get the first ticket's numbers for the initial reveal sequence
-    const ticket1Numbers = confirmedTickets[0] || [];
-    const sequence = buildRevealSequence(activeSets, ticket1Numbers);
+    // Get the first pick set's numbers for the initial reveal sequence
+    const firstPickSetNumbers = confirmedPicksSets[0] || []; // Renamed
+    const sequence = buildRevealSequence(activeSets, firstPickSetNumbers);
 
     setDrawnNumbers([]);
     setIsRevealDone(false);
@@ -113,7 +113,7 @@ export function useRevealAnimation(
       revealTimeouts.current.push(
         setTimeout(() => {
           setDrawnNumbers((prev) => {
-            const newDrawn = [...prev, { number: sequence[i], highlightMatches: { ticket1: ticket1Numbers.includes(sequence[i]) } }];
+            const newDrawn = [...prev, { number: sequence[i], highlightMatches: { pickSet1: firstPickSetNumbers.includes(sequence[i]) } }]; // Renamed highlightMatches
             return newDrawn;
           });
           if (i === sequence.length - 1) {
@@ -124,47 +124,47 @@ export function useRevealAnimation(
     }
 
     // --- Schedule messages and highlight overlays ---
-    // Helper to calculate winnings for a specific ticket
-    const getTicketWinnings = (ticketNumbers: number[]) => {
-      if (!ticketNumbers || ticketNumbers.length !== 6) {
+    // Helper to calculate winnings for a specific pick set
+    const getPickSetWinnings = (pickSetNumbers: number[]) => { // Renamed
+      if (!pickSetNumbers || pickSetNumbers.length !== 6) {
         return { matches: 0, totalWinnings: 0, jackpotWon: false };
       }
       let totalMatches = 0;
       for (const drawnRow of activeSets) {
-        totalMatches += drawnRow.filter((n) => ticketNumbers.includes(n)).length;
+        totalMatches += drawnRow.filter((n) => pickSetNumbers.includes(n)).length;
       }
-      const { jackpotWon, totalWinnings } = calculateWinnings(ticketNumbers, activeSets, jackpotContext.jackpot);
+      const { jackpotWon, totalWinnings } = calculateWinnings(pickSetNumbers, activeSets, jackpotContext.jackpot);
       return { matches: totalMatches, totalWinnings, jackpotWon };
     };
 
-    // Ticket 1 Message & Crediting
-    if (confirmedTickets.length > 0) {
+    // Pick Set 1 Message & Crediting
+    if (confirmedPicksSets.length > 0) {
       messageTimeouts.current.push(
         setTimeout(() => {
-          const ticket = wallet.history.find((t: any) => t.cycle === cycle && t.numbers.join(',') === confirmedTickets[0].join(','));
-          if (ticket) {
-            const { matches, totalWinnings, jackpotWon } = getTicketWinnings(confirmedTickets[0]);
-            const t1Message = jackpotWon ? `Congrats! You won the jackpot of $${totalWinnings}!` : (totalWinnings > 0 ? `Congrats! You won ${totalWinnings} credits!` : "No matches. Wait for next set!");
-            showResultBar(null, t1Message, TICKET1_MESSAGE_DURATION_MS);
-            wallet.processTicketResult(ticket.id, matches, totalWinnings, jackpotWon);
+          const entry = wallet.history.find((e: any) => e.cycle === cycle && e.numbers.join(',') === confirmedPicksSets[0].join(',')); // Renamed ticket to entry
+          if (entry) {
+            const { matches, totalWinnings, jackpotWon } = getPickSetWinnings(confirmedPicksSets[0]); // Renamed
+            const ps1Message = jackpotWon ? `Congrats! You won the jackpot of $${totalWinnings}!` : (totalWinnings > 0 ? `Congrats! You won ${totalWinnings} credits!` : "No matches. Wait for next set!");
+            showResultBar(null, ps1Message, PICKSET1_MESSAGE_DURATION_MS); // Renamed
+            wallet.processEntryResult(entry.id, matches, totalWinnings, jackpotWon); // Renamed processTicketResult
             if (jackpotWon) jackpotContext.resetJackpot();
           }
-        }, TICKET1_MESSAGE_START_MS)
+        }, PICKSET1_MESSAGE_START_MS) // Renamed
       );
     }
 
-    // Ticket 2 Highlight & Message & Crediting
-    if (confirmedTickets.length > 1) {
+    // Pick Set 2 Highlight & Message & Crediting
+    if (confirmedPicksSets.length > 1) {
       messageTimeouts.current.push(
         setTimeout(() => {
           setDrawnNumbers(prev => prev.map(dn => ({
             ...dn,
             highlightMatches: {
               ...dn.highlightMatches,
-              ticket2: confirmedTickets[1].includes(dn.number)
+              pickSet2: confirmedPicksSets[1].includes(dn.number) // Renamed
             }
           })));
-        }, TICKET2_HIGHLIGHT_START_MS)
+        }, PICKSET2_HIGHLIGHT_START_MS) // Renamed
       );
       messageTimeouts.current.push(
         setTimeout(() => {
@@ -172,37 +172,37 @@ export function useRevealAnimation(
             ...dn,
             highlightMatches: {
               ...dn.highlightMatches,
-              ticket2: false // Remove highlight
+              pickSet2: false // Remove highlight // Renamed
             }
           })));
-        }, TICKET2_HIGHLIGHT_END_MS)
+        }, PICKSET2_HIGHLIGHT_END_MS) // Renamed
       );
       messageTimeouts.current.push(
         setTimeout(() => {
-          const ticket = wallet.history.find((t: any) => t.cycle === cycle && t.numbers.join(',') === confirmedTickets[1].join(','));
-          if (ticket) {
-            const { matches, totalWinnings, jackpotWon } = getTicketWinnings(confirmedTickets[1]);
-            const t2Message = jackpotWon ? `Congrats! You won the jackpot of $${totalWinnings}!` : (totalWinnings > 0 ? `Congrats! You won ${totalWinnings} credits!` : "No matches. Wait for next set!");
-            showResultBar(null, t2Message, TICKET2_MESSAGE_DURATION_MS);
-            wallet.processTicketResult(ticket.id, matches, totalWinnings, jackpotWon);
+          const entry = wallet.history.find((e: any) => e.cycle === cycle && e.numbers.join(',') === confirmedPicksSets[1].join(',')); // Renamed ticket to entry
+          if (entry) {
+            const { matches, totalWinnings, jackpotWon } = getPickSetWinnings(confirmedPicksSets[1]); // Renamed
+            const ps2Message = jackpotWon ? `Congrats! You won the jackpot of $${totalWinnings}!` : (totalWinnings > 0 ? `Congrats! You won ${totalWinnings} credits!` : "No matches. Wait for next set!");
+            showResultBar(null, ps2Message, PICKSET2_MESSAGE_DURATION_MS); // Renamed
+            wallet.processEntryResult(entry.id, matches, totalWinnings, jackpotWon); // Renamed processTicketResult
             if (jackpotWon) jackpotContext.resetJackpot();
           }
-        }, TICKET2_MESSAGE_START_MS)
+        }, PICKSET2_MESSAGE_START_MS) // Renamed
       );
     }
 
-    // Ticket 3 Highlight & Message & Crediting
-    if (confirmedTickets.length > 2) {
+    // Pick Set 3 Highlight & Message & Crediting
+    if (confirmedPicksSets.length > 2) {
       messageTimeouts.current.push(
         setTimeout(() => {
           setDrawnNumbers(prev => prev.map(dn => ({
             ...dn,
             highlightMatches: {
               ...dn.highlightMatches,
-              ticket3: confirmedTickets[2].includes(dn.number)
+              pickSet3: confirmedPicksSets[2].includes(dn.number) // Renamed
             }
           })));
-        }, TICKET3_HIGHLIGHT_START_MS)
+        }, PICKSET3_HIGHLIGHT_START_MS) // Renamed
       );
       messageTimeouts.current.push(
         setTimeout(() => {
@@ -210,48 +210,48 @@ export function useRevealAnimation(
             ...dn,
             highlightMatches: {
               ...dn.highlightMatches,
-              ticket3: false // Remove highlight
+              pickSet3: false // Remove highlight // Renamed
             }
           })));
-        }, TICKET3_HIGHLIGHT_END_MS)
+        }, PICKSET3_HIGHLIGHT_END_MS) // Renamed
       );
       messageTimeouts.current.push(
         setTimeout(() => {
-          const ticket = wallet.history.find((t: any) => t.cycle === cycle && t.numbers.join(',') === confirmedTickets[2].join(','));
-          if (ticket) {
-            const { matches, totalWinnings, jackpotWon } = getTicketWinnings(confirmedTickets[2]);
-            const t3Message = jackpotWon ? `Congrats! You won the jackpot of $${totalWinnings}!` : (totalWinnings > 0 ? `Congrats! You won ${totalWinnings} credits!` : "No matches. Wait for final result!");
-            showResultBar(null, t3Message, TICKET3_MESSAGE_DURATION_MS);
-            wallet.processTicketResult(ticket.id, matches, totalWinnings, jackpotWon);
+          const entry = wallet.history.find((e: any) => e.cycle === cycle && e.numbers.join(',') === confirmedPicksSets[2].join(',')); // Renamed ticket to entry
+          if (entry) {
+            const { matches, totalWinnings, jackpotWon } = getPickSetWinnings(confirmedPicksSets[2]); // Renamed
+            const ps3Message = jackpotWon ? `Congrats! You won the jackpot of $${totalWinnings}!` : (totalWinnings > 0 ? `Congrats! You won ${totalWinnings} credits!` : "No matches. Wait for final result!");
+            showResultBar(null, ps3Message, PICKSET3_MESSAGE_DURATION_MS); // Renamed
+            wallet.processEntryResult(entry.id, matches, totalWinnings, jackpotWon); // Renamed processTicketResult
             if (jackpotWon) jackpotContext.resetJackpot();
           }
-        }, TICKET3_MESSAGE_START_MS)
+        }, PICKSET3_MESSAGE_START_MS) // Renamed
       );
     }
 
     // Final Result Message (consolidated)
     messageTimeouts.current.push(
       setTimeout(() => {
-        let totalWinningsAcrossAllTickets = 0;
+        let totalWinningsAcrossAllEntries = 0; // Renamed
         let anyJackpotWon = false;
 
-        confirmedTickets.forEach(userNumbers => {
+        confirmedPicksSets.forEach(userNumbers => { // Renamed
           if (userNumbers.length === 6) {
             const { jackpotWon, totalWinnings } = calculateWinnings(userNumbers, activeSets, jackpotContext.jackpot);
             if (jackpotWon) {
               anyJackpotWon = true;
-              totalWinningsAcrossAllTickets += jackpotContext.jackpot;
+              totalWinningsAcrossAllEntries += jackpotContext.jackpot;
             } else {
-              totalWinningsAcrossAllTickets += totalWinnings;
+              totalWinningsAcrossAllEntries += totalWinnings;
             }
           }
         });
 
         if (anyJackpotWon) {
-          showResultBar(totalWinningsAcrossAllTickets, `Congrats! You won the jackpot of $${totalWinningsAcrossAllTickets}!`, FINAL_MESSAGE_DURATION_MS);
-          jackpotContext.resetJackpot(); // Reset jackpot here if won by any ticket
-        } else if (totalWinningsAcrossAllTickets > 0) {
-          showResultBar(totalWinningsAcrossAllTickets, `Congrats! You won total of ${totalWinningsAcrossAllTickets} credits!`, FINAL_MESSAGE_DURATION_MS);
+          showResultBar(totalWinningsAcrossAllEntries, `Congrats! You won the jackpot of $${totalWinningsAcrossAllEntries}!`, FINAL_MESSAGE_DURATION_MS);
+          jackpotContext.resetJackpot(); // Reset jackpot here if won by any pick set
+        } else if (totalWinningsAcrossAllEntries > 0) {
+          showResultBar(totalWinningsAcrossAllEntries, `Congrats! You won total of ${totalWinningsAcrossAllEntries} credits!`, FINAL_MESSAGE_DURATION_MS);
         } else {
           showResultBar(0, "Try again. Win next time!", FINAL_MESSAGE_DURATION_MS);
         }
@@ -264,14 +264,14 @@ export function useRevealAnimation(
 
     const startSet = cycle * SETS_PER_CYCLE;
     const activeSets = sets.slice(startSet, startSet + SETS_PER_CYCLE);
-    const ticket1Numbers = confirmedTickets[0] || [];
-    const sequence = buildRevealSequence(activeSets, ticket1Numbers);
+    const firstPickSetNumbers = confirmedPicksSets[0] || []; // Renamed
+    const sequence = buildRevealSequence(activeSets, firstPickSetNumbers);
 
     const finalDrawnNumbers: RevealedNumber[] = sequence.map(num => {
-      const highlightMatches: HighlightMatches = {
-        ticket1: confirmedTickets[0]?.includes(num),
-        ticket2: confirmedTickets[1]?.includes(num),
-        ticket3: confirmedTickets[2]?.includes(num),
+      const highlightMatches: RevealedNumber["highlightMatches"] = { // Updated type reference
+        pickSet1: confirmedPicksSets[0]?.includes(num), // Renamed
+        pickSet2: confirmedPicksSets[1]?.includes(num), // Renamed
+        pickSet3: confirmedPicksSets[2]?.includes(num), // Renamed
       };
       return { number: num, highlightMatches };
     });
@@ -280,32 +280,32 @@ export function useRevealAnimation(
     setIsRevealDone(true);
     revealStartedForCycle.current = cycle;
 
-    // Process all tickets and trigger final message immediately if instantly finishing
-    let totalWinningsAcrossAllTickets = 0;
+    // Process all pick sets and trigger final message immediately if instantly finishing
+    let totalWinningsAcrossAllEntries = 0; // Renamed
     let anyJackpotWon = false;
 
-    confirmedTickets.forEach(userNumbers => {
+    confirmedPicksSets.forEach(userNumbers => { // Renamed
       if (userNumbers.length === 6) {
         const { jackpotWon, totalWinnings } = calculateWinnings(userNumbers, activeSets, jackpotContext.jackpot);
-        const ticket = wallet.history.find((t: any) => t.cycle === cycle && t.numbers.join(',') === userNumbers.join(','));
-        if (ticket) {
-          wallet.processTicketResult(ticket.id, 0, totalWinnings, jackpotWon); // Matches not needed for instant finish
+        const entry = wallet.history.find((e: any) => e.cycle === cycle && e.numbers.join(',') === userNumbers.join(',')); // Renamed ticket to entry
+        if (entry) {
+          wallet.processEntryResult(entry.id, 0, totalWinnings, jackpotWon); // Renamed processTicketResult
         }
 
         if (jackpotWon) {
           anyJackpotWon = true;
-          totalWinningsAcrossAllTickets += jackpotContext.jackpot;
+          totalWinningsAcrossAllEntries += jackpotContext.jackpot;
         } else {
-          totalWinningsAcrossAllTickets += totalWinnings;
+          totalWinningsAcrossAllEntries += totalWinnings;
         }
       }
     });
 
     if (anyJackpotWon) {
-      showResultBar(totalWinningsAcrossAllTickets, `Congrats! You won the jackpot of $${totalWinningsAcrossAllTickets}!`, FINAL_MESSAGE_DURATION_MS);
+      showResultBar(totalWinningsAcrossAllEntries, `Congrats! You won the jackpot of $${totalWinningsAcrossAllEntries}!`, FINAL_MESSAGE_DURATION_MS);
       jackpotContext.resetJackpot();
-    } else if (totalWinningsAcrossAllTickets > 0) {
-      showResultBar(totalWinningsAcrossAllTickets, `Congrats! You won total of ${totalWinningsAcrossAllTickets} credits!`, FINAL_MESSAGE_DURATION_MS);
+    } else if (totalWinningsAcrossAllEntries > 0) {
+      showResultBar(totalWinningsAcrossAllEntries, `Congrats! You won total of ${totalWinningsAcrossAllEntries} credits!`, FINAL_MESSAGE_DURATION_MS);
     } else {
       showResultBar(0, "Try again. Win next time!", FINAL_MESSAGE_DURATION_MS);
     }

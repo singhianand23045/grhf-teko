@@ -6,16 +6,16 @@ import { useSpinSetting } from "./useSpinSetting";
 type RevealedNumber = {
   number: number;
   highlightMatches: {
-    ticket1?: boolean;
-    ticket2?: boolean;
-    ticket3?: boolean;
+    pickSet1?: boolean; // Renamed from ticket1
+    pickSet2?: boolean; // Renamed from ticket2
+    pickSet3?: boolean; // Renamed from ticket3
   };
 };
 
 type Props = {
   drawnNumbersWithHighlights?: RevealedNumber[]; // Changed prop name
   reveal: boolean;
-  confirmedTickets?: number[][]; // Not directly used here, but passed from parent
+  confirmedPicksSets?: number[][]; // Renamed from confirmedTickets
   onDone?: () => void;
 };
 
@@ -40,7 +40,7 @@ function getSpinConfig(spinLevel: number) {
 export default function RouletteBallGrid({
   drawnNumbersWithHighlights = [], // Use new prop name
   reveal,
-  confirmedTickets = [], // Use confirmedTickets from context
+  confirmedPicksSets = [], // Use confirmedPicksSets from context
   onDone,
 }: Props) {
   const [spinSetting, setSpinSetting] = React.useState(1);

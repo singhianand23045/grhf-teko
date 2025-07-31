@@ -5,13 +5,13 @@ const CIRCLE_NUM_FONT_SIZE = "1rem";
 const CIRCLE_NUM_DIAM = "2.2rem"; // 35px
 const CIRCLE_DIAM_NUM = 35;
 
-type LotteryTicketProps = {
+type ConfirmedNumbersDisplayProps = {
   picked: number[]; // Now explicitly passed as a prop
   compact?: boolean;
-  ticketIndex?: number; // New prop for displaying ticket number
+  pickSetIndex?: number; // New prop for displaying pick set number
 };
 
-export default function LotteryTicket({ picked, compact = false, ticketIndex }: LotteryTicketProps) {
+export default function ConfirmedNumbersDisplay({ picked, compact = false, pickSetIndex }: ConfirmedNumbersDisplayProps) {
   const sorted = [...picked].sort((a, b) => a - b);
 
   return (
@@ -24,10 +24,10 @@ export default function LotteryTicket({ picked, compact = false, ticketIndex }: 
         paddingBottom: 0,
       }}
     >
-      {/* Conditionally render the "Your Numbers" or "Ticket X" label */}
+      {/* Conditionally render the "Your Numbers" or "Set X" label */}
       {!compact && (
         <div className={`mb-2 font-bold text-lg tracking-wide text-[#217d37] text-center w-full`}>
-          {ticketIndex ? `Ticket ${ticketIndex}` : "Your Numbers"}
+          {pickSetIndex ? `Set ${pickSetIndex}` : "Your Confirmed Numbers"}
         </div>
       )}
       <div
@@ -57,7 +57,7 @@ export default function LotteryTicket({ picked, compact = false, ticketIndex }: 
           </span>
         ))}
       </div>
-      {/* Only show this message if not compact, or if it's the last ticket and not in OPEN state */}
+      {/* Only show this message if not compact, or if it's the last set and not in OPEN state */}
       {!compact && (
         <div className={`mt-2 text-sm text-muted-foreground text-center px-2 ${compact ? "mt-1" : ""} w-full`}>
           Numbers locked in until next round!
