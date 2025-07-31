@@ -65,18 +65,18 @@ export default function Ball3D({
       textColor = "#111";
       textShadow = "0 2px 7px rgba(0,175,255,0.5)";
     } else if (ps3) {
-      ballBackgroundStyle.backgroundColor = "#ffd300"; // Robinhood yellow
-      ballBorderColor = "border-yellow-700";
-      ballBoxShadow = "0 3px 16px 2px rgba(255,211,0,0.28), 0 0.5px 2.8px 0px #eaf3fa";
+      ballBackgroundStyle.backgroundColor = "#FFA500"; // Robinhood orange
+      ballBorderColor = "border-orange-700";
+      ballBoxShadow = "0 3px 16px 2px rgba(255,165,0,0.28), 0 0.5px 2.8px 0px #eaf3fa";
       textColor = "#111";
-      textShadow = "0 2px 7px rgba(255,211,0,0.5)";
+      textShadow = "0 2px 7px rgba(255,165,0,0.5)";
     }
   } else if (numMatches === 2) {
     // Two highlights - split circle
     let gradientColors = "";
     if (ps1 && ps2) gradientColors = "#00c805 50%, #00afff 50%"; // Green-Blue
-    else if (ps1 && ps3) gradientColors = "#00c805 50%, #ffd300 50%"; // Green-Yellow
-    else if (ps2 && ps3) gradientColors = "#00afff 50%, #ffd300 50%"; // Blue-Yellow
+    else if (ps1 && ps3) gradientColors = "#00c805 50%, #FFA500 50%"; // Green-Orange
+    else if (ps2 && ps3) gradientColors = "#00afff 50%, #FFA500 50%"; // Blue-Orange
     
     ballBackgroundStyle.background = `linear-gradient(to right, ${gradientColors})`;
     ballBorderColor = "border-gray-400"; // Neutral border for mixed colors
@@ -85,7 +85,7 @@ export default function Ball3D({
     textShadow = "0 2px 7px rgba(0,0,0,0.2)";
   } else if (numMatches === 3) {
     // Three highlights - wedge
-    ballBackgroundStyle.background = `conic-gradient(from 90deg, #00c805 0 33.3%, #00afff 33.3% 66.6%, #ffd300 66.6% 100%)`;
+    ballBackgroundStyle.background = `conic-gradient(from 90deg, #00c805 0 33.3%, #00afff 33.3% 66.6%, #FFA500 66.6% 100%)`;
     ballBorderColor = "border-gray-400"; // Neutral border for mixed colors
     ballBoxShadow = "0 3px 16px 2px rgba(0,0,0,0.15), 0 0.5px 2.8px 0px #eaf3fa";
     textColor = "#111";

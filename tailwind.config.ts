@@ -95,7 +95,8 @@ export default {
 					cardgray: "#c4c7cc",
 					yellow: "#ffd300",
 					red: "#ff6859",
-					blue: "#00afff"
+					blue: "#00afff",
+					orange: "#FFA500" // New aesthetically pleasing orange
 				}
 			},
 			borderRadius: {

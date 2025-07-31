@@ -30,11 +30,11 @@ export default function ConfirmedNumbersDisplay({ picked, compact = false, pickS
           border: "border-blue-700", // Using default Tailwind blue-700 for border
           shadow: "shadow-blue-300", // Using default Tailwind blue-300 for shadow tint
         };
-      case 3: // Third set: Robinhood Yellow
+      case 3: // Third set: Robinhood Orange
         return {
-          bg: "bg-robinhood-yellow",
-          border: "border-yellow-700", // Using default Tailwind yellow-700 for border
-          shadow: "shadow-yellow-300", // Using default Tailwind yellow-300 for shadow tint
+          bg: "bg-robinhood-orange",
+          border: "border-orange-700", // Using default Tailwind orange-700 for border
+          shadow: "shadow-orange-300", // Using default Tailwind orange-300 for shadow tint
         };
       default: // Fallback to first set colors
         return {
